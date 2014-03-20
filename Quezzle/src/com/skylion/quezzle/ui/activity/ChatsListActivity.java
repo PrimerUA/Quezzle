@@ -3,14 +3,20 @@ package com.skylion.quezzle.ui.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.parse.*;
+import com.skylion.quezzle.QuezzleApplication;
 import com.skylion.quezzle.R;
+import com.skylion.quezzle.network.request.GetChatsRequest;
+import com.skylion.quezzle.network.response.GetChatsResponse;
 
 import java.util.List;
 
@@ -79,7 +85,22 @@ public class ChatsListActivity extends Activity implements View.OnClickListener,
 
     @Override
     public void onClick(View view) {
-        startActivity(new Intent(this, NewChatActivity.class));
+//        startActivity(new Intent(this, NewChatActivity.class));
+        GetChatsRequest request = new GetChatsRequest(new Response.Listener<GetChatsResponse>() {
+            @Override
+            public void onResponse(GetChatsResponse response) {
+                Log.d("KVEST_TAG", "onResponse");
+                //To change body of implemented methods use File | Settings | File Templates.
+            }
+        },
+        new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("KVEST_TAG", "error=" + error.getMessage());
+                //To change body of implemented methods use File | Settings | File Templates.
+            }
+        });
+        QuezzleApplication.getApplication().getVolleyHelper().addRequest(request);
     }
 
     @Override
