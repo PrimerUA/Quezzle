@@ -15,8 +15,11 @@ import com.android.volley.VolleyError;
 import com.parse.*;
 import com.skylion.quezzle.QuezzleApplication;
 import com.skylion.quezzle.R;
+import com.skylion.quezzle.datamodel.ChatPlaces;
 import com.skylion.quezzle.network.request.GetChatsRequest;
+import com.skylion.quezzle.network.request.QueryRequest;
 import com.skylion.quezzle.network.response.GetChatsResponse;
+import com.skylion.quezzle.network.response.QueryResponse;
 
 import java.util.List;
 
@@ -86,20 +89,32 @@ public class ChatsListActivity extends Activity implements View.OnClickListener,
     @Override
     public void onClick(View view) {
 //        startActivity(new Intent(this, NewChatActivity.class));
-        GetChatsRequest request = new GetChatsRequest(new Response.Listener<GetChatsResponse>() {
+        QueryRequest<ChatPlaces> request  = new QueryRequest<ChatPlaces>(ChatPlaces.class.getSimpleName(),  new Response.Listener<QueryResponse<ChatPlaces>>() {
             @Override
-            public void onResponse(GetChatsResponse response) {
-                Log.d("KVEST_TAG", "onResponse");
+            public void onResponse(QueryResponse<ChatPlaces> response) {
                 //To change body of implemented methods use File | Settings | File Templates.
             }
-        },
-        new Response.ErrorListener() {
+        }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d("KVEST_TAG", "error=" + error.getMessage());
                 //To change body of implemented methods use File | Settings | File Templates.
             }
         });
+
+//        GetChatsRequest request = new GetChatsRequest(new Response.Listener<GetChatsResponse>() {
+//            @Override
+//            public void onResponse(GetChatsResponse response) {
+//                Log.d("KVEST_TAG", "onResponse");
+//                //To change body of implemented methods use File | Settings | File Templates.
+//            }
+//        },
+//        new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                Log.d("KVEST_TAG", "error=" + error.getMessage());
+//                //To change body of implemented methods use File | Settings | File Templates.
+//            }
+//        });
         QuezzleApplication.getApplication().getVolleyHelper().addRequest(request);
     }
 

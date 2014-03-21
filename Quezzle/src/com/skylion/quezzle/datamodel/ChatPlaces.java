@@ -7,7 +7,7 @@ package com.skylion.quezzle.datamodel;
  * Time: 23:12
  * To change this template use File | Settings | File Templates.
  */
-public class Chat extends ParseBaseObject {
+public class ChatPlaces extends ParseBaseObject {
     public String name;
     public String description;
 }

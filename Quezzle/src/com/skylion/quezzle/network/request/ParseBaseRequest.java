@@ -15,6 +15,16 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class ParseBaseRequest<T> extends JsonRequest<T> {
+    private static final String APPLICATION_ID_HEADER = "X-Parse-Application-Id";
+    private static final String REST_API_KEY_HEADER = "X-Parse-REST-API-Key";
+    private static final Map<String, String> headers = new HashMap<String, String>(2);
+
+    public static void setKeys(String applicationId, String restApiKey) {
+        headers.clear();
+        headers.put(APPLICATION_ID_HEADER, applicationId);
+        headers.put(REST_API_KEY_HEADER, restApiKey);
+    }
+
     public ParseBaseRequest(String url, String requestBody, Response.Listener<T> listener, Response.ErrorListener errorListener) {
         super(url, requestBody, listener, errorListener);
     }
@@ -25,9 +35,6 @@ public abstract class ParseBaseRequest<T> extends JsonRequest<T> {
 
     @Override
     public Map<String, String> getHeaders() throws AuthFailureError {
-        Map<String, String> headers = new HashMap<String, String>(2);
-        headers.put("X-Parse-Application-Id", "RVCqyTO6a3jDJPh0GeKRzbbpdXZWGWtm13m0MN67");
-        headers.put("X-Parse-REST-API-Key", "KU29aODJKiB1zjApeoeSiHTnwl0mFFcnIDRK7KJ7");
         return headers;
     }
 }

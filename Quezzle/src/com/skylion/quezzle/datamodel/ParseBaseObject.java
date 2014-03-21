@@ -9,4 +9,8 @@ package com.skylion.quezzle.datamodel;
  */
 public class ParseBaseObject {
     public String objectId;
+    private String createdAt;
+    private String updatedAt;
+
+    //TODO implements getters for createdAt and updatedAt
 }
