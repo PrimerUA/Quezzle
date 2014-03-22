@@ -1,8 +1,9 @@
-package com.skylion.quezzle.network.request;
+package com.skylion.quezzle.network.parse.request;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
 import com.android.volley.toolbox.JsonRequest;
+import com.google.gson.Gson;
 
 import java.util.HashMap;
 import java.util.Map;

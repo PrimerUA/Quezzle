@@ -1,4 +1,4 @@
-package com.skylion.quezzle.network.response;
+package com.skylion.quezzle.network.parse.response;
 
 import java.util.List;
 

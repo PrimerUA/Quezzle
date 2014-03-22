@@ -1,5 +1,7 @@
 package com.skylion.quezzle.datamodel;
 
+import com.skylion.quezzle.network.parse.datamodel.ParseBaseObject;
+
 /**
  * Created with IntelliJ IDEA.
  * User: Kvest

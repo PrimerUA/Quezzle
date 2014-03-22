@@ -16,10 +16,9 @@ import com.parse.*;
 import com.skylion.quezzle.QuezzleApplication;
 import com.skylion.quezzle.R;
 import com.skylion.quezzle.datamodel.ChatPlaces;
-import com.skylion.quezzle.network.request.GetChatsRequest;
-import com.skylion.quezzle.network.request.QueryRequest;
-import com.skylion.quezzle.network.response.GetChatsResponse;
-import com.skylion.quezzle.network.response.QueryResponse;
+import com.skylion.quezzle.network.parse.request.CreateObjectRequest;
+import com.skylion.quezzle.network.parse.request.QueryRequest;
+import com.skylion.quezzle.network.parse.response.QueryResponse;
 
 import java.util.List;
 
@@ -89,32 +88,37 @@ public class ChatsListActivity extends Activity implements View.OnClickListener,
     @Override
     public void onClick(View view) {
 //        startActivity(new Intent(this, NewChatActivity.class));
-        QueryRequest<ChatPlaces> request  = new QueryRequest<ChatPlaces>(ChatPlaces.class.getSimpleName(),  new Response.Listener<QueryResponse<ChatPlaces>>() {
-            @Override
-            public void onResponse(QueryResponse<ChatPlaces> response) {
-                //To change body of implemented methods use File | Settings | File Templates.
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                //To change body of implemented methods use File | Settings | File Templates.
-            }
-        });
-
-//        GetChatsRequest request = new GetChatsRequest(new Response.Listener<GetChatsResponse>() {
+//        QueryRequest request = new QueryRequest(ChatPlaces.class.getSimpleName(), new Response.Listener<QueryResponse<ChatPlaces>>() {
 //            @Override
-//            public void onResponse(GetChatsResponse response) {
-//                Log.d("KVEST_TAG", "onResponse");
-//                //To change body of implemented methods use File | Settings | File Templates.
+//            public void onResponse(QueryResponse<ChatPlaces> response) {
+//                Log.d("KVEST_TAG", "response=" + response.toString());
 //            }
 //        },
 //        new Response.ErrorListener() {
 //            @Override
 //            public void onErrorResponse(VolleyError error) {
-//                Log.d("KVEST_TAG", "error=" + error.getMessage());
 //                //To change body of implemented methods use File | Settings | File Templates.
 //            }
 //        });
+
+        ChatPlaces src = new ChatPlaces();
+        src.name = "Chat from code";
+        src.description = "Chat was created from code request";
+//        src.objectId = "";
+//        src.setCreatedAt("2014-03-15T23:06:49.390Z");
+        CreateObjectRequest<ChatPlaces> request = new CreateObjectRequest<ChatPlaces>(ChatPlaces.class.getSimpleName(), src,
+                new Response.Listener<ChatPlaces>() {
+                    @Override
+                    public void onResponse(ChatPlaces response) {
+                        Log.d("KVEST_TAG", "response=" + response.toString());
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d("KVEST_TAG", "error=" + error.getMessage());
+                    }
+                });
         QuezzleApplication.getApplication().getVolleyHelper().addRequest(request);
     }
 

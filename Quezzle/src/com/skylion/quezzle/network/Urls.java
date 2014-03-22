@@ -11,4 +11,5 @@ public abstract class Urls {
     private static final String PARSE_URL = " https://api.parse.com";
 
     public static final String QUERIES_URL = PARSE_URL + "/1/classes/";
+    public static final String CREATE_OBJECT_URL = PARSE_URL + "/1/classes/";
 }

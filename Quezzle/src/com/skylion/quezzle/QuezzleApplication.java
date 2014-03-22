@@ -5,7 +5,7 @@ import com.parse.Parse;
 import com.parse.ParseUser;
 import com.parse.PushService;
 import com.skylion.quezzle.network.VolleyHelper;
-import com.skylion.quezzle.network.request.ParseBaseRequest;
+import com.skylion.quezzle.network.parse.request.ParseBaseRequest;
 import com.skylion.quezzle.ui.activity.ChatsListActivity;
 
 /**
