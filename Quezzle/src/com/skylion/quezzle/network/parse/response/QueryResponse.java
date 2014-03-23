@@ -10,5 +10,5 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class QueryResponse<T> {
-    private List<T> results;
+    public List<T> results;
 }

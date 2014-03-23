@@ -9,7 +9,7 @@ import com.skylion.quezzle.network.parse.datamodel.ParseBaseObject;
  * Time: 23:12
  * To change this template use File | Settings | File Templates.
  */
-public class ChatPlaces extends ParseBaseObject {
+public class ChatPlace extends ParseBaseObject {
     public String name;
     public String description;
 }

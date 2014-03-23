@@ -6,7 +6,6 @@ import com.android.volley.Response;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.skylion.quezzle.datamodel.ChatPlaces;
 import com.skylion.quezzle.network.Urls;
 import com.skylion.quezzle.network.parse.response.QueryResponse;
 
@@ -23,8 +22,11 @@ import java.lang.reflect.Type;
 public class QueryRequest<T> extends ParseBaseRequest<QueryResponse<T>> {
     protected static final Gson gson = new Gson();
 
-    public QueryRequest(String className, Response.Listener<QueryResponse<T>> listener, Response.ErrorListener errorListener) {
-        super(Method.GET, Urls.QUERIES_URL + className , null, listener, errorListener);
+    private Type responseType;
+
+    public QueryRequest(String className, Type responseType, Response.Listener<QueryResponse<T>> listener, Response.ErrorListener errorListener) {
+        super(Method.GET, Urls.QUERIES_URL + className, null, listener, errorListener);
+        this.responseType = responseType;
     }
 
     @Override
@@ -33,7 +35,6 @@ public class QueryRequest<T> extends ParseBaseRequest<QueryResponse<T>> {
             //get string response
             String json = new String(response.data, HttpHeaderParser.parseCharset(response.headers));
             //parse response
-            Type responseType = new TypeToken<QueryResponse<T>>(){}.getType();
             QueryResponse<T> result = gson.fromJson(json, responseType);
 
             return Response.success(result, HttpHeaderParser.parseCacheHeaders(response));

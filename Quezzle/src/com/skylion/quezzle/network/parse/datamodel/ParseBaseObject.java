@@ -20,5 +20,13 @@ public class ParseBaseObject {
         this.updatedAt = updatedAt;
     }
 
-    //TODO implements getters for createdAt and updatedAt
+    public long getCreatedAt() {
+        //TODO implement
+        return 0;
+    }
+
+    public long getUpdatedAt() {
+        //TODO implement
+        return 0;
+    }
 }
