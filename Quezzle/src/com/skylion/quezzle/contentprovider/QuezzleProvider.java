@@ -29,7 +29,7 @@ public class QuezzleProvider extends ContentProvider {
     static {
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         uriMatcher.addURI(QuezzleProviderContract.AUTHORITY, QuezzleProviderContract.CHAT_PLACES_PATH, CHAT_PLACES_URI_INDICATOR);
-        uriMatcher.addURI(QuezzleProviderContract.AUTHORITY, QuezzleProviderContract.CHAT_PLACES_PATH + "/*", CHAT_PLACE_URI_INDICATOR);
+        uriMatcher.addURI(QuezzleProviderContract.AUTHORITY, QuezzleProviderContract.CHAT_PLACES_PATH + "/#", CHAT_PLACE_URI_INDICATOR);
     }
 
     @Override
@@ -48,7 +48,7 @@ public class QuezzleProvider extends ContentProvider {
                 break;
             case CHAT_PLACE_URI_INDICATOR :
                 queryBuilder.setTables(ChatPlaceTable.TABLE_NAME);
-                queryBuilder.appendWhere(ChatPlaceTable.OBJECT_ID_COLUMN + "=" + uri.getLastPathSegment());
+                queryBuilder.appendWhere(ChatPlaceTable._ID + "=" + uri.getLastPathSegment());
                 break;
             default:
                 throw new IllegalArgumentException("Unknown uri = " + uri);
@@ -96,7 +96,7 @@ public class QuezzleProvider extends ContentProvider {
                 rowsDeleted = db.delete(ChatPlaceTable.TABLE_NAME, selection, selectionArgs);
                 break;
             case CHAT_PLACE_URI_INDICATOR :
-                rowsDeleted = db.delete(ChatPlaceTable.TABLE_NAME, ChatPlaceTable.OBJECT_ID_COLUMN + "=" + uri.getLastPathSegment() +
+                rowsDeleted = db.delete(ChatPlaceTable.TABLE_NAME, ChatPlaceTable._ID + "=" + uri.getLastPathSegment() +
                         (hasSelection ? (" AND " + selection) : ""), (hasSelection ? selectionArgs : null));
                 break;
             default:
@@ -117,7 +117,7 @@ public class QuezzleProvider extends ContentProvider {
 
         switch (uriMatcher.match(uri)) {
             case CHAT_PLACE_URI_INDICATOR :
-                rowsUpdated = db.update(ChatPlaceTable.TABLE_NAME, values, ChatPlaceTable.OBJECT_ID_COLUMN + "=" +
+                rowsUpdated = db.update(ChatPlaceTable.TABLE_NAME, values, ChatPlaceTable._ID + "=" +
                         uri.getLastPathSegment() + (hasSelection ? (" AND " + selection) : ""),
                         (hasSelection ? selectionArgs : null));
                 break;

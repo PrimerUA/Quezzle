@@ -36,6 +36,9 @@
         <activity
             android:name=".ui.activity.ChatDetailsActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.activity.ChatActivity"
+            android:screenOrientation="portrait" />
         <provider
             android:name=".contentprovider.QuezzleProvider"
             android:authorities="com.skylion.quezzle.contentprovider.QuezzleProvider"

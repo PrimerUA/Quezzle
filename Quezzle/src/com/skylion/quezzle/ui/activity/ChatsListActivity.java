@@ -47,6 +47,13 @@ public class ChatsListActivity extends Activity implements View.OnClickListener,
         adapter = new ChatListAdapter(this, ChatListAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
         chatsList = (ListView) findViewById(R.id.chatsList);
         chatsList.setAdapter(adapter);
+        chatsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //show chat
+                ChatActivity.start(ChatsListActivity.this, id);
+            }
+        });
         createButton = (Button) findViewById(R.id.createButton);
 
         chatsList = (ListView) findViewById(R.id.chatsList);
