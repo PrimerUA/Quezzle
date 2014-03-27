@@ -12,4 +12,5 @@ public abstract class Urls {
 
     public static final String QUERIES_URL = PARSE_URL + "/1/classes/";
     public static final String CREATE_OBJECT_URL = PARSE_URL + "/1/classes/";
+    public static final String BATCH_OPERATIONS_URL = PARSE_URL + "/1/batch";
 }

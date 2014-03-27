@@ -1,6 +1,7 @@
 package com.skylion.quezzle.ui.activity;
 
 import android.app.Activity;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -26,11 +27,19 @@ public class ChatActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.chat_activity);
+        setContentView(R.layout.fragment_container);
 
         //get chat id from extra
         long chatId = getIntent().getLongExtra(CHAT_ID_EXTRA, -1);
-        //set chat id to fragment
-        ((ChatFragment)getFragmentManager().findFragmentById(R.id.chat_fragment)).setChatId(chatId);
+
+        //set fragment
+        if (savedInstanceState == null) {
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            try {
+                transaction.add(R.id.fragment_container, ChatFragment.newInstance(chatId));
+            } finally {
+                transaction.commit();
+            }
+        }
     }
 }

@@ -29,7 +29,7 @@ import com.skylion.quezzle.ui.adapter.ChatListAdapter;
 
 import java.lang.reflect.Type;
 
-public class ChatsListActivity extends Activity implements View.OnClickListener, AdapterView.OnItemClickListener,
+public class ChatsListActivity extends Activity implements View.OnClickListener,
                                                 LoaderManager.LoaderCallbacks<Cursor> {
     private static final int LOAD_CHATS_ID = 0;
     private static final String[] PROJECTION = new String[]{ChatPlaceTable._ID, ChatPlaceTable.NAME_COLUMN,
@@ -55,9 +55,6 @@ public class ChatsListActivity extends Activity implements View.OnClickListener,
             }
         });
         createButton = (Button) findViewById(R.id.createButton);
-
-        chatsList = (ListView) findViewById(R.id.chatsList);
-        chatsList.setOnItemClickListener(this);
 
         createButton = (Button) findViewById(R.id.createButton);
         createButton.setOnClickListener(this);
@@ -145,11 +142,11 @@ public class ChatsListActivity extends Activity implements View.OnClickListener,
         startActivity(new Intent(this, NewChatActivity.class));
     }
 
-    @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        String chatName = ((ParseObject) chatsList.getAdapter().getItem(i)).get("name").toString();
-        startActivity(new Intent(this, ChatDetailsActivity.class).putExtra("chatName", chatName));
-    }
+//    @Override
+//    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+//        String chatName = ((ParseObject) chatsList.getAdapter().getItem(i)).get("name").toString();
+//        startActivity(new Intent(this, ChatDetailsActivity.class).putExtra("chatName", chatName));
+//    }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
