@@ -22,6 +22,7 @@ import com.skylion.quezzle.datamodel.ChatMessage;
 import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
 import com.skylion.quezzle.network.parse.datamodel.Operation;
 import com.skylion.quezzle.network.parse.request.BatchOperationsRequest;
+import com.skylion.quezzle.service.NetworkService;
 
 /**
  * Created with IntelliJ IDEA.
@@ -72,27 +73,8 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private void sendMessage() {
         if (!TextUtils.isEmpty(message.getText())) {
-            //create message
-            ChatMessage chatMessage = new ChatMessage();
-            chatMessage.message = message.getText().toString();
-
             //send message
-            BatchOperationsRequest request = new BatchOperationsRequest(new Response.Listener<Object>() {
-                @Override
-                public void onResponse(Object response) {
-                    //To change body of implemented methods use File | Settings | File Templates.
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    //To change body of implemented methods use File | Settings | File Templates.
-                }
-            });
-            request.addOperation(new Operation("POST", "/1/classes/" + ChatMessage.class.getSimpleName(), chatMessage));
-            request.addOperation(new Operation("PUT", "/1/classes/" + ChatMessage.class.getSimpleName() + "/NC1RuWS5cP",
-                    "{\"test\":{\"__op\":\"AddRelation\",\"objects\":[{\"__type\":\"Pointer\",\"className\":\"ChatPlace\",\"objectId\":\"30GIW5eyo3\"}]}}"));
-            request.setTag(this);
-            QuezzleApplication.getApplication().getVolleyHelper().addRequest(request);
+            NetworkService.sendMessage(getActivity(), chatKey, message.getText().toString());
 
             //delete text of message
             message.setText("");

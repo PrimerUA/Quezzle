@@ -43,6 +43,9 @@
             android:name=".contentprovider.QuezzleProvider"
             android:authorities="com.skylion.quezzle.contentprovider.QuezzleProvider"
             android:exported="false" />
+        <service
+            android:name=".service.NetworkService"
+            android:exported="false" />
 
         <service android:name="com.parse.PushService" />
         <receiver android:name="com.parse.ParseBroadcastReceiver" >
