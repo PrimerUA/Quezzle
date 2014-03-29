@@ -60,8 +60,13 @@
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
                 <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
-
                 <category android:name="com.skylion.quezzle" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".receiver.NewMessageReceiver" android:exported="false">
+            <intent-filter>
+                <action android:name="com.skylion.quezzle.NEW_CHAT_MESSAGE" />
             </intent-filter>
         </receiver>
     </application>

@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -43,6 +44,17 @@ public class ChatsListActivity extends Activity implements View.OnClickListener,
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chats);
+
+
+        Log.d("KVEST_TAG", "!=" + getIntent().getAction());
+        if (getIntent().getExtras() != null) {
+            String data = getIntent().getExtras().getString("com.parse.Data");
+            for (String key : getIntent().getExtras().keySet()) {
+
+                Log.d("KVEST_TAG", key + "=" + getIntent().getExtras().getString(key));
+            }
+        }
+        //Log.d("KVEST_TAG", "e=" + (getIntent().getExtras() != null ? getIntent().getExtras().toString() : "null"));
 
         adapter = new ChatListAdapter(this, ChatListAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
         chatsList = (ListView) findViewById(R.id.chatsList);
