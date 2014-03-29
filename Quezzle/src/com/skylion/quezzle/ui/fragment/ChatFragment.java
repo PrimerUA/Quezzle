@@ -183,11 +183,13 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         }
     }
 
-    private static class NewMessageEventReceiver extends BroadcastReceiver {
+    private class NewMessageEventReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            setResultCode(Activity.RESULT_OK);
-            abortBroadcast();
+            if (getChatId() == intent.getLongExtra(NetworkService.CHAT_ID_EXTRA, -1)) {
+                setResultCode(Activity.RESULT_OK);
+                abortBroadcast();
+            }
         }
     }
 }

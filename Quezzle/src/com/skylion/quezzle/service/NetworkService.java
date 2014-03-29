@@ -30,7 +30,7 @@ import java.util.List;
  */
 public class NetworkService extends IntentService {
     public static final String NEW_MESSAGE_ACTION = "com.skylion.quezzle.service.NetworkService.NEW_MESSAGE_ACTION";
-    private static final String CHAT_ID_EXTRA = "com.skylion.quezzle.service.NetworkService.CHAT_ID";
+    public static final String CHAT_ID_EXTRA = "com.skylion.quezzle.service.NetworkService.CHAT_ID";
 
     private static final String ACTION_EXTRA = "com.skylion.quezzle.service.NetworkService.ACTION";
     private static final String CHAT_KEY_EXTRA = "com.skylion.quezzle.service.NetworkService.CHAT_KEY";
