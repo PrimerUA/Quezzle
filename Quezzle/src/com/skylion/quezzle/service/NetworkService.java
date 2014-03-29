@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.util.Log;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -77,6 +78,12 @@ public class NetworkService extends IntentService {
 
     private void doReloadChat(Intent intent) {
         String chatKey = intent.getStringExtra(CHAT_KEY_EXTRA);
+        Uri chatUri = QuezzleProviderContract.getMessagesUri(getChatIdByKey(chatKey));
+
+        //remove old data
+        getContentResolver().delete(chatUri, null, null);
+
+        //load new data
         ParseQuery<ParseObject> query = ParseQuery.getQuery("ChatMessage");
         query.whereEqualTo("chatId", chatKey);
         query.setLimit(20);
@@ -100,7 +107,7 @@ public class NetworkService extends IntentService {
                          values[i].put(MessageTable.MESSAGE_COLUMN, message.getString("message"));
                      }
 
-                    getContentResolver().bulkInsert(QuezzleProviderContract.getMessagesUri(getChatIdByKey(chatKey)), values);
+                    getContentResolver().bulkInsert(chatUri, values);
                 }
 
                 offset += messages.size();

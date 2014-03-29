@@ -132,10 +132,13 @@ public class QuezzleProvider extends ContentProvider {
                         (hasSelection ? (" AND " + selection) : ""), (hasSelection ? selectionArgs : null));
                 break;
             case CHAT_MESSAGES_URI_INDICATOR :
-                //TODO
+                rowsDeleted = db.delete(MessageTable.TABLE_NAME, MessageTable.CHAT_ID_COLUMN + "=" + uri.getPathSegments().get(1) +
+                                        (hasSelection ? (" AND " + selection) : ""), (hasSelection ? selectionArgs : null));
                 break;
             case CHAT_MESSAGE_URI_INDICATOR :
-                //TODO
+                rowsDeleted = db.delete(MessageTable.TABLE_NAME, MessageTable.CHAT_ID_COLUMN + "=" + uri.getPathSegments().get(1) +
+                                        " AND " + MessageTable._ID + "=" + uri.getLastPathSegment() +
+                                        (hasSelection ? (" AND " + selection) : ""), (hasSelection ? selectionArgs : null));
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
@@ -163,10 +166,15 @@ public class QuezzleProvider extends ContentProvider {
                         (hasSelection ? selectionArgs : null));
                 break;
             case CHAT_MESSAGES_URI_INDICATOR :
-                //TODO
+                rowsUpdated = db.update(MessageTable.TABLE_NAME, values,
+                        MessageTable.CHAT_ID_COLUMN + "=" + uri.getPathSegments().get(1) +
+                        (hasSelection ? (" AND " + selection) : ""), (hasSelection ? selectionArgs : null));
                 break;
             case CHAT_MESSAGE_URI_INDICATOR :
-                //TODO
+                rowsUpdated = db.update(MessageTable.TABLE_NAME, values,
+                        MessageTable.CHAT_ID_COLUMN + "=" + uri.getPathSegments().get(1) +
+                        " AND " + MessageTable._ID + "=" + uri.getLastPathSegment() +
+                        (hasSelection ? (" AND " + selection) : ""), (hasSelection ? selectionArgs : null));
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
