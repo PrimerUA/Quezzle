@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.text.TextUtils;
 import com.skylion.quezzle.datastorage.QuezzleSQLStorage;
 import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
+import com.skylion.quezzle.datastorage.table.MessageTable;
 
 /**
  * Created with IntelliJ IDEA.
@@ -24,12 +25,19 @@ public class QuezzleProvider extends ContentProvider {
 
     private static final int CHAT_PLACES_URI_INDICATOR = 1;
     private static final int CHAT_PLACE_URI_INDICATOR = 2;
+    private static final int CHAT_MESSAGES_URI_INDICATOR = 3;
+    private static final int CHAT_MESSAGE_URI_INDICATOR = 4;
 
     private static final UriMatcher uriMatcher;
     static {
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         uriMatcher.addURI(QuezzleProviderContract.AUTHORITY, QuezzleProviderContract.CHAT_PLACES_PATH, CHAT_PLACES_URI_INDICATOR);
         uriMatcher.addURI(QuezzleProviderContract.AUTHORITY, QuezzleProviderContract.CHAT_PLACES_PATH + "/#", CHAT_PLACE_URI_INDICATOR);
+
+        uriMatcher.addURI(QuezzleProviderContract.AUTHORITY, QuezzleProviderContract.CHAT_PLACES_PATH + "/#/" +
+                                                             QuezzleProviderContract.MESSAGES_PATH, CHAT_MESSAGES_URI_INDICATOR);
+        uriMatcher.addURI(QuezzleProviderContract.AUTHORITY, QuezzleProviderContract.CHAT_PLACES_PATH + "/#/" +
+                                                             QuezzleProviderContract.MESSAGES_PATH + "/#", CHAT_MESSAGE_URI_INDICATOR);
     }
 
     @Override
@@ -49,6 +57,15 @@ public class QuezzleProvider extends ContentProvider {
             case CHAT_PLACE_URI_INDICATOR :
                 queryBuilder.setTables(ChatPlaceTable.TABLE_NAME);
                 queryBuilder.appendWhere(ChatPlaceTable._ID + "=" + uri.getLastPathSegment());
+                break;
+            case CHAT_MESSAGES_URI_INDICATOR :
+                queryBuilder.setTables(MessageTable.TABLE_NAME);
+                queryBuilder.appendWhere(MessageTable.CHAT_ID_COLUMN + "=" + uri.getPathSegments().get(1));
+                break;
+            case CHAT_MESSAGE_URI_INDICATOR :
+                queryBuilder.setTables(MessageTable.TABLE_NAME);
+                queryBuilder.appendWhere(MessageTable.CHAT_ID_COLUMN + "=" + uri.getPathSegments().get(1));
+                queryBuilder.appendWhere(MessageTable._ID + "=" + uri.getLastPathSegment());
                 break;
             default:
                 throw new IllegalArgumentException("Unknown uri = " + uri);
@@ -72,7 +89,22 @@ public class QuezzleProvider extends ContentProvider {
         switch (uriMatcher.match(uri)) {
 
             case CHAT_PLACES_URI_INDICATOR :
-                rowId = db.insert(ChatPlaceTable.TABLE_NAME, null, values);
+                //replace works as insert or update
+                rowId = db.replace(ChatPlaceTable.TABLE_NAME, null, values);
+                if (rowId > 0)
+                {
+                    Uri resultUri = ContentUris.withAppendedId(uri, rowId);
+                    getContext().getContentResolver().notifyChange(resultUri, null);
+                    return resultUri;
+                }
+                break;
+            case CHAT_MESSAGES_URI_INDICATOR :
+                //add chat id if it is not exists
+                if (!values.containsKey(MessageTable.CHAT_ID_COLUMN)) {
+                    values.put(MessageTable.CHAT_ID_COLUMN, Long.parseLong(uri.getPathSegments().get(1)));
+                }
+                //replace works as insert or update
+                rowId = db.replace(MessageTable.TABLE_NAME, null, values);
                 if (rowId > 0)
                 {
                     Uri resultUri = ContentUris.withAppendedId(uri, rowId);
@@ -99,6 +131,12 @@ public class QuezzleProvider extends ContentProvider {
                 rowsDeleted = db.delete(ChatPlaceTable.TABLE_NAME, ChatPlaceTable._ID + "=" + uri.getLastPathSegment() +
                         (hasSelection ? (" AND " + selection) : ""), (hasSelection ? selectionArgs : null));
                 break;
+            case CHAT_MESSAGES_URI_INDICATOR :
+                //TODO
+                break;
+            case CHAT_MESSAGE_URI_INDICATOR :
+                //TODO
+                break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
@@ -116,10 +154,19 @@ public class QuezzleProvider extends ContentProvider {
         SQLiteDatabase db = sqlStorage.getWritableDatabase();
 
         switch (uriMatcher.match(uri)) {
+            case CHAT_PLACES_URI_INDICATOR :
+                rowsUpdated = db.update(ChatPlaceTable.TABLE_NAME, values, selection, selectionArgs);
+                break;
             case CHAT_PLACE_URI_INDICATOR :
                 rowsUpdated = db.update(ChatPlaceTable.TABLE_NAME, values, ChatPlaceTable._ID + "=" +
                         uri.getLastPathSegment() + (hasSelection ? (" AND " + selection) : ""),
                         (hasSelection ? selectionArgs : null));
+                break;
+            case CHAT_MESSAGES_URI_INDICATOR :
+                //TODO
+                break;
+            case CHAT_MESSAGE_URI_INDICATOR :
+                //TODO
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);

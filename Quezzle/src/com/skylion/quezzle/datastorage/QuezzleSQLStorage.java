@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
+import com.skylion.quezzle.datastorage.table.MessageTable;
 
 /**
  * Created with IntelliJ IDEA.
@@ -24,6 +25,7 @@ public class QuezzleSQLStorage extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         //create DB structure
         db.execSQL(ChatPlaceTable.CREATE_TABLE_SQL);
+        db.execSQL(MessageTable.CREATE_TABLE_SQL);
     }
 
     @Override

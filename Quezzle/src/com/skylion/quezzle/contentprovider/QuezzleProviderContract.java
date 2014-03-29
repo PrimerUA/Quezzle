@@ -12,7 +12,11 @@ import android.net.Uri;
 public abstract class QuezzleProviderContract {
     public static final String AUTHORITY = "com.skylion.quezzle.contentprovider.QuezzleProvider";
 
-    public static final String CHAT_PLACES_PATH = "chat_place";
+    public static final String CHAT_PLACES_PATH = "chat_places";
+    public static final String MESSAGES_PATH = "messages";
 
     public static final Uri CHAT_PLACES_URI = Uri.parse("content://" + AUTHORITY + "/" + CHAT_PLACES_PATH);
+    public static Uri getMessagesUri(long chatId) {
+        return  Uri.parse("content://" + AUTHORITY + "/" + CHAT_PLACES_PATH + "/" + chatId + "/" + MESSAGES_PATH);
+    }
 }

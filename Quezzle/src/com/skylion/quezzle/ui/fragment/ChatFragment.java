@@ -8,11 +8,10 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.skylion.quezzle.QuezzleApplication;
@@ -20,9 +19,11 @@ import com.skylion.quezzle.R;
 import com.skylion.quezzle.contentprovider.QuezzleProviderContract;
 import com.skylion.quezzle.datamodel.ChatMessage;
 import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
+import com.skylion.quezzle.datastorage.table.MessageTable;
 import com.skylion.quezzle.network.parse.datamodel.Operation;
 import com.skylion.quezzle.network.parse.request.BatchOperationsRequest;
 import com.skylion.quezzle.service.NetworkService;
+import com.skylion.quezzle.ui.adapter.MessageListAdapter;
 
 /**
  * Created with IntelliJ IDEA.
@@ -32,7 +33,8 @@ import com.skylion.quezzle.service.NetworkService;
  * To change this template use File | Settings | File Templates.
  */
 public class ChatFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
-    private static final int LOAD_CHAT_KEY = 0;
+    private static final int LOAD_CHAT_KEY_ID = 0;
+    private static final int LOAD_MESSAGES_ID = 1;
     private static final String CHAT_ID_ARGUMENT = "com.skylion.quezzle.ui.fragment.ChatFragment.CHAT_ID";
 
     public static ChatFragment newInstance(long chatId) {
@@ -47,9 +49,13 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     private String chatKey;
     private Button send;
     private EditText message;
+    private ListView messageList;
+    private MessageListAdapter messageListAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        setHasOptionsMenu(true);
+
         View rootView = inflater.inflate(R.layout.chat_fragment, container, false);
 
         send = (Button)rootView.findViewById(R.id.send);
@@ -60,6 +66,9 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
             }
         });
         message = (EditText)rootView.findViewById(R.id.message);
+        messageList = (ListView)rootView.findViewById(R.id.messages_list);
+        messageListAdapter = new MessageListAdapter(getActivity(), MessageListAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+        messageList.setAdapter(messageListAdapter);
 
         return rootView;
     }
@@ -68,7 +77,25 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        getLoaderManager().initLoader(LOAD_CHAT_KEY, null, this);
+        getLoaderManager().initLoader(LOAD_CHAT_KEY_ID, null, this);
+        getLoaderManager().initLoader(LOAD_MESSAGES_ID, null, this);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        inflater.inflate(R.menu.main, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_refresh :
+                NetworkService.reloadChat(getActivity(), chatKey);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     private void sendMessage() {
@@ -103,9 +130,13 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         switch (id) {
-            case LOAD_CHAT_KEY :
+            case LOAD_CHAT_KEY_ID :
                 Uri uri = Uri.withAppendedPath(QuezzleProviderContract.CHAT_PLACES_URI, Long.toString(getChatId()));
                 return new CursorLoader(getActivity(), uri, new String[]{ChatPlaceTable.OBJECT_ID_COLUMN}, null, null, null);
+            case LOAD_MESSAGES_ID :
+                return new CursorLoader(getActivity(), QuezzleProviderContract.getMessagesUri(getChatId()),
+                                        new String[]{MessageTable._ID, MessageTable.UPDATED_AT_COLUMN, MessageTable.MESSAGE_COLUMN},
+                                        null, null, null);
         }
         return null;
     }
@@ -113,8 +144,11 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         switch (loader.getId()) {
-            case LOAD_CHAT_KEY :
+            case LOAD_CHAT_KEY_ID :
                 setChatKey(cursor);
+                break;
+            case LOAD_MESSAGES_ID :
+                messageListAdapter.swapCursor(cursor);
                 break;
         }
     }
@@ -122,8 +156,11 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         switch (loader.getId()) {
-            case LOAD_CHAT_KEY :
+            case LOAD_CHAT_KEY_ID :
                 resetChatKey();
+                break;
+            case LOAD_MESSAGES_ID :
+                messageListAdapter.swapCursor(null);
                 break;
         }
     }
