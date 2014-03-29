@@ -1,18 +1,22 @@
 package com.skylion.quezzle.service;
 
-import android.app.IntentService;
+import android.app.*;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.util.Log;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.skylion.quezzle.R;
 import com.skylion.quezzle.contentprovider.QuezzleProviderContract;
 import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
 import com.skylion.quezzle.datastorage.table.MessageTable;
+import com.skylion.quezzle.ui.activity.ChatActivity;
 
 import java.util.Date;
 import java.util.List;
@@ -25,9 +29,16 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class NetworkService extends IntentService {
+    public static final String NEW_MESSAGE_ACTION = "com.skylion.quezzle.service.NetworkService.NEW_MESSAGE_ACTION";
+    private static final String CHAT_ID_EXTRA = "com.skylion.quezzle.service.NetworkService.CHAT_ID";
+
     private static final String ACTION_EXTRA = "com.skylion.quezzle.service.NetworkService.ACTION";
     private static final String CHAT_KEY_EXTRA = "com.skylion.quezzle.service.NetworkService.CHAT_KEY";
     private static final String MESSAGE_EXTRA = "com.skylion.quezzle.service.NetworkService.MESSAGE";
+    private static final String WITH_NOTIFICATION_EXTRA = "com.skylion.quezzle.service.NetworkService.WITH_NOTIFICATION";
+
+    private static final int NEW_MESSAGE_NOTIFICATION_ID = 1;
+
     private static final int LOAD_MESSAGES_LIMIT = 20;
 
     private static final int ACTION_SEND_MESSAGE = 0;
@@ -51,10 +62,11 @@ public class NetworkService extends IntentService {
         context.startService(intent);
     }
 
-    public static void refreshChat(Context context, String chatKey) {
+    public static void refreshChat(Context context, String chatKey, boolean withNotification) {
         Intent intent = new Intent(context, NetworkService.class);
         intent.putExtra(ACTION_EXTRA, ACTION_REFRESH_CHAT);
         intent.putExtra(CHAT_KEY_EXTRA, chatKey);
+        intent.putExtra(WITH_NOTIFICATION_EXTRA, withNotification);
 
         context.startService(intent);
     }
@@ -93,12 +105,43 @@ public class NetworkService extends IntentService {
     private void doRefreshChat(Intent intent) {
         //load needed data from db
         String chatKey = intent.getStringExtra(CHAT_KEY_EXTRA);
-        long chatId = getChatIdByKey(chatKey);
+        final long chatId = getChatIdByKey(chatKey);
         Date lastMessageDate = getChatLastMessageDate(chatId);
         Uri messagesUri = QuezzleProviderContract.getMessagesUri(getChatIdByKey(chatKey));
 
         //load new data
-        loadChatMessages(chatKey, messagesUri, lastMessageDate);
+        int createdCount = loadChatMessages(chatKey, messagesUri, lastMessageDate);
+
+        //show notification if needed
+        if (createdCount > 0 && intent.getBooleanExtra(WITH_NOTIFICATION_EXTRA, false)) {
+            Intent broadcastIntent = new Intent(NEW_MESSAGE_ACTION);
+            broadcastIntent.putExtra(CHAT_ID_EXTRA, chatId);
+            sendOrderedBroadcast(broadcastIntent, null, new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (getResultCode() != Activity.RESULT_OK) {
+                        showNewMessageNotification(chatId);
+                    }
+                }
+            }, null, 0, null, null);
+        }
+    }
+
+    private void showNewMessageNotification(long chatId) {
+        Notification.Builder builder = new Notification.Builder(this)
+                                        .setAutoCancel(true)
+                                        .setSmallIcon(R.drawable.ic_launcher)
+                                        .setContentTitle(getString(R.string.new_message))
+                                        .setContentText(getString(R.string.chat_has_new_message, getChatName(chatId)))
+                                        .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+        // Creates an explicit intent for an Activity in your app
+        Intent resultIntent = ChatActivity.getIntent(this, chatId);
+
+        PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setContentIntent(resultPendingIntent);
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        // mId allows you to update the notification later on.
+        mNotificationManager.notify(NEW_MESSAGE_NOTIFICATION_ID, builder.build());
     }
 
     private void doReloadChat(Intent intent) {
@@ -112,7 +155,9 @@ public class NetworkService extends IntentService {
         loadChatMessages(chatKey, messagesUri, null);
     }
 
-    private void loadChatMessages(String chatKey, Uri messagesUri, Date lastMessageDate) {
+    private int loadChatMessages(String chatKey, Uri messagesUri, Date lastMessageDate) {
+        int createdCount = 0;
+
         ParseQuery<ParseObject> query = ParseQuery.getQuery("ChatMessage");
         query.whereEqualTo("chatId", chatKey);
         query.addAscendingOrder("updatedAt");
@@ -140,7 +185,7 @@ public class NetworkService extends IntentService {
                         values[i].put(MessageTable.MESSAGE_COLUMN, message.getString("message"));
                     }
 
-                    getContentResolver().bulkInsert(messagesUri, values);
+                    createdCount += getContentResolver().bulkInsert(messagesUri, values);
                 }
 
                 offset += messages.size();
@@ -149,6 +194,8 @@ public class NetworkService extends IntentService {
         } catch (ParseException pe) {
             Log.e("KVEST_TAG", "Error updating chat: " + pe.getMessage());
         }
+
+        return createdCount;
     }
 
     private long getChatIdByKey(String chatKey) {
@@ -174,6 +221,21 @@ public class NetworkService extends IntentService {
                 return new Date(cursor.getLong(cursor.getColumnIndex(MessageTable.UPDATED_AT_COLUMN)));
             } else {
                 return null;
+            }
+        } finally {
+            cursor.close();
+        }
+    }
+
+    private String getChatName(long chatId) {
+        Uri uri = Uri.withAppendedPath(QuezzleProviderContract.CHAT_PLACES_URI, Long.toString(chatId));
+        Cursor cursor = getContentResolver().query(uri, new String[]{ChatPlaceTable.NAME_COLUMN},
+                                                   null, null, null);
+        try {
+            if (cursor.moveToFirst()) {
+                return cursor.getString(cursor.getColumnIndex(ChatPlaceTable.NAME_COLUMN));
+            } else {
+                return "?";
             }
         } finally {
             cursor.close();

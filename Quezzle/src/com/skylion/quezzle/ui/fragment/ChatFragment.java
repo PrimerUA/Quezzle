@@ -1,9 +1,9 @@
 package com.skylion.quezzle.ui.fragment;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.LoaderManager;
-import android.content.CursorLoader;
-import android.content.Loader;
+import android.content.*;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -53,6 +53,8 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     private ListView messageList;
     private MessageListAdapter messageListAdapter;
 
+    private NewMessageEventReceiver receiver = new NewMessageEventReceiver();
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         setHasOptionsMenu(true);
@@ -72,6 +74,21 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         messageList.setAdapter(messageListAdapter);
 
         return rootView;
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        getActivity().registerReceiver(receiver, new IntentFilter(NetworkService.NEW_MESSAGE_ACTION));
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        getActivity().unregisterReceiver(receiver);
     }
 
     @Override
@@ -163,6 +180,14 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
             case LOAD_MESSAGES_ID :
                 messageListAdapter.swapCursor(null);
                 break;
+        }
+    }
+
+    private static class NewMessageEventReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            setResultCode(Activity.RESULT_OK);
+            abortBroadcast();
         }
     }
 }

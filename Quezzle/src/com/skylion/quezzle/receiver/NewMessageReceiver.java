@@ -25,7 +25,7 @@ public class NewMessageReceiver extends BroadcastReceiver {
             //parse push data
             PushData pushData = gson.fromJson(data, PushData.class);
             //start updating chat
-            NetworkService.refreshChat(context, pushData.chatObjectId);
+            NetworkService.refreshChat(context, pushData.chatObjectId, true);
         } else {
             Log.e("KVEST_TAG", "NewMessageReceiver error - empty data");
         }
