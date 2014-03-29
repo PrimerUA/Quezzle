@@ -95,11 +95,9 @@ public class NetworkService extends IntentService {
 
                          values[i] = new ContentValues(4);
                          values[i].put(MessageTable.OBJECT_ID_COLUMN, message.getObjectId());
-                         //TODO
-                         //values[i].put(MessageTable.CREATED_AT_COLUMN = "created_at";
-                         //values[i].put(MessageTable.UPDATED_AT_COLUMN = "updated_at";
+                         values[i].put(MessageTable.CREATED_AT_COLUMN, message.getCreatedAt().getTime());
+                         values[i].put(MessageTable.UPDATED_AT_COLUMN, message.getUpdatedAt().getTime());
                          values[i].put(MessageTable.MESSAGE_COLUMN, message.getString("message"));
-
                      }
 
                     getContentResolver().bulkInsert(QuezzleProviderContract.getMessagesUri(getChatIdByKey(chatKey)), values);

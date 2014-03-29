@@ -33,6 +33,7 @@ import com.skylion.quezzle.ui.adapter.MessageListAdapter;
  * To change this template use File | Settings | File Templates.
  */
 public class ChatFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+    private static final String CHAT_MESSAGES_ORDER = MessageTable.UPDATED_AT_COLUMN + " DESC";
     private static final int LOAD_CHAT_KEY_ID = 0;
     private static final int LOAD_MESSAGES_ID = 1;
     private static final String CHAT_ID_ARGUMENT = "com.skylion.quezzle.ui.fragment.ChatFragment.CHAT_ID";
@@ -136,7 +137,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
             case LOAD_MESSAGES_ID :
                 return new CursorLoader(getActivity(), QuezzleProviderContract.getMessagesUri(getChatId()),
                                         new String[]{MessageTable._ID, MessageTable.UPDATED_AT_COLUMN, MessageTable.MESSAGE_COLUMN},
-                                        null, null, null);
+                                        null, null, CHAT_MESSAGES_ORDER);
         }
         return null;
     }

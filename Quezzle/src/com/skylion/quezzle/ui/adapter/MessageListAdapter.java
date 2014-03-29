@@ -21,7 +21,7 @@ import java.util.Date;
  * To change this template use File | Settings | File Templates.
  */
 public class MessageListAdapter extends CursorAdapter {
-    private static final String DATE_FORMAT_PATTERN = "[dd.MM.yyyy mm:ss]";
+    private static final String DATE_FORMAT_PATTERN = "[dd.MM.yyyy HH:mm:ss]";
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_PATTERN);
 
     private int messageColumnIndex = -1;
