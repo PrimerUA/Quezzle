@@ -8,20 +8,20 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.*;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.skylion.quezzle.QuezzleApplication;
+
 import com.skylion.quezzle.R;
 import com.skylion.quezzle.contentprovider.QuezzleProviderContract;
-import com.skylion.quezzle.datamodel.ChatMessage;
 import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
 import com.skylion.quezzle.datastorage.table.MessageTable;
-import com.skylion.quezzle.network.parse.datamodel.Operation;
-import com.skylion.quezzle.network.parse.request.BatchOperationsRequest;
 import com.skylion.quezzle.service.NetworkService;
 import com.skylion.quezzle.ui.adapter.MessageListAdapter;
 
@@ -91,7 +91,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_refresh :
+            case R.id.action_refresh:
                 NetworkService.reloadChat(getActivity(), chatKey);
                 return true;
             default:
