@@ -27,158 +27,168 @@ import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
 import com.skylion.quezzle.network.parse.response.QueryResponse;
 import com.skylion.quezzle.network.request.ChatPlacesRequest;
 import com.skylion.quezzle.ui.adapter.ChatListAdapter;
+import com.skylion.quezzle.ui.auth.UserLoginActivity;
 
-import java.lang.reflect.Type;
+public class ChatsListActivity extends Activity implements View.OnClickListener, LoaderManager.LoaderCallbacks<Cursor> {
+	private static final int LOAD_CHATS_ID = 0;
+	private static final String[] PROJECTION = new String[] { ChatPlaceTable._ID, ChatPlaceTable.NAME_COLUMN,
+			ChatPlaceTable.DESCRIPTION_COLUMN };
 
-public class ChatsListActivity extends Activity implements View.OnClickListener,
-                                                LoaderManager.LoaderCallbacks<Cursor> {
-    private static final int LOAD_CHATS_ID = 0;
-    private static final String[] PROJECTION = new String[]{ChatPlaceTable._ID, ChatPlaceTable.NAME_COLUMN,
-                                                            ChatPlaceTable.DESCRIPTION_COLUMN};
+	private ListView chatsList;
+	private ChatListAdapter adapter;
+	private Button createButton;
 
-    private ListView chatsList;
-    private ChatListAdapter adapter;
-    private Button createButton;
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_chats);
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_chats);
+		ParseUser currentUser = ParseUser.getCurrentUser();
+		if (currentUser != null) {
+			// do stuff with the user
+		} else {
+			startActivity(new Intent(this, UserLoginActivity.class));
+		}
+		
+		Log.d("KVEST_TAG", "!=" + getIntent().getAction());
+		if (getIntent().getExtras() != null) {
+			String data = getIntent().getExtras().getString("com.parse.Data");
+			for (String key : getIntent().getExtras().keySet()) {
 
+				Log.d("KVEST_TAG", key + "=" + getIntent().getExtras().getString(key));
+			}
+		}
+		// Log.d("KVEST_TAG", "e=" + (getIntent().getExtras() != null ?
+		// getIntent().getExtras().toString() : "null"));
 
-        Log.d("KVEST_TAG", "!=" + getIntent().getAction());
-        if (getIntent().getExtras() != null) {
-            String data = getIntent().getExtras().getString("com.parse.Data");
-            for (String key : getIntent().getExtras().keySet()) {
+		adapter = new ChatListAdapter(this, ChatListAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+		chatsList = (ListView) findViewById(R.id.chatsList);
+		chatsList.setAdapter(adapter);
+		chatsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				// show chat
+				ChatActivity.start(ChatsListActivity.this, id);
+			}
+		});
+		createButton = (Button) findViewById(R.id.createButton);
 
-                Log.d("KVEST_TAG", key + "=" + getIntent().getExtras().getString(key));
-            }
-        }
-        //Log.d("KVEST_TAG", "e=" + (getIntent().getExtras() != null ? getIntent().getExtras().toString() : "null"));
+		createButton = (Button) findViewById(R.id.createButton);
+		createButton.setOnClickListener(this);
 
-        adapter = new ChatListAdapter(this, ChatListAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
-        chatsList = (ListView) findViewById(R.id.chatsList);
-        chatsList.setAdapter(adapter);
-        chatsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //show chat
-                ChatActivity.start(ChatsListActivity.this, id);
-            }
-        });
-        createButton = (Button) findViewById(R.id.createButton);
+		getLoaderManager().initLoader(LOAD_CHATS_ID, null, this);
+		// loadChatList();
+	}
 
-        createButton = (Button) findViewById(R.id.createButton);
-        createButton.setOnClickListener(this);
+	private void loadChatList() {
+		// clear db
+		getContentResolver().delete(QuezzleProviderContract.CHAT_PLACES_URI, null, null);
 
-        getLoaderManager().initLoader(LOAD_CHATS_ID, null, this);
-        //loadChatList();
-    }
+		// query new chats
+		ChatPlacesRequest request = new ChatPlacesRequest(new Response.Listener<QueryResponse<ChatPlace>>() {
+			@Override
+			public void onResponse(QueryResponse<ChatPlace> response) {
+				if (response.results != null) {
+					ContentValues[] values = new ContentValues[response.results.size()];
+					for (int i = 0; i < values.length; ++i) {
+						ChatPlace chatPlace = response.results.get(i);
+						values[i] = new ContentValues(5);
+						values[i].put(ChatPlaceTable.OBJECT_ID_COLUMN, chatPlace.objectId);
+						values[i].put(ChatPlaceTable.CREATED_AT_COLUMN, chatPlace.getCreatedAt());
+						values[i].put(ChatPlaceTable.UPDATED_AT_COLUMN, chatPlace.getUpdatedAt());
+						values[i].put(ChatPlaceTable.NAME_COLUMN, chatPlace.name);
+						values[i].put(ChatPlaceTable.DESCRIPTION_COLUMN, chatPlace.description);
+					}
 
-    private void loadChatList() {
-        //clear db
-        getContentResolver().delete(QuezzleProviderContract.CHAT_PLACES_URI, null, null);
+					getContentResolver().bulkInsert(QuezzleProviderContract.CHAT_PLACES_URI, values);
+				} else {
+					Toast.makeText(ChatsListActivity.this, "Error loading chats", Toast.LENGTH_SHORT).show();
+				}
+			}
+		}, new Response.ErrorListener() {
+			@Override
+			public void onErrorResponse(VolleyError error) {
+				Toast.makeText(ChatsListActivity.this, "Error loading chats", Toast.LENGTH_SHORT).show();
+			}
+		});
+		request.setTag(this);
+		QuezzleApplication.getApplication().getVolleyHelper().addRequest(request);
+		// final ParseGeoPoint userLocation = (ParseGeoPoint)
+		// ParseUser.getCurrentUser().get("location");
+		// ParseQueryAdapter<ParseObject> adapter = new
+		// ParseQueryAdapter<ParseObject>(this, new
+		// ParseQueryAdapter.QueryFactory<ParseObject>() {
+		// public ParseQuery<ParseObject> create() {
+		// ParseQuery<ParseObject> query = ParseQuery.getQuery("ChatPlace");
+		// query.whereNear("location", userLocation);
+		// query.setLimit(10);
+		// query.findInBackground(new FindCallback<ParseObject>() {
+		// @Override
+		// public void done(List<ParseObject> parseObjects, ParseException e) {
+		//
+		// }
+		// });
+		// return query;
+		// }
+		// });
+		// adapter.setTextKey("name"); //запихнуть в
+		// кастомный адаптер и вызвать в done
+		// adapter.setImageKey("photo");
+		// chatsList.setAdapter(adapter);
+	}
 
-        //query new chats
-        ChatPlacesRequest request = new ChatPlacesRequest(new Response.Listener<QueryResponse<ChatPlace>>() {
-            @Override
-            public void onResponse(QueryResponse<ChatPlace> response) {
-                if (response.results != null) {
-                    ContentValues[] values = new ContentValues[response.results.size()];
-                    for (int i = 0; i < values.length; ++i) {
-                        ChatPlace chatPlace = response.results.get(i);
-                        values[i] = new ContentValues(5);
-                        values[i].put(ChatPlaceTable.OBJECT_ID_COLUMN, chatPlace.objectId);
-                        values[i].put(ChatPlaceTable.CREATED_AT_COLUMN, chatPlace.getCreatedAt());
-                        values[i].put(ChatPlaceTable.UPDATED_AT_COLUMN, chatPlace.getUpdatedAt());
-                        values[i].put(ChatPlaceTable.NAME_COLUMN, chatPlace.name);
-                        values[i].put(ChatPlaceTable.DESCRIPTION_COLUMN, chatPlace.description);
-                    }
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
 
-                    getContentResolver().bulkInsert(QuezzleProviderContract.CHAT_PLACES_URI, values);
-                } else {
-                    Toast.makeText(ChatsListActivity.this, "Error loading chats", Toast.LENGTH_SHORT).show();
-                }
-            }
-        },
-        new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(ChatsListActivity.this, "Error loading chats", Toast.LENGTH_SHORT).show();
-            }
-        });
-        request.setTag(this);
-        QuezzleApplication.getApplication().getVolleyHelper().addRequest(request);
-//        final ParseGeoPoint userLocation = (ParseGeoPoint) ParseUser.getCurrentUser().get("location");
-//        ParseQueryAdapter<ParseObject> adapter = new ParseQueryAdapter<ParseObject>(this, new ParseQueryAdapter.QueryFactory<ParseObject>() {
-//            public ParseQuery<ParseObject> create() {
-//                ParseQuery<ParseObject> query = ParseQuery.getQuery("ChatPlace");
-//                query.whereNear("location", userLocation);
-//                query.setLimit(10);
-//                query.findInBackground(new FindCallback<ParseObject>() {
-//                    @Override
-//                    public void done(List<ParseObject> parseObjects, ParseException e) {
-//
-//                    }
-//                });
-//                return query;
-//            }
-//        });
-//        adapter.setTextKey("name"); //запихнуть в кастомный адаптер и вызвать в done
-//        adapter.setImageKey("photo");
-//        chatsList.setAdapter(adapter);
-    }
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.main, menu);
+		return true;
+	}
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle action bar item clicks here. The action bar will
+		// automatically handle clicks on the Home/Up button, so long
+		// as you specify a parent activity in AndroidManifest.xml.
+		int id = item.getItemId();
+		if (id == R.id.action_refresh) {
+			loadChatList();
+		}
+		return super.onOptionsItemSelected(item);
+	}
 
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
+	@Override
+	public void onClick(View view) {
+		startActivity(new Intent(this, NewChatActivity.class));
+	}
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_refresh) {
-            loadChatList();
-        }
-        return super.onOptionsItemSelected(item);
-    }
+	// @Override
+	// public void onItemClick(AdapterView<?> adapterView, View view, int i,
+	// long l) {
+	// String chatName = ((ParseObject)
+	// chatsList.getAdapter().getItem(i)).get("name").toString();
+	// startActivity(new Intent(this,
+	// ChatDetailsActivity.class).putExtra("chatName", chatName));
+	// }
 
-    @Override
-    public void onClick(View view) {
-        startActivity(new Intent(this, NewChatActivity.class));
-    }
+	@Override
+	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+		switch (id) {
+		case LOAD_CHATS_ID:
+			return new CursorLoader(this, QuezzleProviderContract.CHAT_PLACES_URI, PROJECTION, null, null, null);
 
-//    @Override
-//    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-//        String chatName = ((ParseObject) chatsList.getAdapter().getItem(i)).get("name").toString();
-//        startActivity(new Intent(this, ChatDetailsActivity.class).putExtra("chatName", chatName));
-//    }
+		}
 
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        switch (id) {
-            case LOAD_CHATS_ID : return new CursorLoader(this,
-                    QuezzleProviderContract.CHAT_PLACES_URI,
-                    PROJECTION, null, null, null);
+		return null;
+	}
 
-        }
+	@Override
+	public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+		adapter.swapCursor(cursor);
+	}
 
-        return null;
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        adapter.swapCursor(cursor);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        adapter.swapCursor(null);
-    }
+	@Override
+	public void onLoaderReset(Loader<Cursor> loader) {
+		adapter.swapCursor(null);
+	}
 }
