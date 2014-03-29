@@ -37,6 +37,8 @@ public class NetworkService extends IntentService {
     private static final String MESSAGE_EXTRA = "com.skylion.quezzle.service.NetworkService.MESSAGE";
     private static final String WITH_NOTIFICATION_EXTRA = "com.skylion.quezzle.service.NetworkService.WITH_NOTIFICATION";
 
+    private static final long UNKNOWN_CHAT_ID = -1;
+
     private static final int NEW_MESSAGE_NOTIFICATION_ID = 1;
 
     private static final int LOAD_MESSAGES_LIMIT = 20;
@@ -106,8 +108,11 @@ public class NetworkService extends IntentService {
         //load needed data from db
         String chatKey = intent.getStringExtra(CHAT_KEY_EXTRA);
         final long chatId = getChatIdByKey(chatKey);
+        if (chatId == UNKNOWN_CHAT_ID) {
+            return;
+        }
         Date lastMessageDate = getChatLastMessageDate(chatId);
-        Uri messagesUri = QuezzleProviderContract.getMessagesUri(getChatIdByKey(chatKey));
+        Uri messagesUri = QuezzleProviderContract.getMessagesUri(chatId);
 
         //load new data
         int createdCount = loadChatMessages(chatKey, messagesUri, lastMessageDate);
@@ -146,7 +151,11 @@ public class NetworkService extends IntentService {
 
     private void doReloadChat(Intent intent) {
         String chatKey = intent.getStringExtra(CHAT_KEY_EXTRA);
-        Uri messagesUri = QuezzleProviderContract.getMessagesUri(getChatIdByKey(chatKey));
+        long chatId = getChatIdByKey(chatKey);
+        if (chatId == UNKNOWN_CHAT_ID) {
+            return;
+        }
+        Uri messagesUri = QuezzleProviderContract.getMessagesUri(chatId);
 
         //remove old data
         getContentResolver().delete(messagesUri, null, null);
@@ -205,7 +214,7 @@ public class NetworkService extends IntentService {
             if (cursor.moveToFirst()) {
                 return cursor.getLong(cursor.getColumnIndex(ChatPlaceTable._ID));
             } else {
-                return -1;
+                return UNKNOWN_CHAT_ID;
             }
         } finally {
             cursor.close();
