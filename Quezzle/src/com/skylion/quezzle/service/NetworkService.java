@@ -14,6 +14,7 @@ import com.skylion.quezzle.contentprovider.QuezzleProviderContract;
 import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
 import com.skylion.quezzle.datastorage.table.MessageTable;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -27,9 +28,11 @@ public class NetworkService extends IntentService {
     private static final String ACTION_EXTRA = "com.skylion.quezzle.service.NetworkService.ACTION";
     private static final String CHAT_KEY_EXTRA = "com.skylion.quezzle.service.NetworkService.CHAT_KEY";
     private static final String MESSAGE_EXTRA = "com.skylion.quezzle.service.NetworkService.MESSAGE";
+    private static final int LOAD_MESSAGES_LIMIT = 20;
 
     private static final int ACTION_SEND_MESSAGE = 0;
     private static final int ACTION_RELOAD_CHAT = 1;
+    private static final int ACTION_REFRESH_CHAT = 2;
 
     public static void sendMessage(Context context, String chatKey, String message) {
         Intent intent = new Intent(context, NetworkService.class);
@@ -48,6 +51,14 @@ public class NetworkService extends IntentService {
         context.startService(intent);
     }
 
+    public static void refreshChat(Context context, String chatKey) {
+        Intent intent = new Intent(context, NetworkService.class);
+        intent.putExtra(ACTION_EXTRA, ACTION_REFRESH_CHAT);
+        intent.putExtra(CHAT_KEY_EXTRA, chatKey);
+
+        context.startService(intent);
+    }
+
     public NetworkService() {
         super("NetworkService");
     }
@@ -60,6 +71,9 @@ public class NetworkService extends IntentService {
                 break;
             case ACTION_RELOAD_CHAT :
                 doReloadChat(intent);
+                break;
+            case ACTION_REFRESH_CHAT :
+                doRefreshChat(intent);
                 break;
         }
     }
@@ -76,17 +90,36 @@ public class NetworkService extends IntentService {
         }
     }
 
-    private void doReloadChat(Intent intent) {
+    private void doRefreshChat(Intent intent) {
+        //load needed data from db
         String chatKey = intent.getStringExtra(CHAT_KEY_EXTRA);
-        Uri chatUri = QuezzleProviderContract.getMessagesUri(getChatIdByKey(chatKey));
-
-        //remove old data
-        getContentResolver().delete(chatUri, null, null);
+        long chatId = getChatIdByKey(chatKey);
+        Date lastMessageDate = getChatLastMessageDate(chatId);
+        Uri messagesUri = QuezzleProviderContract.getMessagesUri(getChatIdByKey(chatKey));
 
         //load new data
+        loadChatMessages(chatKey, messagesUri, lastMessageDate);
+    }
+
+    private void doReloadChat(Intent intent) {
+        String chatKey = intent.getStringExtra(CHAT_KEY_EXTRA);
+        Uri messagesUri = QuezzleProviderContract.getMessagesUri(getChatIdByKey(chatKey));
+
+        //remove old data
+        getContentResolver().delete(messagesUri, null, null);
+
+        //load new data
+        loadChatMessages(chatKey, messagesUri, null);
+    }
+
+    private void loadChatMessages(String chatKey, Uri messagesUri, Date lastMessageDate) {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("ChatMessage");
         query.whereEqualTo("chatId", chatKey);
-        query.setLimit(20);
+        query.addAscendingOrder("updatedAt");
+        if (lastMessageDate != null) {
+            query.whereGreaterThan("updatedAt", lastMessageDate);
+        }
+        query.setLimit(LOAD_MESSAGES_LIMIT);
         int offset = 0;
         try {
             boolean hasMoreData = true;
@@ -97,17 +130,17 @@ public class NetworkService extends IntentService {
                 if (!messages.isEmpty()) {
                     ContentValues[] values = new ContentValues[messages.size()];
 
-                     for(int i = 0; i < messages.size(); ++i) {
-                         ParseObject message = messages.get(i);
+                    for(int i = 0; i < messages.size(); ++i) {
+                        ParseObject message = messages.get(i);
 
-                         values[i] = new ContentValues(4);
-                         values[i].put(MessageTable.OBJECT_ID_COLUMN, message.getObjectId());
-                         values[i].put(MessageTable.CREATED_AT_COLUMN, message.getCreatedAt().getTime());
-                         values[i].put(MessageTable.UPDATED_AT_COLUMN, message.getUpdatedAt().getTime());
-                         values[i].put(MessageTable.MESSAGE_COLUMN, message.getString("message"));
-                     }
+                        values[i] = new ContentValues(4);
+                        values[i].put(MessageTable.OBJECT_ID_COLUMN, message.getObjectId());
+                        values[i].put(MessageTable.CREATED_AT_COLUMN, message.getCreatedAt().getTime());
+                        values[i].put(MessageTable.UPDATED_AT_COLUMN, message.getUpdatedAt().getTime());
+                        values[i].put(MessageTable.MESSAGE_COLUMN, message.getString("message"));
+                    }
 
-                    getContentResolver().bulkInsert(chatUri, values);
+                    getContentResolver().bulkInsert(messagesUri, values);
                 }
 
                 offset += messages.size();
@@ -126,6 +159,21 @@ public class NetworkService extends IntentService {
                 return cursor.getLong(cursor.getColumnIndex(ChatPlaceTable._ID));
             } else {
                 return -1;
+            }
+        } finally {
+            cursor.close();
+        }
+    }
+
+    private Date getChatLastMessageDate(long chatId) {
+        Cursor cursor = getContentResolver().query(QuezzleProviderContract.getMessagesUri(chatId),
+                                                   new String[]{MessageTable.UPDATED_AT_COLUMN}, null,
+                                                   null, MessageTable.UPDATED_AT_COLUMN + " DESC");
+        try {
+            if (cursor.moveToFirst()) {
+                return new Date(cursor.getLong(cursor.getColumnIndex(MessageTable.UPDATED_AT_COLUMN)));
+            } else {
+                return null;
             }
         } finally {
             cursor.close();
