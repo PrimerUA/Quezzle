@@ -18,6 +18,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
+import com.parse.GetCallback;
+import com.parse.ParseException;
+import com.parse.ParseUser;
 import com.skylion.quezzle.R;
 import com.skylion.quezzle.contentprovider.QuezzleProviderContract;
 import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
@@ -118,9 +121,14 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private void sendMessage() {
         if (!TextUtils.isEmpty(message.getText())) {
-            //send message
-            NetworkService.sendMessage(getActivity(), chatKey, message.getText().toString());
+        	ParseUser user = ParseUser.getCurrentUser();
+        	user.fetchInBackground(new GetCallback<ParseUser>() {
 
+				@Override
+				public void done(ParseUser parseUser, ParseException arg1) {
+					NetworkService.sendMessage(getActivity(), chatKey, message.getText().toString(), parseUser.getUsername());
+				}
+			});
             //delete text of message
             message.setText("");
         }
@@ -153,7 +161,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
                 return new CursorLoader(getActivity(), uri, new String[]{ChatPlaceTable.OBJECT_ID_COLUMN}, null, null, null);
             case LOAD_MESSAGES_ID :
                 return new CursorLoader(getActivity(), QuezzleProviderContract.getMessagesUri(getChatId()),
-                                        new String[]{MessageTable._ID, MessageTable.UPDATED_AT_COLUMN, MessageTable.MESSAGE_COLUMN},
+                                        new String[]{MessageTable._ID, MessageTable.UPDATED_AT_COLUMN, MessageTable.MESSAGE_COLUMN, MessageTable.AUTHOR_COLUMN},
                                         null, null, CHAT_MESSAGES_ORDER);
         }
         return null;

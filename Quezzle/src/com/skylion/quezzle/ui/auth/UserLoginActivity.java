@@ -11,6 +11,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.plus.PlusClient;
+import com.parse.LogInCallback;
 import com.parse.ParseException;
 import com.parse.ParseUser;
 import com.parse.SignUpCallback;
@@ -93,8 +94,17 @@ public class UserLoginActivity extends Activity implements GooglePlayServicesCli
 					if (e == null) {
 						finish();
 					} else {
-						Toast.makeText(UserLoginActivity.this, "Error code: " + e.getMessage(), Toast.LENGTH_SHORT)
-								.show();
+						ParseUser.logInInBackground(plusClient.getCurrentPerson().getDisplayName(), "my pass",
+								new LogInCallback() {
+									public void done(ParseUser user, ParseException e) {
+										if (user != null) {
+											finish();
+										} else {
+											Toast.makeText(UserLoginActivity.this, "Error code: " + e.getMessage(),
+													Toast.LENGTH_SHORT).show();
+										}
+									}
+								});
 					}
 				}
 			});
@@ -103,7 +113,8 @@ public class UserLoginActivity extends Activity implements GooglePlayServicesCli
 
 	@Override
 	public void onDisconnected() {
-		//Toast.makeText(this, getString(R.string.google_disconnected), Toast.LENGTH_SHORT).show();
+		// Toast.makeText(this, getString(R.string.google_disconnected),
+		// Toast.LENGTH_SHORT).show();
 	}
 
 	@Override
