@@ -47,7 +47,7 @@ public class ChatsListActivity extends Activity implements View.OnClickListener,
 		if (currentUser != null) {
 			// do stuff with the user
 		} else {
-			//startActivity(new Intent(this, UserLoginActivity.class));
+			startActivity(new Intent(this, UserLoginActivity.class));
 		}
 		
 		Log.d("KVEST_TAG", "!=" + getIntent().getAction());
@@ -77,7 +77,7 @@ public class ChatsListActivity extends Activity implements View.OnClickListener,
 		createButton.setOnClickListener(this);
 
 		getLoaderManager().initLoader(LOAD_CHATS_ID, null, this);
-		// loadChatList();
+		loadChatList();
 	}
 
 	private void loadChatList() {

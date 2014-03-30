@@ -16,7 +16,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.parse.GetCallback;
 import com.parse.ParseException;
@@ -51,7 +53,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     private String chatKey;
-    private Button send;
+    private ImageButton send;
     private EditText message;
     private ListView messageList;
     private MessageListAdapter messageListAdapter;
@@ -64,7 +66,8 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
         View rootView = inflater.inflate(R.layout.chat_fragment, container, false);
 
-        send = (Button)rootView.findViewById(R.id.send);
+        Toast.makeText(getActivity(), "Нажмите обновить вверху экрана :)", Toast.LENGTH_SHORT).show();
+        send = (ImageButton)rootView.findViewById(R.id.send);
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

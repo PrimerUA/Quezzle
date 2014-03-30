@@ -35,9 +35,10 @@
             android:id="@+id/descriptionEdit" />
 
     <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Create"
-            android:id="@+id/createLocalChatButton" />
+        android:id="@+id/createLocalChatButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button"
+        android:text="Create" />
 
 </LinearLayout>
