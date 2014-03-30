@@ -127,10 +127,10 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 				@Override
 				public void done(ParseUser parseUser, ParseException arg1) {
 					NetworkService.sendMessage(getActivity(), chatKey, message.getText().toString(), parseUser.getUsername());
+                    //delete text of message
+                    message.setText("");
 				}
 			});
-            //delete text of message
-            message.setText("");
         }
     }
 
