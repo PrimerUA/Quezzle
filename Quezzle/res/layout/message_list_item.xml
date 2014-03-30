@@ -8,12 +8,19 @@
     <TextView
         android:id="@+id/message_date"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="35dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginTop="5dp" 
+        android:textColor="@android:color/black" />
 
     <TextView
         android:id="@+id/message_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/message_date" />
+        android:layout_below="@id/message_date"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp" 
+        android:textColor="@android:color/black" />
 
 </LinearLayout>
