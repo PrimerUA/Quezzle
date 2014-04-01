@@ -6,8 +6,6 @@ import com.skylion.quezzle.datamodel.ChatPlace;
 import com.skylion.quezzle.network.parse.request.QueryRequest;
 import com.skylion.quezzle.network.parse.response.QueryResponse;
 
-import java.lang.reflect.Type;
-
 /**
  * Created with IntelliJ IDEA.
  * User: Kvest

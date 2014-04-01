@@ -12,7 +12,8 @@
         android:layout_height="match_parent"
         android:layout_above="@+id/createButton"
         android:layout_alignParentRight="true"
-        android:background="@drawable/kolba" />
+        android:background="@drawable/kolba"
+        android:divider="#ffffff" />
 
     <Button
         android:id="@+id/createButton"
@@ -21,11 +22,12 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:background="@drawable/button"
         android:layout_marginBottom="10dp"
-        android:layout_marginRight="10dp"
         android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
         android:layout_marginTop="2dp"
-        android:text="@string/create" />
+        android:background="@drawable/button"
+        android:text="@string/create"
+        android:textStyle="bold" />
 
 </RelativeLayout>

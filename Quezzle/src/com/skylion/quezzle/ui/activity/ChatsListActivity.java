@@ -37,12 +37,15 @@ public class ChatsListActivity extends Activity implements View.OnClickListener,
 	private ListView chatsList;
 	private ChatListAdapter adapter;
 	private Button createButton;
+	
+	private String chatName;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_chats);
 		ParseUser currentUser = ParseUser.getCurrentUser();
+		getActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.blue));
 		if (currentUser != null) {
 			// do stuff with the user
 		} else {
@@ -67,10 +70,9 @@ public class ChatsListActivity extends Activity implements View.OnClickListener,
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				// show chat
-				ChatActivity.start(ChatsListActivity.this, id);
+				ChatActivity.start(ChatsListActivity.this, id, chatName);
 			}
 		});
-		createButton = (Button) findViewById(R.id.createButton);
 
 		createButton = (Button) findViewById(R.id.createButton);
 		createButton.setOnClickListener(this);
@@ -97,6 +99,8 @@ public class ChatsListActivity extends Activity implements View.OnClickListener,
 						values[i].put(ChatPlaceTable.UPDATED_AT_COLUMN, chatPlace.getUpdatedAt());
 						values[i].put(ChatPlaceTable.NAME_COLUMN, chatPlace.name);
 						values[i].put(ChatPlaceTable.DESCRIPTION_COLUMN, chatPlace.description);
+						
+						chatName = chatPlace.name;
 					}
 
 					getContentResolver().bulkInsert(QuezzleProviderContract.CHAT_PLACES_URI, values);
@@ -107,7 +111,7 @@ public class ChatsListActivity extends Activity implements View.OnClickListener,
 		}, new Response.ErrorListener() {
 			@Override
 			public void onErrorResponse(VolleyError error) {
-				Toast.makeText(ChatsListActivity.this, "Error loading chats", Toast.LENGTH_SHORT).show();
+				Toast.makeText(ChatsListActivity.this, "Error loading chats: " + error.getMessage(), Toast.LENGTH_SHORT).show();
 			}
 		});
 		request.setTag(this);
@@ -175,9 +179,7 @@ public class ChatsListActivity extends Activity implements View.OnClickListener,
 		switch (id) {
 		case LOAD_CHATS_ID:
 			return new CursorLoader(this, QuezzleProviderContract.CHAT_PLACES_URI, PROJECTION, null, null, null);
-
 		}
-
 		return null;
 	}
 

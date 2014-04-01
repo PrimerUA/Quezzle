@@ -106,7 +106,7 @@ public class NetworkService extends IntentService {
 
 	private void doRefreshChat(Intent intent) {
 		// load needed data from db
-        String chatKey = intent.getStringExtra(CHAT_KEY_EXTRA);
+		String chatKey = intent.getStringExtra(CHAT_KEY_EXTRA);
 		final long chatId = getChatIdByKey(chatKey);
 		if (chatId == UNKNOWN_CHAT_ID) {
 			return;
@@ -133,15 +133,14 @@ public class NetworkService extends IntentService {
 	}
 
 	private void showNewMessageNotification(long chatId) {
-		Notification.Builder builder = new Notification.Builder(this).setAutoCancel(true)
-				.setSmallIcon(R.drawable.ic_launcher).setContentTitle(getString(R.string.new_message))
+		Notification.Builder builder = new Notification.Builder(this).setAutoCancel(true).setSmallIcon(R.drawable.ic_launcher)
+				.setContentTitle(getString(R.string.new_message))
 				.setContentText(getString(R.string.chat_has_new_message, getChatName(chatId)))
-				.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+				.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)).setVibrate(new long[] { 1000, 1000, 1000 });
 		// Creates an explicit intent for an Activity in your app
-		Intent resultIntent = ChatActivity.getIntent(this, chatId);
+		Intent resultIntent = ChatActivity.getIntent(this, chatId, getChatName(chatId));
 
-		PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent,
-				PendingIntent.FLAG_UPDATE_CURRENT);
+		PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 		builder.setContentIntent(resultPendingIntent);
 		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		// mId allows you to update the notification later on.
@@ -154,9 +153,9 @@ public class NetworkService extends IntentService {
 			return;
 		}
 		Uri messagesUri = QuezzleProviderContract.getMessagesUri(chatId);
-        String chatKey = getChatKeyById(chatId);
+		String chatKey = getChatKeyById(chatId);
 
-        // remove old data
+		// remove old data
 		getContentResolver().delete(messagesUri, null, null);
 
 		// load new data
@@ -208,9 +207,8 @@ public class NetworkService extends IntentService {
 	}
 
 	private long getChatIdByKey(String chatKey) {
-		Cursor cursor = getContentResolver().query(QuezzleProviderContract.CHAT_PLACES_URI,
-				new String[] { ChatPlaceTable._ID }, ChatPlaceTable.OBJECT_ID_COLUMN + "=?", new String[] { chatKey },
-				null);
+		Cursor cursor = getContentResolver().query(QuezzleProviderContract.CHAT_PLACES_URI, new String[] { ChatPlaceTable._ID },
+				ChatPlaceTable.OBJECT_ID_COLUMN + "=?", new String[] { chatKey }, null);
 		try {
 			if (cursor.moveToFirst()) {
 				return cursor.getLong(cursor.getColumnIndex(ChatPlaceTable._ID));
@@ -222,20 +220,19 @@ public class NetworkService extends IntentService {
 		}
 	}
 
-    private String getChatKeyById(long chatId) {
-        Cursor cursor = getContentResolver().query(QuezzleProviderContract.CHAT_PLACES_URI,
-                new String[] { ChatPlaceTable.OBJECT_ID_COLUMN}, ChatPlaceTable._ID + "=?", new String[] { Long.toString(chatId) },
-                null);
-        try {
-            if (cursor.moveToFirst()) {
-                return cursor.getString(cursor.getColumnIndex(ChatPlaceTable.OBJECT_ID_COLUMN));
-            } else {
-                return "";
-            }
-        } finally {
-            cursor.close();
-        }
-    }
+	private String getChatKeyById(long chatId) {
+		Cursor cursor = getContentResolver().query(QuezzleProviderContract.CHAT_PLACES_URI,
+				new String[] { ChatPlaceTable.OBJECT_ID_COLUMN }, ChatPlaceTable._ID + "=?", new String[] { Long.toString(chatId) }, null);
+		try {
+			if (cursor.moveToFirst()) {
+				return cursor.getString(cursor.getColumnIndex(ChatPlaceTable.OBJECT_ID_COLUMN));
+			} else {
+				return "";
+			}
+		} finally {
+			cursor.close();
+		}
+	}
 
 	private Date getChatLastMessageDate(long chatId) {
 		Cursor cursor = getContentResolver().query(QuezzleProviderContract.getMessagesUri(chatId),

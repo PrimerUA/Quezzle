@@ -35,6 +35,7 @@ public class NewChatActivity extends Activity implements View.OnClickListener {
 		getActionBar().setTitle(R.string.title_activity_new_chat);
 		getActionBar().setHomeButtonEnabled(true);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
+		getActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.blue));
 		
 		nameEdit = (EditText) findViewById(R.id.nameEdit);
 		descEdit = (EditText) findViewById(R.id.descriptionEdit);
@@ -94,10 +95,7 @@ public class NewChatActivity extends Activity implements View.OnClickListener {
 		// Handle action bar item clicks here. The action bar will
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
-		int id = item.getItemId();
-		if (id == R.id.action_settings) {
-			return true;
-		}
+		finish();
 		return super.onOptionsItemSelected(item);
 	}
 }

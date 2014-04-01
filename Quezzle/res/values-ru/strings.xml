@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Quezzle</string>
+    <string name="action_refresh">Обновить</string>
+    <string name="title_activity_new_chat">Создать новый чат</string>
+    <string name="title_activity_auth">Вход</string>
+    <string name="action_settings">Настройки</string>
+    <string name="send">Отправить</string>
+    <string name="subtitle">Venues and events chatroom</string>
+    <string name="create">Создать новый чат</string>
+    <string name="new_message">Новое сообщение</string>
+    <string name="connecting">Соединение...</string>
+    <string name="loading_auth">Авторизация</string>
+    <string name="loading_chats">Загрузка чатов</string>
+    <string name="loading_messages">Загрузка сообщений</string>
+    <string name="empty_fields">Заполните пустые поля</string>
+    <string name="chat_has_new_message">Новое сообщение в чате \"%1$s\"</string>
+</resources>

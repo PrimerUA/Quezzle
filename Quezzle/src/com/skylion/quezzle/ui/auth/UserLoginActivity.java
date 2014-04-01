@@ -34,6 +34,7 @@ public class UserLoginActivity extends Activity implements GooglePlayServicesCli
 		setContentView(R.layout.login_screen);
 		
 		getActionBar().setTitle(R.string.title_activity_auth);
+		getActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.blue));
 
 		plusClient = new PlusClient.Builder(this, this, this).setVisibleActivities("http://schemas.google.com/AddActivity",
 				"http://schemas.google.com/BuyActivity").build();
