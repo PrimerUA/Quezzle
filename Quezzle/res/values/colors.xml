@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 	<color name="main_bg">#C2E6FF</color>
+	<color name="main_bg_transparent">#acC2E6FF</color>
 	<color name="title">#46d3c2</color>
 </resources>

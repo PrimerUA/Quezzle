@@ -2,6 +2,7 @@ package com.skylion.quezzle.ui.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.Menu;
@@ -10,6 +11,8 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.Toast;
+
 import com.parse.*;
 import com.skylion.quezzle.R;
 
@@ -30,7 +33,10 @@ public class ChatDetailsActivity extends Activity implements View.OnClickListene
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_chat_details);
-
+		
+		getActionBar().setHomeButtonEnabled(true);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
+		
 		chatsList = (ListView) findViewById(R.id.chattingList);
 		messageEdit = (EditText) findViewById(R.id.messageEdit);
 		messageEdit.setMovementMethod(new ScrollingMovementMethod());
@@ -39,7 +45,8 @@ public class ChatDetailsActivity extends Activity implements View.OnClickListene
 		postButton.setOnClickListener(this);
 
 		chatName = getIntent().getStringExtra("chatName");
-
+		getActionBar().setTitle(chatName);
+		
 		ParseQuery<ParseObject> query = ParseQuery.getQuery("ChatMessage");
 		query.whereEqualTo("chatName", chatName);
 		query.findInBackground(new FindCallback<ParseObject>() {

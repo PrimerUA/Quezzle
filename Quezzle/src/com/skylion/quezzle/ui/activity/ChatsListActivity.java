@@ -16,9 +16,10 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
+
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.parse.*;
+import com.parse.ParseUser;
 import com.skylion.quezzle.QuezzleApplication;
 import com.skylion.quezzle.R;
 import com.skylion.quezzle.contentprovider.QuezzleProviderContract;
@@ -27,7 +28,6 @@ import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
 import com.skylion.quezzle.network.parse.response.QueryResponse;
 import com.skylion.quezzle.network.request.ChatPlacesRequest;
 import com.skylion.quezzle.ui.adapter.ChatListAdapter;
-import com.skylion.quezzle.ui.auth.UserLoginActivity;
 
 public class ChatsListActivity extends Activity implements View.OnClickListener, LoaderManager.LoaderCallbacks<Cursor> {
 	private static final int LOAD_CHATS_ID = 0;
@@ -42,12 +42,11 @@ public class ChatsListActivity extends Activity implements View.OnClickListener,
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_chats);
-
 		ParseUser currentUser = ParseUser.getCurrentUser();
 		if (currentUser != null) {
 			// do stuff with the user
 		} else {
-			startActivity(new Intent(this, UserLoginActivity.class));
+			//startActivity(new Intent(this, UserLoginActivity.class));
 		}
 		
 		Log.d("KVEST_TAG", "!=" + getIntent().getAction());

@@ -14,7 +14,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -85,7 +84,6 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onResume() {
         super.onResume();
-
         getActivity().registerReceiver(receiver, new IntentFilter(NetworkService.NEW_MESSAGE_ACTION));
     }
 
@@ -122,17 +120,18 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     private void sendMessage() {
-        if (!TextUtils.isEmpty(message.getText())) {
+        if (!TextUtils.isEmpty(message.getText().toString().trim())) {
+        	message.setText("");
         	ParseUser user = ParseUser.getCurrentUser();
         	user.fetchInBackground(new GetCallback<ParseUser>() {
 
 				@Override
 				public void done(ParseUser parseUser, ParseException arg1) {
 					NetworkService.sendMessage(getActivity(), chatKey, message.getText().toString(), parseUser.getUsername());
-                    //delete text of message
-                    message.setText("");
 				}
 			});
+        } else {
+        	Toast.makeText(getActivity(), getString(R.string.empty_fields), Toast.LENGTH_SHORT).show();
         }
     }
 

@@ -1,6 +1,7 @@
 package com.skylion.quezzle.ui.auth;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
@@ -25,14 +26,17 @@ public class UserLoginActivity extends Activity implements GooglePlayServicesCli
 	public final int REQUEST_CODE_RESOLVE_ERR = 9000;
 
 	private PlusClient plusClient;
+	private ProgressDialog progressDialog;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.login_screen);
+		
+		getActionBar().setTitle(R.string.title_activity_auth);
 
-		plusClient = new PlusClient.Builder(this, this, this).setVisibleActivities(
-				"http://schemas.google.com/AddActivity", "http://schemas.google.com/BuyActivity").build();
+		plusClient = new PlusClient.Builder(this, this, this).setVisibleActivities("http://schemas.google.com/AddActivity",
+				"http://schemas.google.com/BuyActivity").build();
 		plusClient.connect();
 
 		screenInit();
@@ -51,6 +55,7 @@ public class UserLoginActivity extends Activity implements GooglePlayServicesCli
 	protected void startGooglePlus() {
 		if (!plusClient.isConnected()) {
 			plusClient.connect();
+			progressDialog = ProgressDialog.show(this, getString(R.string.connecting), getString(R.string.loading_auth));
 		}
 	}
 
@@ -77,6 +82,7 @@ public class UserLoginActivity extends Activity implements GooglePlayServicesCli
 				plusClient.connect();
 			}
 		} else {
+			progressDialog.dismiss();
 			Toast.makeText(this, "G+ error code: " + result.getErrorCode(), Toast.LENGTH_SHORT).show();
 		}
 	}
@@ -92,19 +98,20 @@ public class UserLoginActivity extends Activity implements GooglePlayServicesCli
 			user.signUpInBackground(new SignUpCallback() {
 				public void done(ParseException e) {
 					if (e == null) {
+						progressDialog.dismiss();
 						finish();
 					} else {
-						ParseUser.logInInBackground(plusClient.getCurrentPerson().getDisplayName(), "my pass",
-								new LogInCallback() {
-									public void done(ParseUser user, ParseException e) {
-										if (user != null) {
-											finish();
-										} else {
-											Toast.makeText(UserLoginActivity.this, "Error code: " + e.getMessage(),
-													Toast.LENGTH_SHORT).show();
-										}
-									}
-								});
+						ParseUser.logInInBackground(plusClient.getCurrentPerson().getDisplayName(), "my pass", new LogInCallback() {
+							public void done(ParseUser user, ParseException e) {
+								if (user != null) {
+									progressDialog.dismiss();
+									finish();
+								} else {
+									progressDialog.dismiss();
+									Toast.makeText(UserLoginActivity.this, "Error code: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+								}
+							}
+						});
 					}
 				}
 			});
