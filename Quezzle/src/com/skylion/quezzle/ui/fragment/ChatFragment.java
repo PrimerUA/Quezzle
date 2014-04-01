@@ -66,7 +66,6 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
         View rootView = inflater.inflate(R.layout.chat_fragment, container, false);
 
-        Toast.makeText(getActivity(), "Нажмите обновить вверху экрана :)", Toast.LENGTH_SHORT).show();
         send = (ImageButton)rootView.findViewById(R.id.send);
         send.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -115,7 +114,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_refresh:
-                NetworkService.reloadChat(getActivity(), chatKey);
+                NetworkService.reloadChat(getActivity(), getChatId());
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -177,6 +176,10 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
                 setChatKey(cursor);
                 break;
             case LOAD_MESSAGES_ID :
+                if (cursor.getCount() == 0) {
+                    //try to load chat messages
+                    NetworkService.reloadChat(getActivity(), getChatId());
+                }
                 messageListAdapter.swapCursor(cursor);
                 break;
         }
