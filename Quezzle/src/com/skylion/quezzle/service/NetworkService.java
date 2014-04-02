@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -133,7 +134,7 @@ public class NetworkService extends IntentService {
 	}
 
 	private void showNewMessageNotification(long chatId) {
-		Notification.Builder builder = new Notification.Builder(this).setAutoCancel(true).setSmallIcon(R.drawable.ic_launcher)
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(this).setAutoCancel(true).setSmallIcon(R.drawable.ic_launcher)
 				.setContentTitle(getString(R.string.new_message))
 				.setContentText(getString(R.string.chat_has_new_message, getChatName(chatId)))
 				.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)).setVibrate(new long[] { 1000, 1000, 1000 });

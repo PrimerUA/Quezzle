@@ -47,6 +47,7 @@ public class ChatsListActivity extends Activity implements View.OnClickListener,
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_chats);
 		chatNameList = new ArrayList<String>();
+		
 		ParseUser currentUser = ParseUser.getCurrentUser();
 		getActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.blue));
 		if (currentUser != null) {
