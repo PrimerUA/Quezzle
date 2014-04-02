@@ -47,7 +47,7 @@
         android:id="@+id/LoginScreen_googleSignInButton"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/abc_action_bar_title_text_size" >
+        android:layout_marginTop="25dp" >
 
     </com.google.android.gms.common.SignInButton>
 

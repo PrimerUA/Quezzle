@@ -38,7 +38,7 @@
         android:id="@+id/createLocalChatButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/abc_action_bar_title_text_size"
+        android:layout_margin="25dp"
         android:background="@drawable/button"
         android:text="Create"
         android:textStyle="bold" />

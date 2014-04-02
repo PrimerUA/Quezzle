@@ -1,5 +1,7 @@
 package com.skylion.quezzle.ui.activity;
 
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.ContentValues;
@@ -37,21 +39,22 @@ public class ChatsListActivity extends Activity implements View.OnClickListener,
 	private ListView chatsList;
 	private ChatListAdapter adapter;
 	private Button createButton;
-	
-	private String chatName;
+
+	private ArrayList<String> chatNameList;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_chats);
+		chatNameList = new ArrayList<String>();
 		ParseUser currentUser = ParseUser.getCurrentUser();
 		getActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.blue));
 		if (currentUser != null) {
 			// do stuff with the user
 		} else {
-			//startActivity(new Intent(this, UserLoginActivity.class));
+			// startActivity(new Intent(this, UserLoginActivity.class));
 		}
-		
+
 		Log.d("KVEST_TAG", "!=" + getIntent().getAction());
 		if (getIntent().getExtras() != null) {
 			String data = getIntent().getExtras().getString("com.parse.Data");
@@ -70,7 +73,7 @@ public class ChatsListActivity extends Activity implements View.OnClickListener,
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				// show chat
-				ChatActivity.start(ChatsListActivity.this, id, chatName);
+				ChatActivity.start(ChatsListActivity.this, id, chatNameList.get(position));
 			}
 		});
 
@@ -99,8 +102,8 @@ public class ChatsListActivity extends Activity implements View.OnClickListener,
 						values[i].put(ChatPlaceTable.UPDATED_AT_COLUMN, chatPlace.getUpdatedAt());
 						values[i].put(ChatPlaceTable.NAME_COLUMN, chatPlace.name);
 						values[i].put(ChatPlaceTable.DESCRIPTION_COLUMN, chatPlace.description);
-						
-						chatName = chatPlace.name;
+
+						chatNameList.add(chatPlace.name);
 					}
 
 					getContentResolver().bulkInsert(QuezzleProviderContract.CHAT_PLACES_URI, values);
@@ -111,7 +114,8 @@ public class ChatsListActivity extends Activity implements View.OnClickListener,
 		}, new Response.ErrorListener() {
 			@Override
 			public void onErrorResponse(VolleyError error) {
-				Toast.makeText(ChatsListActivity.this, "Error loading chats: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+				Toast.makeText(ChatsListActivity.this, "Error loading chats: " + error.getMessage(), Toast.LENGTH_SHORT)
+						.show();
 			}
 		});
 		request.setTag(this);
