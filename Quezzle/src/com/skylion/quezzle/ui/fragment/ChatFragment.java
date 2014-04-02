@@ -45,6 +45,8 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 	private static final String CHAT_ID_ARGUMENT = "com.skylion.quezzle.ui.fragment.ChatFragment.CHAT_ID";
 	private static final String CHAT_NAME_ARGUMENT = "com.skylion.quezzle.ui.fragment.ChatFragment.CHAT_NAME";
 
+    private boolean wasReloaded = false;
+
 	public static ChatFragment newInstance(long chatId, String chatName) {
 		Bundle arguments = new Bundle();
 		arguments.putLong(CHAT_ID_ARGUMENT, chatId);
@@ -188,10 +190,14 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 			setChatKey(cursor);
 			break;
 		case LOAD_MESSAGES_ID:
-			if (cursor.getCount() == 0) {
+			if (cursor.getCount() == 0 && !wasReloaded) {
+                wasReloaded = true;
+
 				// try to load chat messages
 				NetworkService.reloadChat(getActivity(), getChatId());
-			}
+			} else {
+                wasReloaded = true;
+            }
 			messageListAdapter.swapCursor(cursor);
 			break;
 		}
