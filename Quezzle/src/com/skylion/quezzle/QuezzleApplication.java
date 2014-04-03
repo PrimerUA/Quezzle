@@ -6,8 +6,6 @@ import com.parse.Parse;
 import com.parse.ParseObject;
 import com.parse.PushService;
 import com.skylion.quezzle.datamodel.ChatPlace;
-import com.skylion.quezzle.network.VolleyHelper;
-import com.skylion.quezzle.network.parse.request.ParseBaseRequest;
 import com.skylion.quezzle.ui.activity.ChatsListActivity;
 
 /**
@@ -19,7 +17,6 @@ import com.skylion.quezzle.ui.activity.ChatsListActivity;
  */
 public class QuezzleApplication extends Application {
     private static QuezzleApplication application;
-    private VolleyHelper volleyHelper;
 
     public static QuezzleApplication getApplication() {
         return application;
@@ -30,7 +27,6 @@ public class QuezzleApplication extends Application {
         super.onCreate();
 
         application = this;
-        volleyHelper = new VolleyHelper(this);
 
         initParse();
     }
@@ -40,11 +36,6 @@ public class QuezzleApplication extends Application {
         ParseObject.registerSubclass(ChatPlace.class);
 
         Parse.initialize(this, "RVCqyTO6a3jDJPh0GeKRzbbpdXZWGWtm13m0MN67", "BBD41jgbfdaTUdvtTxutynfB07C2HJKRquCX8MR3");
-        ParseBaseRequest.setKeys("RVCqyTO6a3jDJPh0GeKRzbbpdXZWGWtm13m0MN67", "KU29aODJKiB1zjApeoeSiHTnwl0mFFcnIDRK7KJ7");
         PushService.setDefaultPushCallback(this, ChatsListActivity.class);
-    }
-
-    public VolleyHelper getVolleyHelper() {
-        return volleyHelper;
     }
 }
