@@ -16,4 +16,6 @@
     <string name="empty_fields">Fill in empty fields</string>
     <string name="welcome">Welcome to Quezzle!</string>
     <string name="chat_has_new_message">Chat \"%1$s\" has new message</string>
+    <string name="error_creating_chat">Error creating new chat:\n%1$s</string>
+    <string name="error_reloading_chat_list">Error reloading chat list:\n%1$s</string>
 </resources>

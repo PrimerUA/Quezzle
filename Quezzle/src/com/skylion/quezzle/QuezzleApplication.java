@@ -3,10 +3,11 @@ package com.skylion.quezzle;
 import android.app.Application;
 
 import com.parse.Parse;
+import com.parse.ParseObject;
 import com.parse.PushService;
-import com.skylion.quezzle.network.VolleyHelper;
-import com.skylion.quezzle.network.parse.request.ParseBaseRequest;
+import com.skylion.quezzle.datamodel.ChatPlace;
 import com.skylion.quezzle.ui.activity.ChatsListActivity;
+import com.skylion.quezzle.utility.Constants;
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,7 +18,6 @@ import com.skylion.quezzle.ui.activity.ChatsListActivity;
  */
 public class QuezzleApplication extends Application {
     private static QuezzleApplication application;
-    private VolleyHelper volleyHelper;
 
     public static QuezzleApplication getApplication() {
         return application;
@@ -28,14 +28,15 @@ public class QuezzleApplication extends Application {
         super.onCreate();
 
         application = this;
-        volleyHelper = new VolleyHelper(this);
 
-        Parse.initialize(this, "RVCqyTO6a3jDJPh0GeKRzbbpdXZWGWtm13m0MN67", "BBD41jgbfdaTUdvtTxutynfB07C2HJKRquCX8MR3");
-        ParseBaseRequest.setKeys("RVCqyTO6a3jDJPh0GeKRzbbpdXZWGWtm13m0MN67", "KU29aODJKiB1zjApeoeSiHTnwl0mFFcnIDRK7KJ7");
-        PushService.setDefaultPushCallback(this, ChatsListActivity.class);
+        initParse();
     }
 
-    public VolleyHelper getVolleyHelper() {
-        return volleyHelper;
+    private void initParse() {
+        //register classes
+        ParseObject.registerSubclass(ChatPlace.class);
+
+        Parse.initialize(this, Constants.PARSE_APP_ID, Constants.PARSE_CLIENT_KEY);
+        PushService.setDefaultPushCallback(this, ChatsListActivity.class);
     }
 }

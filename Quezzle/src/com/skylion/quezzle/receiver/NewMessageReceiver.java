@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import com.google.gson.Gson;
 import com.skylion.quezzle.service.NetworkService;
+import com.skylion.quezzle.utility.Constants;
 
 /**
  * Created with IntelliJ IDEA.
@@ -27,7 +28,7 @@ public class NewMessageReceiver extends BroadcastReceiver {
             //start updating chat
             NetworkService.refreshChat(context, pushData.chatObjectId, true);
         } else {
-            Log.e("KVEST_TAG", "NewMessageReceiver error - empty data");
+            Log.e(Constants.LOG_TAG, "NewMessageReceiver error - empty data");
         }
     }
 
