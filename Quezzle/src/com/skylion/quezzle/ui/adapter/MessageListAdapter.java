@@ -6,15 +6,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
-import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.skylion.quezzle.R;
 import com.skylion.quezzle.datastorage.table.MessageTable;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Random;
 
 /**
  * Created with IntelliJ IDEA. User: Kvest Date: 28.03.14 Time: 23:58 To change
@@ -40,7 +38,7 @@ public class MessageListAdapter extends CursorAdapter {
 
 		// create holder
 		ViewHolder holder = new ViewHolder();
-		holder.content = (LinearLayout) view.findViewById(R.id.contentLayout);
+		holder.content = (RelativeLayout) view.findViewById(R.id.contentLayout);
 		holder.author = (TextView) view.findViewById(R.id.message_author);
 		holder.date = (TextView) view.findViewById(R.id.message_date);
 		holder.text = (TextView) view.findViewById(R.id.message_text);
@@ -61,16 +59,10 @@ public class MessageListAdapter extends CursorAdapter {
 		holder.author.setText(cursor.getString(authorColumnIndex));
 		holder.date.setText(DATE_FORMAT.format(date));
 		holder.text.setText(cursor.getString(messageColumnIndex));
-		
-		//LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-		//if (new Random().nextInt(2) == 0) {
+
 		if (cursor.getPosition() % 2 == 0) {
-			//layoutParams.setMargins(15, 0, 0, 0);
-			//holder.content.setLayoutParams(layoutParams);
 			holder.content.setBackgroundResource(R.drawable.item);
 		} else {
-			//layoutParams.setMargins(0, 0, 15, 0);
-			//holder.content.setLayoutParams(layoutParams);
 			holder.content.setBackgroundResource(R.drawable.item_my);
 		}
 	}
@@ -89,6 +81,6 @@ public class MessageListAdapter extends CursorAdapter {
 		public TextView author;
 		public TextView date;
 		public TextView text;
-		public LinearLayout content;
+		public RelativeLayout content;
 	}
 }
