@@ -14,5 +14,6 @@
     <string name="loading_chats">Loading chats</string>
     <string name="loading_messages">Loading messages</string>
     <string name="empty_fields">Fill in empty fields</string>
+    <string name="welcome">Welcome to Quezzle!</string>
     <string name="chat_has_new_message">Chat \"%1$s\" has new message</string>
 </resources>

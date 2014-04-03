@@ -134,14 +134,15 @@ public class NetworkService extends IntentService {
 	}
 
 	private void showNewMessageNotification(long chatId) {
-		NotificationCompat.Builder builder = new NotificationCompat.Builder(this).setAutoCancel(true).setSmallIcon(R.drawable.ic_launcher)
-				.setContentTitle(getString(R.string.new_message))
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(this).setAutoCancel(true)
+				.setSmallIcon(R.drawable.ic_launcher).setContentTitle(getString(R.string.new_message))
 				.setContentText(getString(R.string.chat_has_new_message, getChatName(chatId)))
-				.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)).setVibrate(new long[] { 1000, 1000, 1000 });
+				.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+				.setVibrate(new long[] { 1000, 500, 500 });
 		// Creates an explicit intent for an Activity in your app
 		Intent resultIntent = ChatActivity.getIntent(this, chatId, getChatName(chatId));
-
-		PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+		PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent,
+				PendingIntent.FLAG_UPDATE_CURRENT);
 		builder.setContentIntent(resultPendingIntent);
 		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		// mId allows you to update the notification later on.
@@ -165,7 +166,6 @@ public class NetworkService extends IntentService {
 
 	private int loadChatMessages(String chatKey, Uri messagesUri, Date lastMessageDate) {
 		int createdCount = 0;
-
 		ParseQuery<ParseObject> query = ParseQuery.getQuery("ChatMessage");
 		query.whereEqualTo("chatId", chatKey);
 		query.addAscendingOrder("updatedAt");
@@ -208,8 +208,9 @@ public class NetworkService extends IntentService {
 	}
 
 	private long getChatIdByKey(String chatKey) {
-		Cursor cursor = getContentResolver().query(QuezzleProviderContract.CHAT_PLACES_URI, new String[] { ChatPlaceTable._ID },
-				ChatPlaceTable.OBJECT_ID_COLUMN + "=?", new String[] { chatKey }, null);
+		Cursor cursor = getContentResolver().query(QuezzleProviderContract.CHAT_PLACES_URI,
+				new String[] { ChatPlaceTable._ID }, ChatPlaceTable.OBJECT_ID_COLUMN + "=?", new String[] { chatKey },
+				null);
 		try {
 			if (cursor.moveToFirst()) {
 				return cursor.getLong(cursor.getColumnIndex(ChatPlaceTable._ID));
@@ -223,7 +224,8 @@ public class NetworkService extends IntentService {
 
 	private String getChatKeyById(long chatId) {
 		Cursor cursor = getContentResolver().query(QuezzleProviderContract.CHAT_PLACES_URI,
-				new String[] { ChatPlaceTable.OBJECT_ID_COLUMN }, ChatPlaceTable._ID + "=?", new String[] { Long.toString(chatId) }, null);
+				new String[] { ChatPlaceTable.OBJECT_ID_COLUMN }, ChatPlaceTable._ID + "=?",
+				new String[] { Long.toString(chatId) }, null);
 		try {
 			if (cursor.moveToFirst()) {
 				return cursor.getString(cursor.getColumnIndex(ChatPlaceTable.OBJECT_ID_COLUMN));

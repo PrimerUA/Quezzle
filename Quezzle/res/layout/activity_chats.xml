@@ -13,7 +13,8 @@
         android:layout_above="@+id/createButton"
         android:layout_alignParentRight="true"
         android:background="@drawable/kolba"
-        android:divider="#ffffff" />
+        android:divider="#ffffff"
+        android:dividerHeight="@dimen/d2p" />
 
     <Button
         android:id="@+id/createButton"
@@ -26,7 +27,7 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_marginTop="2dp"
-        android:background="@drawable/button"
+        android:background="@drawable/create_button"
         android:text="@string/create"
         android:textStyle="bold" />
 

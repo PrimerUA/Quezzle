@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -58,7 +59,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 	}
 
 	private String chatKey;
-	private ImageButton send;
+	private ImageView send;
 	private EditText message;
 	private ListView messageList;
 	private MessageListAdapter messageListAdapter;
@@ -76,7 +77,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
 		View rootView = inflater.inflate(R.layout.chat_fragment, container, false);
 
-		send = (ImageButton) rootView.findViewById(R.id.send);
+		send = (ImageView) rootView.findViewById(R.id.send);
 		send.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -130,14 +131,15 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 	}
 
 	private void sendMessage() {
-		if (!TextUtils.isEmpty(message.getText().toString().trim())) {
+		final String text = message.getText().toString().trim();
+		if (!TextUtils.isEmpty(text)) {
 			message.setText("");
 			ParseUser user = ParseUser.getCurrentUser();
 			user.fetchInBackground(new GetCallback<ParseUser>() {
 
 				@Override
 				public void done(ParseUser parseUser, ParseException arg1) {
-					NetworkService.sendMessage(getActivity(), chatKey, message.getText().toString(), parseUser.getUsername());
+					NetworkService.sendMessage(getActivity(), chatKey, text, parseUser.getUsername());
 				}
 			});
 		} else {

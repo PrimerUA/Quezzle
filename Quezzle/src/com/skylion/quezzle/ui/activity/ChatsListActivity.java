@@ -30,6 +30,7 @@ import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
 import com.skylion.quezzle.network.parse.response.QueryResponse;
 import com.skylion.quezzle.network.request.ChatPlacesRequest;
 import com.skylion.quezzle.ui.adapter.ChatListAdapter;
+import com.skylion.quezzle.ui.auth.UserLoginActivity;
 
 public class ChatsListActivity extends Activity implements View.OnClickListener, LoaderManager.LoaderCallbacks<Cursor> {
 	private static final int LOAD_CHATS_ID = 0;
@@ -53,7 +54,7 @@ public class ChatsListActivity extends Activity implements View.OnClickListener,
 		if (currentUser != null) {
 			// do stuff with the user
 		} else {
-			// startActivity(new Intent(this, UserLoginActivity.class));
+			startActivity(new Intent(this, UserLoginActivity.class));
 		}
 
 		Log.d("KVEST_TAG", "!=" + getIntent().getAction());

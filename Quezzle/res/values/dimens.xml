@@ -5,4 +5,5 @@
     <dimen name="d5p">5dp</dimen>
     <dimen name="d25p">25dp</dimen>
     <dimen name="d35p">35dp</dimen>
+    <dimen name="d2p">2dp</dimen>
 </resources>

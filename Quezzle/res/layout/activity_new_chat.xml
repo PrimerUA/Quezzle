@@ -38,8 +38,8 @@
         android:id="@+id/createLocalChatButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="25dp"
-        android:background="@drawable/button"
+        android:layout_margin="20dp"
+        android:background="@drawable/create_button"
         android:text="Create"
         android:textStyle="bold" />
 
