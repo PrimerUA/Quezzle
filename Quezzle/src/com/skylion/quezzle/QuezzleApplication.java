@@ -7,6 +7,7 @@ import com.parse.ParseObject;
 import com.parse.PushService;
 import com.skylion.quezzle.datamodel.ChatPlace;
 import com.skylion.quezzle.ui.activity.ChatsListActivity;
+import com.skylion.quezzle.utility.Constants;
 
 /**
  * Created with IntelliJ IDEA.
@@ -35,7 +36,7 @@ public class QuezzleApplication extends Application {
         //register classes
         ParseObject.registerSubclass(ChatPlace.class);
 
-        Parse.initialize(this, "RVCqyTO6a3jDJPh0GeKRzbbpdXZWGWtm13m0MN67", "BBD41jgbfdaTUdvtTxutynfB07C2HJKRquCX8MR3");
+        Parse.initialize(this, Constants.PARSE_APP_ID, Constants.PARSE_CLIENT_KEY);
         PushService.setDefaultPushCallback(this, ChatsListActivity.class);
     }
 }
