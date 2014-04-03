@@ -43,14 +43,12 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 	private static final int LOAD_CHAT_KEY_ID = 0;
 	private static final int LOAD_MESSAGES_ID = 1;
 	private static final String CHAT_ID_ARGUMENT = "com.skylion.quezzle.ui.fragment.ChatFragment.CHAT_ID";
-	private static final String CHAT_NAME_ARGUMENT = "com.skylion.quezzle.ui.fragment.ChatFragment.CHAT_NAME";
 
     private boolean wasReloaded = false;
 
-	public static ChatFragment newInstance(long chatId, String chatName) {
+	public static ChatFragment newInstance(long chatId) {
 		Bundle arguments = new Bundle();
 		arguments.putLong(CHAT_ID_ARGUMENT, chatId);
-		arguments.putString(CHAT_NAME_ARGUMENT, chatName);
 
 		ChatFragment result = new ChatFragment();
 		result.setArguments(arguments);
@@ -71,7 +69,6 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
 		getActivity().getActionBar().setHomeButtonEnabled(true);
 		getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
-		getActivity().getActionBar().setTitle(getChatNmae());
 		getActivity().getActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.blue));
 
 		View rootView = inflater.inflate(R.layout.chat_fragment, container, false);
@@ -149,17 +146,15 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 		Bundle arguments = getArguments();
 		return (arguments != null && arguments.containsKey(CHAT_ID_ARGUMENT)) ? arguments.getLong(CHAT_ID_ARGUMENT) : -1;
 	}
-	
-	private String getChatNmae() {
-		Bundle arguments = getArguments();
-		return (arguments != null && arguments.containsKey(CHAT_NAME_ARGUMENT)) ? arguments.getString(CHAT_NAME_ARGUMENT) : getString(R.string.app_name);
-	}
 
-	private void setChatKey(Cursor cursor) {
+	private void setChatData(Cursor cursor) {
 		if (cursor.moveToFirst()) {
 			chatKey = cursor.getString(cursor.getColumnIndex(ChatPlaceTable.OBJECT_ID_COLUMN));
 			send.setEnabled(true);
 			message.setEnabled(true);
+
+            String chatName = cursor.getString(cursor.getColumnIndex(ChatPlaceTable.NAME_COLUMN));
+            getActivity().getActionBar().setTitle(chatName);
 		}
 	}
 
@@ -174,7 +169,8 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 		switch (id) {
 		case LOAD_CHAT_KEY_ID:
 			Uri uri = Uri.withAppendedPath(QuezzleProviderContract.CHAT_PLACES_URI, Long.toString(getChatId()));
-			return new CursorLoader(getActivity(), uri, new String[] { ChatPlaceTable.OBJECT_ID_COLUMN }, null, null, null);
+			return new CursorLoader(getActivity(), uri, new String[] { ChatPlaceTable.OBJECT_ID_COLUMN, ChatPlaceTable.NAME_COLUMN },
+                                    null, null, null);
 		case LOAD_MESSAGES_ID:
 			return new CursorLoader(getActivity(), QuezzleProviderContract.getMessagesUri(getChatId()), new String[] { MessageTable._ID,
 					MessageTable.UPDATED_AT_COLUMN, MessageTable.MESSAGE_COLUMN, MessageTable.AUTHOR_COLUMN }, null, null,
@@ -187,7 +183,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 	public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
 		switch (loader.getId()) {
 		case LOAD_CHAT_KEY_ID:
-			setChatKey(cursor);
+            setChatData(cursor);
 			break;
 		case LOAD_MESSAGES_ID:
 			if (cursor.getCount() == 0 && !wasReloaded) {

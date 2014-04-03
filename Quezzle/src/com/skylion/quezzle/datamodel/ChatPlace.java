@@ -1,6 +1,7 @@
 package com.skylion.quezzle.datamodel;
 
-import com.skylion.quezzle.network.parse.datamodel.ParseBaseObject;
+import com.parse.ParseClassName;
+import com.parse.ParseObject;
 
 /**
  * Created with IntelliJ IDEA.
@@ -9,7 +10,28 @@ import com.skylion.quezzle.network.parse.datamodel.ParseBaseObject;
  * Time: 23:12
  * To change this template use File | Settings | File Templates.
  */
-public class ChatPlace extends ParseBaseObject {
-    public String name;
-    public String description;
+
+@ParseClassName("ChatPlace")
+public class ChatPlace extends ParseObject {
+    public static final String NAME_FIELD = "name";
+    public static final String DESCRIPTION_FIELD = "description";
+
+    public ChatPlace() {
+    }
+
+    public String getName() {
+        return getString(NAME_FIELD);
+    }
+
+    public void setName(String name) {
+        put(NAME_FIELD, name);
+    }
+
+    public String getDescription() {
+        return getString(DESCRIPTION_FIELD);
+    }
+
+    public void setDescription(String description) {
+        put(DESCRIPTION_FIELD, description);
+    }
 }

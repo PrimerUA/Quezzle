@@ -15,9 +15,13 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.skylion.quezzle.R;
 import com.skylion.quezzle.contentprovider.QuezzleProviderContract;
+import com.skylion.quezzle.datamodel.ChatPlace;
 import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
 import com.skylion.quezzle.datastorage.table.MessageTable;
+import com.skylion.quezzle.notification.CreateChatNotification;
+import com.skylion.quezzle.notification.ReloadChatListNotification;
 import com.skylion.quezzle.ui.activity.ChatActivity;
+import com.skylion.quezzle.utility.Constants;
 
 import java.util.Date;
 import java.util.List;
@@ -32,6 +36,8 @@ public class NetworkService extends IntentService {
 
 	private static final String ACTION_EXTRA = "com.skylion.quezzle.service.NetworkService.ACTION";
 	private static final String CHAT_KEY_EXTRA = "com.skylion.quezzle.service.NetworkService.CHAT_KEY";
+	private static final String CHAT_NAME_EXTRA = "com.skylion.quezzle.service.NetworkService.CHAT_NAME";
+	private static final String CHAT_DESCRIPTION_EXTRA = "com.skylion.quezzle.service.NetworkService.CHAT_DESCRIPTION";
 	private static final String AUTHOR_EXTRA = "com.skylion.quezzle.service.NetworkService.AUTHOR";
 	private static final String MESSAGE_EXTRA = "com.skylion.quezzle.service.NetworkService.MESSAGE";
 	private static final String WITH_NOTIFICATION_EXTRA = "com.skylion.quezzle.service.NetworkService.WITH_NOTIFICATION";
@@ -45,8 +51,26 @@ public class NetworkService extends IntentService {
 	private static final int ACTION_SEND_MESSAGE = 0;
 	private static final int ACTION_RELOAD_CHAT = 1;
 	private static final int ACTION_REFRESH_CHAT = 2;
+    private static final int ACTION_CREATE_CHAT = 3;
+    private static final int ACTION_RELOAD_CHAT_LIST = 4;
 
-	public static void sendMessage(Context context, String chatKey, String message, String author) {
+    public static void reloadChatList(Context context) {
+        Intent intent = new Intent(context, NetworkService.class);
+        intent.putExtra(ACTION_EXTRA, ACTION_RELOAD_CHAT_LIST);
+
+        context.startService(intent);
+    }
+
+    public static void createChat(Context context, String chatName, String chatDescription) {
+        Intent intent = new Intent(context, NetworkService.class);
+        intent.putExtra(ACTION_EXTRA, ACTION_CREATE_CHAT);
+        intent.putExtra(CHAT_NAME_EXTRA, chatName);
+        intent.putExtra(CHAT_DESCRIPTION_EXTRA, chatDescription);
+
+        context.startService(intent);
+    }
+
+    public static void sendMessage(Context context, String chatKey, String message, String author) {
 		Intent intent = new Intent(context, NetworkService.class);
 		intent.putExtra(ACTION_EXTRA, ACTION_SEND_MESSAGE);
 		intent.putExtra(CHAT_KEY_EXTRA, chatKey);
@@ -80,15 +104,21 @@ public class NetworkService extends IntentService {
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		switch (intent.getIntExtra(ACTION_EXTRA, -1)) {
-		case ACTION_SEND_MESSAGE:
-			doSendMessage(intent);
-			break;
-		case ACTION_RELOAD_CHAT:
-			doReloadChat(intent);
-			break;
-		case ACTION_REFRESH_CHAT:
-			doRefreshChat(intent);
-			break;
+            case ACTION_SEND_MESSAGE :
+                doSendMessage(intent);
+                break;
+            case ACTION_RELOAD_CHAT :
+                doReloadChat(intent);
+                break;
+            case ACTION_REFRESH_CHAT :
+                doRefreshChat(intent);
+                break;
+            case ACTION_CREATE_CHAT :
+                doCreateChat(intent);
+                break;
+            case ACTION_RELOAD_CHAT_LIST :
+                doReloadChatList(intent);
+                break;
 		}
 	}
 
@@ -101,9 +131,37 @@ public class NetworkService extends IntentService {
 		try {
 			chatMessage.save();
 		} catch (ParseException pe) {
-			Log.e("KVEST_TAG", "Error sending message: " + pe.getMessage());
+			Log.e(Constants.LOG_TAG, "Error sending message: " + pe.getMessage());
 		}
 	}
+
+    private void doCreateChat(Intent intent) {
+        ChatPlace chatPlace = new ChatPlace();
+        chatPlace.setName(intent.getStringExtra(CHAT_NAME_EXTRA));
+        chatPlace.setDescription(intent.getStringExtra(CHAT_DESCRIPTION_EXTRA));
+
+        try {
+            //save chat in server
+            chatPlace.save();
+
+            //save chat in local cache
+            ContentValues values = new ContentValues(5);
+            values.put(ChatPlaceTable.OBJECT_ID_COLUMN, chatPlace.getObjectId());
+            values.put(ChatPlaceTable.CREATED_AT_COLUMN, chatPlace.getCreatedAt().getTime());
+            values.put(ChatPlaceTable.UPDATED_AT_COLUMN, chatPlace.getUpdatedAt().getTime());
+            values.put(ChatPlaceTable.NAME_COLUMN, chatPlace.getName());
+            values.put(ChatPlaceTable.DESCRIPTION_COLUMN, chatPlace.getDescription());
+            getContentResolver().insert(QuezzleProviderContract.CHAT_PLACES_URI, values);
+
+            //notify UI about success creating chat
+            sendBroadcast(CreateChatNotification.createSuccessResult());
+        } catch (ParseException pe) {
+            Log.e(Constants.LOG_TAG, "Error sending message: " + pe.getMessage());
+
+            //notify UI about error while creating chat
+            sendBroadcast(CreateChatNotification.createErrorsResult(pe.getLocalizedMessage()));
+        }
+    }
 
 	private void doRefreshChat(Intent intent) {
 		// load needed data from db
@@ -123,13 +181,13 @@ public class NetworkService extends IntentService {
 			Intent broadcastIntent = new Intent(NEW_MESSAGE_ACTION);
 			broadcastIntent.putExtra(CHAT_ID_EXTRA, chatId);
 			sendOrderedBroadcast(broadcastIntent, null, new BroadcastReceiver() {
-				@Override
-				public void onReceive(Context context, Intent intent) {
-					if (getResultCode() != Activity.RESULT_OK) {
-						showNewMessageNotification(chatId);
-					}
-				}
-			}, null, 0, null, null);
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (getResultCode() != Activity.RESULT_OK) {
+                        showNewMessageNotification(chatId);
+                    }
+                }
+            }, null, 0, null, null);
 		}
 	}
 
@@ -139,7 +197,7 @@ public class NetworkService extends IntentService {
 				.setContentText(getString(R.string.chat_has_new_message, getChatName(chatId)))
 				.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)).setVibrate(new long[] { 1000, 1000, 1000 });
 		// Creates an explicit intent for an Activity in your app
-		Intent resultIntent = ChatActivity.getIntent(this, chatId, getChatName(chatId));
+		Intent resultIntent = ChatActivity.getIntent(this, chatId);
 
 		PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 		builder.setContentIntent(resultPendingIntent);
@@ -147,6 +205,50 @@ public class NetworkService extends IntentService {
 		// mId allows you to update the notification later on.
 		mNotificationManager.notify(NEW_MESSAGE_NOTIFICATION_ID, builder.build());
 	}
+
+    private void doReloadChatList(Intent intent) {
+        // clear local cache
+        getContentResolver().delete(QuezzleProviderContract.CHAT_PLACES_URI, null, null);
+
+
+        // query all chats
+        ParseQuery<ChatPlace> query = ParseQuery.getQuery(ChatPlace.class);
+        query.setLimit(LOAD_MESSAGES_LIMIT);
+        int offset = 0;
+        try {
+            boolean hasMoreData = true;
+            while (hasMoreData) {
+                query.setSkip(offset);
+                List<ChatPlace> chats = query.find();
+
+                if (!chats.isEmpty()) {
+                    ContentValues[] values = new ContentValues[chats.size()];
+					for (int i = 0; i < values.length; ++i) {
+						ChatPlace chatPlace = chats.get(i);
+						values[i] = new ContentValues(5);
+						values[i].put(ChatPlaceTable.OBJECT_ID_COLUMN, chatPlace.getObjectId());
+						values[i].put(ChatPlaceTable.CREATED_AT_COLUMN, chatPlace.getCreatedAt().getTime());
+						values[i].put(ChatPlaceTable.UPDATED_AT_COLUMN, chatPlace.getUpdatedAt().getTime());
+						values[i].put(ChatPlaceTable.NAME_COLUMN, chatPlace.getName());
+						values[i].put(ChatPlaceTable.DESCRIPTION_COLUMN, chatPlace.getDescription());
+					}
+
+					getContentResolver().bulkInsert(QuezzleProviderContract.CHAT_PLACES_URI, values);
+                }
+
+                offset += chats.size();
+                hasMoreData = !chats.isEmpty();
+            }
+
+            //notify UI about success reloading chats
+            sendBroadcast(ReloadChatListNotification.createSuccessResult());
+        } catch (ParseException pe) {
+            Log.e(Constants.LOG_TAG, "Error updating chat: " + pe.getMessage());
+
+            //notify UI about error while reloading chats
+            sendBroadcast(ReloadChatListNotification.createErrorsResult(pe.getLocalizedMessage()));
+        }
+    }
 
 	private void doReloadChat(Intent intent) {
 		long chatId = intent.getLongExtra(CHAT_ID_EXTRA, UNKNOWN_CHAT_ID);
@@ -201,7 +303,7 @@ public class NetworkService extends IntentService {
 				hasMoreData = !messages.isEmpty();
 			}
 		} catch (ParseException pe) {
-			Log.e("KVEST_TAG", "Error updating chat: " + pe.getMessage());
+			Log.e(Constants.LOG_TAG, "Error updating chat: " + pe.getMessage());
 		}
 
 		return createdCount;

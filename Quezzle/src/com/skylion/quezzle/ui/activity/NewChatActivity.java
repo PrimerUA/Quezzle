@@ -1,31 +1,27 @@
 package com.skylion.quezzle.ui.activity;
 
 import android.app.Activity;
-import android.content.ContentValues;
+import android.content.*;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.skylion.quezzle.QuezzleApplication;
 import com.skylion.quezzle.R;
-import com.skylion.quezzle.contentprovider.QuezzleProviderContract;
-import com.skylion.quezzle.datamodel.ChatPlace;
-import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
-import com.skylion.quezzle.network.parse.request.CreateObjectRequest;
+import com.skylion.quezzle.notification.CreateChatNotification;
+import com.skylion.quezzle.service.NetworkService;
 
 /**
  * Created with IntelliJ IDEA. User: Kvest Date: 19.03.14 Time: 21:28 To change
  * this template use File | Settings | File Templates.
  */
-public class NewChatActivity extends Activity implements View.OnClickListener {
+public class NewChatActivity extends Activity {
 	private EditText nameEdit;
 	private EditText descEdit;
 	private Button createButton;
+
+    private CreateChatNotificationReceiver receiver = new CreateChatNotificationReceiver();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -41,61 +37,45 @@ public class NewChatActivity extends Activity implements View.OnClickListener {
 		descEdit = (EditText) findViewById(R.id.descriptionEdit);
 
 		createButton = (Button) findViewById(R.id.createLocalChatButton);
-		createButton.setOnClickListener(this);
+		createButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendMessage();
+            }
+        });
 	}
 
-	@Override
-	public void onClick(View view) {
+    @Override
+    public void onResume() {
+        super.onResume();
+        registerReceiver(receiver, new IntentFilter(CreateChatNotification.ACTION));
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        unregisterReceiver(receiver);
+    }
+
+	private void sendMessage() {
 		if (TextUtils.isEmpty(nameEdit.getText())) {
 			Toast.makeText(NewChatActivity.this, getString(R.string.empty_fields), Toast.LENGTH_SHORT).show();
 			return;
 		}
 
-		ChatPlace src = new ChatPlace();
-		src.name = nameEdit.getText().toString();
-		src.description = descEdit.getText().toString();
-		CreateObjectRequest<ChatPlace> request = new CreateObjectRequest<ChatPlace>(ChatPlace.class.getSimpleName(), src,
-				new Response.Listener<ChatPlace>() {
-					@Override
-					public void onResponse(ChatPlace response) {
-						// save object to db
-						ContentValues values = new ContentValues(5);
-						values.put(ChatPlaceTable.OBJECT_ID_COLUMN, response.objectId);
-						values.put(ChatPlaceTable.CREATED_AT_COLUMN, response.getCreatedAt());
-						values.put(ChatPlaceTable.UPDATED_AT_COLUMN, response.getUpdatedAt());
-						values.put(ChatPlaceTable.NAME_COLUMN, response.name);
-						values.put(ChatPlaceTable.DESCRIPTION_COLUMN, response.description);
-						getContentResolver().insert(QuezzleProviderContract.CHAT_PLACES_URI, values);
+        NetworkService.createChat(this, nameEdit.getText().toString(), descEdit.getText().toString());
+	}
 
-						finish();
-					}
-				}, new Response.ErrorListener() {
-					@Override
-					public void onErrorResponse(VolleyError error) {
-						Toast.makeText(NewChatActivity.this, "Error creating new chat", Toast.LENGTH_SHORT).show();
-					}
-				});
-		request.setTag(this);
-		QuezzleApplication.getApplication().getVolleyHelper().addRequest(request);
-		// ParseGeoPoint point = new ParseGeoPoint(40.0, -30.0); //get coords!
-		// ParseObject chatPlace = new ParseObject("ChatPlace");
-		// chatPlace.put("name", nameEdit.getText().toString());
-		// chatPlace.put("description", descEdit.getText().toString());
-		// //chatPlace.put("location", point);
-		// chatPlace.saveInBackground(new SaveCallback() {
-		// @Override
-		// public void done(ParseException e) {
-		// finish();
-		// }
-		// });
-	}
-	
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
-		finish();
-		return super.onOptionsItemSelected(item);
-	}
+    private class CreateChatNotificationReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (CreateChatNotification.isSuccessful(intent)) {
+                finish();
+            } else {
+                Toast.makeText(NewChatActivity.this, getString(R.string.error_creating_chat,
+                               CreateChatNotification.getErrorMessage(intent)),
+                               Toast.LENGTH_LONG).show();
+            }
+        }
+    }
 }

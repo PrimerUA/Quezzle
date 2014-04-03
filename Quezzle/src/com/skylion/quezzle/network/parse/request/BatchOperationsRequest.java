@@ -9,6 +9,7 @@ import com.android.volley.toolbox.HttpHeaderParser;
 import com.google.gson.Gson;
 import com.skylion.quezzle.network.Urls;
 import com.skylion.quezzle.network.parse.datamodel.Operation;
+import com.skylion.quezzle.utility.Constants;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -41,7 +42,7 @@ public class BatchOperationsRequest extends ParseBaseRequest<Object> {
         try {
             //get string response
             String json = new String(response.data, HttpHeaderParser.parseCharset(response.headers));
-            Log.d("KVEST_TAG", "json=" + json);
+            Log.d(Constants.LOG_TAG, "json=" + json);
 
             return Response.error(new ParseError());
         } catch (UnsupportedEncodingException e) {
