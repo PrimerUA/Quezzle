@@ -1,4 +1,4 @@
-package com.skylion.quezzle.ui.auth;
+package com.skylion.quezzle.ui.activity;
 
 import android.app.Activity;
 import android.app.ProgressDialog;

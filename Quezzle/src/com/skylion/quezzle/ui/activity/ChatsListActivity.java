@@ -1,7 +1,5 @@
 package com.skylion.quezzle.ui.activity;
 
-import java.util.ArrayList;
-
 import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.*;
@@ -23,7 +21,6 @@ import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
 import com.skylion.quezzle.notification.ReloadChatListNotification;
 import com.skylion.quezzle.service.NetworkService;
 import com.skylion.quezzle.ui.adapter.ChatListAdapter;
-import com.skylion.quezzle.ui.auth.UserLoginActivity;
 import com.skylion.quezzle.utility.Constants;
 
 public class ChatsListActivity extends Activity implements View.OnClickListener, LoaderManager.LoaderCallbacks<Cursor> {
