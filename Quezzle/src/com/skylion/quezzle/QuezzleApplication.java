@@ -5,6 +5,7 @@ import android.app.Application;
 import com.parse.Parse;
 import com.parse.ParseObject;
 import com.parse.PushService;
+import com.skylion.quezzle.datamodel.ChatMessage;
 import com.skylion.quezzle.datamodel.ChatPlace;
 import com.skylion.quezzle.ui.activity.ChatsListActivity;
 import com.skylion.quezzle.utility.Constants;
@@ -35,6 +36,7 @@ public class QuezzleApplication extends Application {
     private void initParse() {
         //register classes
         ParseObject.registerSubclass(ChatPlace.class);
+        ParseObject.registerSubclass(ChatMessage.class);
 
         Parse.initialize(this, Constants.PARSE_APP_ID, Constants.PARSE_CLIENT_KEY);
         PushService.setDefaultPushCallback(this, ChatsListActivity.class);

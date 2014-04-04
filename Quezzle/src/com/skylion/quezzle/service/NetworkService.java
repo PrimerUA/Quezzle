@@ -2,29 +2,23 @@ package com.skylion.quezzle.service;
 
 import android.app.*;
 import android.content.BroadcastReceiver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
-import com.parse.ParseException;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
 import com.skylion.quezzle.R;
 import com.skylion.quezzle.contentprovider.QuezzleProviderContract;
-import com.skylion.quezzle.datamodel.ChatPlace;
 import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
 import com.skylion.quezzle.datastorage.table.MessageTable;
+import com.skylion.quezzle.network.NetworkHelper;
 import com.skylion.quezzle.notification.CreateChatNotification;
 import com.skylion.quezzle.notification.ReloadChatListNotification;
+import com.skylion.quezzle.notification.SendMessageNotification;
 import com.skylion.quezzle.ui.activity.ChatActivity;
-import com.skylion.quezzle.utility.Constants;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA. User: roman Date: 3/28/14 Time: 5:21 PM To change
@@ -45,8 +39,6 @@ public class NetworkService extends IntentService {
 	private static final long UNKNOWN_CHAT_ID = -1;
 
 	private static final int NEW_MESSAGE_NOTIFICATION_ID = 1;
-
-	private static final int LOAD_MESSAGES_LIMIT = 20;
 
 	private static final int ACTION_SEND_MESSAGE = 0;
 	private static final int ACTION_RELOAD_CHAT = 1;
@@ -123,44 +115,36 @@ public class NetworkService extends IntentService {
 	}
 
 	private void doSendMessage(Intent intent) {
-		ParseObject chatMessage = new ParseObject("ChatMessage");
-		chatMessage.put("message", intent.getStringExtra(MESSAGE_EXTRA));
-		chatMessage.put("chatId", intent.getStringExtra(CHAT_KEY_EXTRA));
-		chatMessage.put("author", intent.getStringExtra(AUTHOR_EXTRA));
+        NetworkHelper.sendMessage(intent.getStringExtra(MESSAGE_EXTRA), intent.getStringExtra(CHAT_KEY_EXTRA),
+                                  intent.getStringExtra(AUTHOR_EXTRA), new NetworkHelper.OnResultListener() {
+            @Override
+            public void onSuccess() {
+                //notify UI about success creating chat
+                sendBroadcast(SendMessageNotification.createSuccessResult());
+            }
 
-		try {
-			chatMessage.save();
-		} catch (ParseException pe) {
-			Log.e(Constants.LOG_TAG, "Error sending message: " + pe.getMessage());
-		}
+            @Override
+            public void onError(String message) {
+                sendBroadcast(SendMessageNotification.createErrorsResult(message));
+            }
+        });
 	}
 
     private void doCreateChat(Intent intent) {
-        ChatPlace chatPlace = new ChatPlace();
-        chatPlace.setName(intent.getStringExtra(CHAT_NAME_EXTRA));
-        chatPlace.setDescription(intent.getStringExtra(CHAT_DESCRIPTION_EXTRA));
+        NetworkHelper.createChat(intent.getStringExtra(CHAT_NAME_EXTRA), intent.getStringExtra(CHAT_DESCRIPTION_EXTRA),
+                                 getContentResolver(), new NetworkHelper.OnResultListener() {
+            @Override
+            public void onSuccess() {
+                //notify UI about success creating chat
+                sendBroadcast(CreateChatNotification.createSuccessResult());
+            }
 
-        try {
-            //save chat in server
-            chatPlace.save();
-
-            //save chat in local cache
-            ContentValues values = new ContentValues(5);
-            values.put(ChatPlaceTable.OBJECT_ID_COLUMN, chatPlace.getObjectId());
-            values.put(ChatPlaceTable.CREATED_AT_COLUMN, chatPlace.getCreatedAt().getTime());
-            values.put(ChatPlaceTable.UPDATED_AT_COLUMN, chatPlace.getUpdatedAt().getTime());
-            values.put(ChatPlaceTable.NAME_COLUMN, chatPlace.getName());
-            values.put(ChatPlaceTable.DESCRIPTION_COLUMN, chatPlace.getDescription());
-            getContentResolver().insert(QuezzleProviderContract.CHAT_PLACES_URI, values);
-
-            //notify UI about success creating chat
-            sendBroadcast(CreateChatNotification.createSuccessResult());
-        } catch (ParseException pe) {
-            Log.e(Constants.LOG_TAG, "Error sending message: " + pe.getMessage());
-
-            //notify UI about error while creating chat
-            sendBroadcast(CreateChatNotification.createErrorsResult(pe.getLocalizedMessage()));
-        }
+            @Override
+            public void onError(String message) {
+                //notify UI about error while creating chat
+                sendBroadcast(CreateChatNotification.createErrorsResult(message));
+            }
+        });
     }
 
 	private void doRefreshChat(Intent intent) {
@@ -174,7 +158,8 @@ public class NetworkService extends IntentService {
 		Uri messagesUri = QuezzleProviderContract.getMessagesUri(chatId);
 
 		// load new data
-		int createdCount = loadChatMessages(chatKey, messagesUri, lastMessageDate);
+		int createdCount = NetworkHelper.loadAllChatMessages(chatKey, messagesUri, lastMessageDate,
+                                                             getContentResolver(), null);
 
 		// show notification if needed
 		if (createdCount > 0 && intent.getBooleanExtra(WITH_NOTIFICATION_EXTRA, false)) {
@@ -196,7 +181,7 @@ public class NetworkService extends IntentService {
 				.setSmallIcon(R.drawable.ic_launcher).setContentTitle(getString(R.string.new_message))
 				.setContentText(getString(R.string.chat_has_new_message, getChatName(chatId)))
 				.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-				.setVibrate(new long[] { 1000, 500, 500 });
+				.setVibrate(new long[]{1000, 500, 500});
 		// Creates an explicit intent for an Activity in your app
 		Intent resultIntent = ChatActivity.getIntent(this, chatId);
 		PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent,
@@ -211,44 +196,20 @@ public class NetworkService extends IntentService {
         // clear local cache
         getContentResolver().delete(QuezzleProviderContract.CHAT_PLACES_URI, null, null);
 
-
         // query all chats
-        ParseQuery<ChatPlace> query = ParseQuery.getQuery(ChatPlace.class);
-        query.setLimit(LOAD_MESSAGES_LIMIT);
-        int offset = 0;
-        try {
-            boolean hasMoreData = true;
-            while (hasMoreData) {
-                query.setSkip(offset);
-                List<ChatPlace> chats = query.find();
-
-                if (!chats.isEmpty()) {
-                    ContentValues[] values = new ContentValues[chats.size()];
-					for (int i = 0; i < values.length; ++i) {
-						ChatPlace chatPlace = chats.get(i);
-						values[i] = new ContentValues(5);
-						values[i].put(ChatPlaceTable.OBJECT_ID_COLUMN, chatPlace.getObjectId());
-						values[i].put(ChatPlaceTable.CREATED_AT_COLUMN, chatPlace.getCreatedAt().getTime());
-						values[i].put(ChatPlaceTable.UPDATED_AT_COLUMN, chatPlace.getUpdatedAt().getTime());
-						values[i].put(ChatPlaceTable.NAME_COLUMN, chatPlace.getName());
-						values[i].put(ChatPlaceTable.DESCRIPTION_COLUMN, chatPlace.getDescription());
-					}
-
-					getContentResolver().bulkInsert(QuezzleProviderContract.CHAT_PLACES_URI, values);
-                }
-
-                offset += chats.size();
-                hasMoreData = !chats.isEmpty();
+        NetworkHelper.loadAllChats(getContentResolver(), new NetworkHelper.OnResultListener() {
+            @Override
+            public void onSuccess() {
+                //notify UI about success reloading chats
+                sendBroadcast(ReloadChatListNotification.createSuccessResult());
             }
 
-            //notify UI about success reloading chats
-            sendBroadcast(ReloadChatListNotification.createSuccessResult());
-        } catch (ParseException pe) {
-            Log.e(Constants.LOG_TAG, "Error updating chat: " + pe.getMessage());
-
-            //notify UI about error while reloading chats
-            sendBroadcast(ReloadChatListNotification.createErrorsResult(pe.getLocalizedMessage()));
-        }
+            @Override
+            public void onError(String message) {
+                //notify UI about error while reloading chats
+                sendBroadcast(ReloadChatListNotification.createErrorsResult(message));
+            }
+        });
     }
 
 	private void doReloadChat(Intent intent) {
@@ -263,50 +224,7 @@ public class NetworkService extends IntentService {
 		getContentResolver().delete(messagesUri, null, null);
 
 		// load new data
-		loadChatMessages(chatKey, messagesUri, null);
-	}
-
-	private int loadChatMessages(String chatKey, Uri messagesUri, Date lastMessageDate) {
-		int createdCount = 0;
-		ParseQuery<ParseObject> query = ParseQuery.getQuery("ChatMessage");
-		query.whereEqualTo("chatId", chatKey);
-		query.addAscendingOrder("updatedAt");
-		if (lastMessageDate != null) {
-			query.whereGreaterThan("updatedAt", lastMessageDate);
-		}
-		query.setLimit(LOAD_MESSAGES_LIMIT);
-		int offset = 0;
-		try {
-			boolean hasMoreData = true;
-			while (hasMoreData) {
-				query.setSkip(offset);
-				List<ParseObject> messages = query.find();
-
-				if (!messages.isEmpty()) {
-					ContentValues[] values = new ContentValues[messages.size()];
-
-					for (int i = 0; i < messages.size(); ++i) {
-						ParseObject message = messages.get(i);
-
-						values[i] = new ContentValues(5);
-						values[i].put(MessageTable.OBJECT_ID_COLUMN, message.getObjectId());
-						values[i].put(MessageTable.CREATED_AT_COLUMN, message.getCreatedAt().getTime());
-						values[i].put(MessageTable.UPDATED_AT_COLUMN, message.getUpdatedAt().getTime());
-						values[i].put(MessageTable.MESSAGE_COLUMN, message.getString("message"));
-						values[i].put(MessageTable.AUTHOR_COLUMN, message.getString("author"));
-					}
-
-					createdCount += getContentResolver().bulkInsert(messagesUri, values);
-				}
-
-				offset += messages.size();
-				hasMoreData = !messages.isEmpty();
-			}
-		} catch (ParseException pe) {
-			Log.e(Constants.LOG_TAG, "Error updating chat: " + pe.getMessage());
-		}
-
-		return createdCount;
+        NetworkHelper.loadAllChatMessages(chatKey, messagesUri, null, getContentResolver(), null);
 	}
 
 	private long getChatIdByKey(String chatKey) {
