@@ -17,16 +17,14 @@ import com.skylion.quezzle.ui.fragment.ChatFragment;
  */
 public class ChatActivity extends Activity {
 	private static final String CHAT_ID_EXTRA = "com.skylion.quezzle.ui.activity.ChatActivity.CHAT_ID";
-	private static final String CHAT_NAME_EXTRA = "com.skylion.quezzle.ui.activity.ChatActivity.CHAT_NAME";
 
-    public static void start(Context context, long chatId, String chatName) {
-        context.startActivity(getIntent(context, chatId,chatName));
+    public static void start(Context context, long chatId) {
+        context.startActivity(getIntent(context, chatId));
     }
 
-    public static Intent getIntent(Context context, long chatId, String chatName) {
+    public static Intent getIntent(Context context, long chatId) {
         Intent intent = new Intent(context, ChatActivity.class);
         intent.putExtra(CHAT_ID_EXTRA, chatId);
-        intent.putExtra(CHAT_NAME_EXTRA, chatName);
         return intent;
     }
 

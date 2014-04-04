@@ -198,7 +198,7 @@ public class NetworkService extends IntentService {
 				.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
 				.setVibrate(new long[] { 1000, 500, 500 });
 		// Creates an explicit intent for an Activity in your app
-		Intent resultIntent = ChatActivity.getIntent(this, chatId, getChatName(chatId));
+		Intent resultIntent = ChatActivity.getIntent(this, chatId);
 		PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent,
 				PendingIntent.FLAG_UPDATE_CURRENT);
 		builder.setContentIntent(resultPendingIntent);

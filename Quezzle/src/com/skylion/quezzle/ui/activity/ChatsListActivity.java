@@ -66,7 +66,7 @@ public class ChatsListActivity extends Activity implements View.OnClickListener,
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				// show chat
-				ChatActivity.start(ChatsListActivity.this, id, chatNameList.get(position)); ///???
+				ChatActivity.start(ChatsListActivity.this, id);
 			}
 		});
 
