@@ -1,4 +1,4 @@
-package com.skylion.quezzle.ui.auth;
+package com.skylion.quezzle.ui.activity;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -32,7 +32,7 @@ public class UserLoginActivity extends Activity implements GooglePlayServicesCli
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.login_screen);
-		
+		progressDialog = new ProgressDialog(this);
 		getActionBar().setTitle(R.string.title_activity_auth);
 		getActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.blue));
 
@@ -106,6 +106,7 @@ public class UserLoginActivity extends Activity implements GooglePlayServicesCli
 							public void done(ParseUser user, ParseException e) {
 								if (user != null) {
 									progressDialog.dismiss();
+									Toast.makeText(UserLoginActivity.this, getString(R.string.welcome), Toast.LENGTH_SHORT).show();
 									finish();
 								} else {
 									progressDialog.dismiss();

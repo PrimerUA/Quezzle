@@ -38,12 +38,16 @@
         <activity
             android:name=".ui.activity.NewChatActivity"
             android:screenOrientation="portrait"
-            android:parentActivityName=".ui.activity.ChatsListActivity"/>
+            android:parentActivityName=".ui.activity.ChatsListActivity" >
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value=".ui.activity.ChatsListActivity" />
+        </activity>
         <activity
             android:name=".ui.activity.ChatActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".ui.auth.UserLoginActivity"
+            android:name=".ui.activity.UserLoginActivity"
             android:screenOrientation="portrait" />
 
         <provider

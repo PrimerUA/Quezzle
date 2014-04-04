@@ -16,7 +16,7 @@ import com.skylion.quezzle.ui.fragment.ChatFragment;
  * To change this template use File | Settings | File Templates.
  */
 public class ChatActivity extends Activity {
-    private static final String CHAT_ID_EXTRA = "com.skylion.quezzle.ui.activity.ChatActivity.CHAT_ID";
+	private static final String CHAT_ID_EXTRA = "com.skylion.quezzle.ui.activity.ChatActivity.CHAT_ID";
 
     public static void start(Context context, long chatId) {
         context.startActivity(getIntent(context, chatId));

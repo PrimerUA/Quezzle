@@ -1,7 +1,5 @@
 package com.skylion.quezzle.ui.activity;
 
-import java.util.ArrayList;
-
 import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.*;
@@ -47,7 +45,7 @@ public class ChatsListActivity extends Activity implements View.OnClickListener,
 		if (currentUser != null) {
 			// do stuff with the user
 		} else {
-			// startActivity(new Intent(this, UserLoginActivity.class));
+			startActivity(new Intent(this, UserLoginActivity.class));
 		}
 
 		Log.d(Constants.LOG_TAG, "!=" + getIntent().getAction());
