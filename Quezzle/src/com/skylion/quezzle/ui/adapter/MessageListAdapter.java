@@ -19,6 +19,8 @@ import java.util.Date;
  * this template use File | Settings | File Templates.
  */
 public class MessageListAdapter extends CursorAdapter {
+    public static final String[] PROJECTION = new String[] {MessageTable._ID, MessageTable.UPDATED_AT_COLUMN,
+                                                            MessageTable.MESSAGE_COLUMN, MessageTable.AUTHOR_COLUMN };
 	private static final String DATE_FORMAT_PATTERN = "[dd.MM.yyyy HH:mm:ss]";
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_PATTERN);
 

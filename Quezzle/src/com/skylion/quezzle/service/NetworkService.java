@@ -26,10 +26,9 @@ import java.util.Date;
  */
 public class NetworkService extends IntentService {
 	public static final String NEW_MESSAGE_ACTION = "com.skylion.quezzle.service.NetworkService.NEW_MESSAGE_ACTION";
-	public static final String CHAT_ID_EXTRA = "com.skylion.quezzle.service.NetworkService.CHAT_ID";
+    public static final String CHAT_KEY_EXTRA = "com.skylion.quezzle.service.NetworkService.CHAT_KEY";
 
 	private static final String ACTION_EXTRA = "com.skylion.quezzle.service.NetworkService.ACTION";
-	private static final String CHAT_KEY_EXTRA = "com.skylion.quezzle.service.NetworkService.CHAT_KEY";
 	private static final String CHAT_NAME_EXTRA = "com.skylion.quezzle.service.NetworkService.CHAT_NAME";
 	private static final String CHAT_DESCRIPTION_EXTRA = "com.skylion.quezzle.service.NetworkService.CHAT_DESCRIPTION";
 	private static final String AUTHOR_EXTRA = "com.skylion.quezzle.service.NetworkService.AUTHOR";
@@ -72,10 +71,10 @@ public class NetworkService extends IntentService {
 		context.startService(intent);
 	}
 
-	public static void reloadChat(Context context, long chatId) {
+	public static void reloadChat(Context context, String chatKey) {
 		Intent intent = new Intent(context, NetworkService.class);
 		intent.putExtra(ACTION_EXTRA, ACTION_RELOAD_CHAT);
-		intent.putExtra(CHAT_ID_EXTRA, chatId);
+		intent.putExtra(CHAT_KEY_EXTRA, chatKey);
 
 		context.startService(intent);
 	}
@@ -149,13 +148,9 @@ public class NetworkService extends IntentService {
 
 	private void doRefreshChat(Intent intent) {
 		// load needed data from db
-		String chatKey = intent.getStringExtra(CHAT_KEY_EXTRA);
-		final long chatId = getChatIdByKey(chatKey);
-		if (chatId == UNKNOWN_CHAT_ID) {
-			return;
-		}
-		Date lastMessageDate = getChatLastMessageDate(chatId);
-		Uri messagesUri = QuezzleProviderContract.getMessagesUri(chatId);
+		final String chatKey = intent.getStringExtra(CHAT_KEY_EXTRA);
+		Date lastMessageDate = getChatLastMessageDate(chatKey);
+		Uri messagesUri = QuezzleProviderContract.getMessagesUri(chatKey);
 
 		// load new data
 		int createdCount = NetworkHelper.loadAllChatMessages(chatKey, messagesUri, lastMessageDate,
@@ -164,26 +159,26 @@ public class NetworkService extends IntentService {
 		// show notification if needed
 		if (createdCount > 0 && intent.getBooleanExtra(WITH_NOTIFICATION_EXTRA, false)) {
 			Intent broadcastIntent = new Intent(NEW_MESSAGE_ACTION);
-			broadcastIntent.putExtra(CHAT_ID_EXTRA, chatId);
+			broadcastIntent.putExtra(CHAT_KEY_EXTRA, chatKey);
 			sendOrderedBroadcast(broadcastIntent, null, new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     if (getResultCode() != Activity.RESULT_OK) {
-                        showNewMessageNotification(chatId);
+                        showNewMessageNotification(chatKey);
                     }
                 }
             }, null, 0, null, null);
 		}
 	}
 
-	private void showNewMessageNotification(long chatId) {
+	private void showNewMessageNotification(String chatKey) {
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(this).setAutoCancel(true)
 				.setSmallIcon(R.drawable.ic_launcher).setContentTitle(getString(R.string.new_message))
-				.setContentText(getString(R.string.chat_has_new_message, getChatName(chatId)))
+				.setContentText(getString(R.string.chat_has_new_message, getChatName(chatKey)))
 				.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
 				.setVibrate(new long[]{1000, 500, 500});
 		// Creates an explicit intent for an Activity in your app
-		Intent resultIntent = ChatActivity.getIntent(this, chatId);
+		Intent resultIntent = ChatActivity.getIntent(this, chatKey);
 		PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent,
 				PendingIntent.FLAG_UPDATE_CURRENT);
 		builder.setContentIntent(resultPendingIntent);
@@ -213,12 +208,8 @@ public class NetworkService extends IntentService {
     }
 
 	private void doReloadChat(Intent intent) {
-		long chatId = intent.getLongExtra(CHAT_ID_EXTRA, UNKNOWN_CHAT_ID);
-		if (chatId == UNKNOWN_CHAT_ID) {
-			return;
-		}
-		Uri messagesUri = QuezzleProviderContract.getMessagesUri(chatId);
-		String chatKey = getChatKeyById(chatId);
+        String chatKey = intent.getStringExtra(CHAT_KEY_EXTRA);
+        Uri messagesUri = QuezzleProviderContract.getMessagesUri(chatKey);
 
 		// remove old data
 		getContentResolver().delete(messagesUri, null, null);
@@ -227,38 +218,8 @@ public class NetworkService extends IntentService {
         NetworkHelper.loadAllChatMessages(chatKey, messagesUri, null, getContentResolver(), null);
 	}
 
-	private long getChatIdByKey(String chatKey) {
-		Cursor cursor = getContentResolver().query(QuezzleProviderContract.CHAT_PLACES_URI,
-				new String[] { ChatPlaceTable._ID }, ChatPlaceTable.OBJECT_ID_COLUMN + "=?", new String[] { chatKey },
-				null);
-		try {
-			if (cursor.moveToFirst()) {
-				return cursor.getLong(cursor.getColumnIndex(ChatPlaceTable._ID));
-			} else {
-				return UNKNOWN_CHAT_ID;
-			}
-		} finally {
-			cursor.close();
-		}
-	}
-
-	private String getChatKeyById(long chatId) {
-		Cursor cursor = getContentResolver().query(QuezzleProviderContract.CHAT_PLACES_URI,
-				new String[] { ChatPlaceTable.OBJECT_ID_COLUMN }, ChatPlaceTable._ID + "=?",
-				new String[] { Long.toString(chatId) }, null);
-		try {
-			if (cursor.moveToFirst()) {
-				return cursor.getString(cursor.getColumnIndex(ChatPlaceTable.OBJECT_ID_COLUMN));
-			} else {
-				return "";
-			}
-		} finally {
-			cursor.close();
-		}
-	}
-
-	private Date getChatLastMessageDate(long chatId) {
-		Cursor cursor = getContentResolver().query(QuezzleProviderContract.getMessagesUri(chatId),
+	private Date getChatLastMessageDate(String chatKey) {
+		Cursor cursor = getContentResolver().query(QuezzleProviderContract.getMessagesUri(chatKey),
 				new String[] { MessageTable.UPDATED_AT_COLUMN }, null, null, MessageTable.UPDATED_AT_COLUMN + " DESC");
 		try {
 			if (cursor.moveToFirst()) {
@@ -271,8 +232,8 @@ public class NetworkService extends IntentService {
 		}
 	}
 
-	private String getChatName(long chatId) {
-		Uri uri = Uri.withAppendedPath(QuezzleProviderContract.CHAT_PLACES_URI, Long.toString(chatId));
+	private String getChatName(String chatKey) {
+		Uri uri = Uri.withAppendedPath(QuezzleProviderContract.CHAT_PLACES_URI, chatKey);
 		Cursor cursor = getContentResolver().query(uri, new String[] { ChatPlaceTable.NAME_COLUMN }, null, null, null);
 		try {
 			if (cursor.moveToFirst()) {

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.*;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -25,8 +26,6 @@ import com.skylion.quezzle.utility.Constants;
 
 public class ChatsListActivity extends Activity implements View.OnClickListener, LoaderManager.LoaderCallbacks<Cursor> {
 	private static final int LOAD_CHATS_ID = 0;
-	private static final String[] PROJECTION = new String[] { ChatPlaceTable._ID, ChatPlaceTable.NAME_COLUMN,
-			ChatPlaceTable.DESCRIPTION_COLUMN };
 
     private boolean firstLoad = true;
 	private ListView chatsList;
@@ -62,9 +61,12 @@ public class ChatsListActivity extends Activity implements View.OnClickListener,
 		chatsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				// show chat
-				ChatActivity.start(ChatsListActivity.this, id);
-			}
+                //get chat key from adapter
+                String chatKey = adapter.getChatKey(view, position, id);
+
+                //show chat
+                ChatActivity.start(ChatsListActivity.this, chatKey);
+            }
 		});
 
 		createButton = (Button) findViewById(R.id.createButton);
@@ -117,7 +119,7 @@ public class ChatsListActivity extends Activity implements View.OnClickListener,
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 		switch (id) {
 		case LOAD_CHATS_ID:
-			return new CursorLoader(this, QuezzleProviderContract.CHAT_PLACES_URI, PROJECTION, null, null, null);
+			return new CursorLoader(this, QuezzleProviderContract.CHAT_PLACES_URI, ChatListAdapter.PROJECTION, null, null, null);
 		}
 		return null;
 	}

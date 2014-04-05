@@ -16,15 +16,15 @@ import com.skylion.quezzle.ui.fragment.ChatFragment;
  * To change this template use File | Settings | File Templates.
  */
 public class ChatActivity extends Activity {
-	private static final String CHAT_ID_EXTRA = "com.skylion.quezzle.ui.activity.ChatActivity.CHAT_ID";
+	private static final String CHAT_KEY_EXTRA = "com.skylion.quezzle.ui.activity.ChatActivity.CHAT_KEY";
 
-    public static void start(Context context, long chatId) {
-        context.startActivity(getIntent(context, chatId));
+    public static void start(Context context, String chatKey) {
+        context.startActivity(getIntent(context, chatKey));
     }
 
-    public static Intent getIntent(Context context, long chatId) {
+    public static Intent getIntent(Context context, String chatKey) {
         Intent intent = new Intent(context, ChatActivity.class);
-        intent.putExtra(CHAT_ID_EXTRA, chatId);
+        intent.putExtra(CHAT_KEY_EXTRA, chatKey);
         return intent;
     }
 
@@ -33,14 +33,14 @@ public class ChatActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_container);
 
-        //get chat id from extra
-        long chatId = getIntent().getLongExtra(CHAT_ID_EXTRA, -1);
+        //get chat key from extra
+        String chatKey = getIntent().getStringExtra(CHAT_KEY_EXTRA);
 
         //set fragment
         if (savedInstanceState == null) {
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
             try {
-            	transaction.add(R.id.fragment_container, ChatFragment.newInstance(chatId));
+            	transaction.add(R.id.fragment_container, ChatFragment.newInstance(chatKey));
             } finally {
                 transaction.commit();
             }

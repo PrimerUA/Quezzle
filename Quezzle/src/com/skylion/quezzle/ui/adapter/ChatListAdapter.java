@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
 import com.skylion.quezzle.R;
@@ -18,8 +19,11 @@ import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
  * To change this template use File | Settings | File Templates.
  */
 public class ChatListAdapter extends CursorAdapter {
+    public static final String[] PROJECTION = new String[] {ChatPlaceTable._ID, ChatPlaceTable.NAME_COLUMN,
+                                                             ChatPlaceTable.DESCRIPTION_COLUMN, ChatPlaceTable.OBJECT_ID_COLUMN };
     private int nameColumnIndex = -1;
     private int descriptionColumnIndex = -1;
+    private int objectIdColumnIndex = -1;
 
     public ChatListAdapter(Context context, int flags) {
         super(context, null, flags);
@@ -32,6 +36,7 @@ public class ChatListAdapter extends CursorAdapter {
     private void calculateColumnIndexes(Cursor cursor) {
         nameColumnIndex = cursor.getColumnIndex(ChatPlaceTable.NAME_COLUMN);
         descriptionColumnIndex = cursor.getColumnIndex(ChatPlaceTable.DESCRIPTION_COLUMN);
+        objectIdColumnIndex = cursor.getColumnIndex(ChatPlaceTable.OBJECT_ID_COLUMN);
     }
 
     @Override
@@ -42,6 +47,7 @@ public class ChatListAdapter extends CursorAdapter {
 
         //create holder
         ViewHolder holder = new ViewHolder();
+        holder.objectId = "";
         holder.name = (TextView)view.findViewById(R.id.chat_name);
         holder.description = (TextView)view.findViewById(R.id.chat_description);
         view.setTag(holder);
@@ -57,11 +63,26 @@ public class ChatListAdapter extends CursorAdapter {
             calculateColumnIndexes(cursor);
         }
 
+        holder.objectId = cursor.getString(objectIdColumnIndex);
         holder.name.setText(cursor.getString(nameColumnIndex));
         holder.description.setText(cursor.getString(descriptionColumnIndex));
     }
 
+    public String getChatKey(View view, int position, long id) {
+        Object tag = view.getTag();
+        if (tag == null) {
+            return "";
+        }
+
+        try {
+            return ((ViewHolder)tag).objectId;
+        } catch (ClassCastException cce) {
+            return "";
+        }
+    }
+
     private static class ViewHolder {
+        public String objectId;
         public TextView name;
         public TextView description;
     }

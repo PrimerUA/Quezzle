@@ -20,7 +20,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -41,22 +40,22 @@ import com.skylion.quezzle.ui.adapter.MessageListAdapter;
  */
 public class ChatFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 	private static final String CHAT_MESSAGES_ORDER = MessageTable.UPDATED_AT_COLUMN + " DESC";
-	private static final int LOAD_CHAT_KEY_ID = 0;
+	private static final int LOAD_CHAT_INFO_ID = 0;
 	private static final int LOAD_MESSAGES_ID = 1;
-	private static final String CHAT_ID_ARGUMENT = "com.skylion.quezzle.ui.fragment.ChatFragment.CHAT_ID";
+	private static final String CHAT_KEY_ARGUMENT = "com.skylion.quezzle.ui.fragment.ChatFragment.CHAT_KEY";
 
     private boolean firstLoad = true;
 
-	public static ChatFragment newInstance(long chatId) {
+	public static ChatFragment newInstance(String chatKey) {
 		Bundle arguments = new Bundle();
-		arguments.putLong(CHAT_ID_ARGUMENT, chatId);
+		arguments.putString(CHAT_KEY_ARGUMENT, chatKey);
 
 		ChatFragment result = new ChatFragment();
 		result.setArguments(arguments);
 		return result;
 	}
 
-	private String chatKey;
+    private String chatKey = null;
 	private ImageView send;
 	private EditText message;
 	private ListView messageList;
@@ -105,7 +104,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 
-		getLoaderManager().initLoader(LOAD_CHAT_KEY_ID, null, this);
+		getLoaderManager().initLoader(LOAD_CHAT_INFO_ID, null, this);
 		getLoaderManager().initLoader(LOAD_MESSAGES_ID, null, this);
 	}
 
@@ -119,7 +118,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_refresh:
-			NetworkService.reloadChat(getActivity(), getChatId());
+			NetworkService.reloadChat(getActivity(), getChatKey());
 			return true;
 		default:
 			getActivity().finish();
@@ -136,7 +135,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
 				@Override
 				public void done(ParseUser parseUser, ParseException arg1) {
-					NetworkService.sendMessage(getActivity(), chatKey, text, parseUser.getUsername());
+					NetworkService.sendMessage(getActivity(), getChatKey(), text, parseUser.getUsername());
 				}
 			});
 		} else {
@@ -144,39 +143,32 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 		}
 	}
 
-	private long getChatId() {
-		Bundle arguments = getArguments();
-		return (arguments != null && arguments.containsKey(CHAT_ID_ARGUMENT)) ? arguments.getLong(CHAT_ID_ARGUMENT) : -1;
+	private String getChatKey() {
+        if (chatKey == null) {
+            Bundle arguments = getArguments();
+            chatKey = (arguments != null && arguments.containsKey(CHAT_KEY_ARGUMENT)) ? arguments.getString(CHAT_KEY_ARGUMENT) : "";
+        }
+
+		return chatKey;
 	}
 
-	private void setChatData(Cursor cursor) {
+	private void setChatInfo(Cursor cursor) {
 		if (cursor.moveToFirst()) {
-			chatKey = cursor.getString(cursor.getColumnIndex(ChatPlaceTable.OBJECT_ID_COLUMN));
-			send.setEnabled(true);
-			message.setEnabled(true);
-
             String chatName = cursor.getString(cursor.getColumnIndex(ChatPlaceTable.NAME_COLUMN));
             getActivity().getActionBar().setTitle(chatName);
 		}
 	}
 
-	private void resetChatKey() {
-		send.setEnabled(false);
-		message.setEnabled(false);
-		chatKey = null;
-	}
-
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 		switch (id) {
-		case LOAD_CHAT_KEY_ID:
-			Uri uri = Uri.withAppendedPath(QuezzleProviderContract.CHAT_PLACES_URI, Long.toString(getChatId()));
-			return new CursorLoader(getActivity(), uri, new String[] { ChatPlaceTable.OBJECT_ID_COLUMN, ChatPlaceTable.NAME_COLUMN },
+		case LOAD_CHAT_INFO_ID :
+			Uri uri = Uri.withAppendedPath(QuezzleProviderContract.CHAT_PLACES_URI, getChatKey());
+			return new CursorLoader(getActivity(), uri, new String[] {ChatPlaceTable.NAME_COLUMN },
                                     null, null, null);
-		case LOAD_MESSAGES_ID:
-			return new CursorLoader(getActivity(), QuezzleProviderContract.getMessagesUri(getChatId()), new String[] { MessageTable._ID,
-					MessageTable.UPDATED_AT_COLUMN, MessageTable.MESSAGE_COLUMN, MessageTable.AUTHOR_COLUMN }, null, null,
-					CHAT_MESSAGES_ORDER);
+		case LOAD_MESSAGES_ID :
+			return new CursorLoader(getActivity(), QuezzleProviderContract.getMessagesUri(getChatKey()), MessageListAdapter.PROJECTION,
+                                                                                          null, null,CHAT_MESSAGES_ORDER);
 		}
 		return null;
 	}
@@ -184,13 +176,13 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
 		switch (loader.getId()) {
-		case LOAD_CHAT_KEY_ID:
-            setChatData(cursor);
+		case LOAD_CHAT_INFO_ID :
+            setChatInfo(cursor);
 			break;
 		case LOAD_MESSAGES_ID:
             if (firstLoad && cursor.getCount() == 0) {
 				// try to load chat messages
-				NetworkService.reloadChat(getActivity(), getChatId());
+				NetworkService.reloadChat(getActivity(), getChatKey());
 			}
             firstLoad = false;
 
@@ -202,19 +194,16 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 	@Override
 	public void onLoaderReset(Loader<Cursor> loader) {
 		switch (loader.getId()) {
-		case LOAD_CHAT_KEY_ID:
-			resetChatKey();
-			break;
-		case LOAD_MESSAGES_ID:
-			messageListAdapter.swapCursor(null);
-			break;
+            case LOAD_MESSAGES_ID:
+                messageListAdapter.swapCursor(null);
+                break;
 		}
 	}
 
 	private class NewMessageEventReceiver extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			if (getChatId() == intent.getLongExtra(NetworkService.CHAT_ID_EXTRA, -1)) {
+			if (getChatKey().equals(intent.getStringExtra(NetworkService.CHAT_KEY_EXTRA))) {
 				setResultCode(Activity.RESULT_OK);
 				abortBroadcast();
 			}

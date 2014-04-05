@@ -15,7 +15,7 @@ import com.skylion.quezzle.datastorage.table.MessageTable;
  */
 public class QuezzleSQLStorage extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "quezzle.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     public QuezzleSQLStorage(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -30,6 +30,11 @@ public class QuezzleSQLStorage extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        //Nothing to do yet
+        //Delete old tables
+        db.execSQL(ChatPlaceTable.DROP_TABLE_SQL);
+        db.execSQL(MessageTable.DROP_TABLE_SQL);
+
+        //create new tables
+        onCreate(db);
     }
 }
