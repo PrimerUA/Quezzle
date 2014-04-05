@@ -26,7 +26,6 @@
             android:layout_margin="5dp"
             android:layout_weight="1"
             android:background="@drawable/textlines"
-            android:enabled="false"
             android:inputType="textCapSentences|textMultiLine"
             android:maxLength="@integer/L140"
             android:maxLines="4"

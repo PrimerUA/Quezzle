@@ -40,8 +40,8 @@
             android:screenOrientation="portrait"
             android:parentActivityName=".ui.activity.ChatsListActivity" >
             <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value=".ui.activity.ChatsListActivity" />
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.activity.ChatsListActivity" />
         </activity>
         <activity
             android:name=".ui.activity.ChatActivity"

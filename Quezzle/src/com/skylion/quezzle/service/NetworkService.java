@@ -35,8 +35,6 @@ public class NetworkService extends IntentService {
 	private static final String MESSAGE_EXTRA = "com.skylion.quezzle.service.NetworkService.MESSAGE";
 	private static final String WITH_NOTIFICATION_EXTRA = "com.skylion.quezzle.service.NetworkService.WITH_NOTIFICATION";
 
-	private static final long UNKNOWN_CHAT_ID = -1;
-
 	private static final int NEW_MESSAGE_NOTIFICATION_ID = 1;
 
 	private static final int ACTION_SEND_MESSAGE = 0;
