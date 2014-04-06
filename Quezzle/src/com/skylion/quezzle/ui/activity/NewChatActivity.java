@@ -1,6 +1,5 @@
 package com.skylion.quezzle.ui.activity;
 
-import android.app.Activity;
 import android.content.*;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -16,7 +15,7 @@ import com.skylion.quezzle.service.NetworkService;
  * Created with IntelliJ IDEA. User: Kvest Date: 19.03.14 Time: 21:28 To change
  * this template use File | Settings | File Templates.
  */
-public class NewChatActivity extends Activity {
+public class NewChatActivity extends QuezzleBaseActivity {
 	private EditText nameEdit;
 	private EditText descEdit;
 	private Button createButton;

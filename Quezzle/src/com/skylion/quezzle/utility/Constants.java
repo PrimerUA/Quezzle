@@ -11,4 +11,5 @@ public abstract class Constants {
     public static final String LOG_TAG = "Quezzle";
     public static final String PARSE_APP_ID = "RVCqyTO6a3jDJPh0GeKRzbbpdXZWGWtm13m0MN67";
     public static final String PARSE_CLIENT_KEY = "BBD41jgbfdaTUdvtTxutynfB07C2HJKRquCX8MR3";
+    public static final String BUGSENS_API_KEY = "9b18f9b5";
 }

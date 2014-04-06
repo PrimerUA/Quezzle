@@ -1,6 +1,5 @@
 package com.skylion.quezzle.ui.activity;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -18,7 +17,7 @@ import com.parse.ParseUser;
 import com.parse.SignUpCallback;
 import com.skylion.quezzle.R;
 
-public class UserLoginActivity extends Activity implements GooglePlayServicesClient.ConnectionCallbacks,
+public class UserLoginActivity extends QuezzleBaseActivity implements GooglePlayServicesClient.ConnectionCallbacks,
 		GooglePlayServicesClient.OnConnectionFailedListener {
 
 	private SignInButton loginButton;

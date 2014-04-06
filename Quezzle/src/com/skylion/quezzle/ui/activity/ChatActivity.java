@@ -1,11 +1,9 @@
 package com.skylion.quezzle.ui.activity;
 
-import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import com.skylion.quezzle.R;
 import com.skylion.quezzle.ui.fragment.ChatFragment;
 
@@ -16,7 +14,7 @@ import com.skylion.quezzle.ui.fragment.ChatFragment;
  * Time: 23:51
  * To change this template use File | Settings | File Templates.
  */
-public class ChatActivity extends Activity {
+public class ChatActivity extends QuezzleBaseActivity {
 	private static final String CHAT_KEY_EXTRA = "com.skylion.quezzle.ui.activity.ChatActivity.CHAT_KEY";
 
     public static void start(Context context, String chatKey) {

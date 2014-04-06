@@ -1,6 +1,5 @@
 package com.skylion.quezzle.ui.activity;
 
-import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.*;
 import android.database.Cursor;
@@ -22,7 +21,7 @@ import com.skylion.quezzle.service.NetworkService;
 import com.skylion.quezzle.ui.adapter.ChatListAdapter;
 import com.skylion.quezzle.utility.Constants;
 
-public class ChatsListActivity extends Activity implements View.OnClickListener, LoaderManager.LoaderCallbacks<Cursor> {
+public class ChatsListActivity extends QuezzleBaseActivity implements View.OnClickListener, LoaderManager.LoaderCallbacks<Cursor> {
 	private static final int LOAD_CHATS_ID = 0;
 
     private boolean firstLoad = true;
