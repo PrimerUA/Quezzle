@@ -12,6 +12,7 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -92,7 +93,8 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 		super.onResume();
 
 		getActivity().registerReceiver(receiver, new IntentFilter(NetworkService.NEW_MESSAGE_ACTION));
-        getActivity().registerReceiver(sendMessageNotificationReceiver, new IntentFilter(SendMessageNotification.ACTION));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(sendMessageNotificationReceiver,
+                                                                          new IntentFilter(SendMessageNotification.ACTION));
 	}
 
 	@Override
@@ -100,7 +102,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 		super.onPause();
 
 		getActivity().unregisterReceiver(receiver);
-        getActivity().unregisterReceiver(sendMessageNotificationReceiver);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(sendMessageNotificationReceiver);
 	}
 
 	@Override

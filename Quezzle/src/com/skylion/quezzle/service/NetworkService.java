@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import com.skylion.quezzle.R;
 import com.skylion.quezzle.contentprovider.QuezzleProviderContract;
 import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
@@ -117,12 +118,12 @@ public class NetworkService extends IntentService {
             @Override
             public void onSuccess() {
                 //notify UI about success creating chat
-                sendBroadcast(SendMessageNotification.createSuccessResult());
+                sendLocalBroadcast(SendMessageNotification.createSuccessResult());
             }
 
             @Override
             public void onError(String message) {
-                sendBroadcast(SendMessageNotification.createErrorsResult(message));
+                sendLocalBroadcast(SendMessageNotification.createErrorsResult(message));
             }
         });
 	}
@@ -133,13 +134,13 @@ public class NetworkService extends IntentService {
             @Override
             public void onSuccess() {
                 //notify UI about success creating chat
-                sendBroadcast(CreateChatNotification.createSuccessResult());
+                sendLocalBroadcast(CreateChatNotification.createSuccessResult());
             }
 
             @Override
             public void onError(String message) {
                 //notify UI about error while creating chat
-                sendBroadcast(CreateChatNotification.createErrorsResult(message));
+                sendLocalBroadcast(CreateChatNotification.createErrorsResult(message));
             }
         });
     }
@@ -194,13 +195,13 @@ public class NetworkService extends IntentService {
             @Override
             public void onSuccess() {
                 //notify UI about success reloading chats
-                sendBroadcast(ReloadChatListNotification.createSuccessResult());
+                sendLocalBroadcast(ReloadChatListNotification.createSuccessResult());
             }
 
             @Override
             public void onError(String message) {
                 //notify UI about error while reloading chats
-                sendBroadcast(ReloadChatListNotification.createErrorsResult(message));
+                sendLocalBroadcast(ReloadChatListNotification.createErrorsResult(message));
             }
         });
     }
@@ -243,4 +244,8 @@ public class NetworkService extends IntentService {
 			cursor.close();
 		}
 	}
+
+    private void sendLocalBroadcast(Intent intent) {
+        LocalBroadcastManager.getInstance(NetworkService.this).sendBroadcast(intent);
+    }
 }

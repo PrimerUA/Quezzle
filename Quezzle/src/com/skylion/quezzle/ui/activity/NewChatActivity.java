@@ -2,6 +2,7 @@ package com.skylion.quezzle.ui.activity;
 
 import android.content.*;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -47,13 +48,13 @@ public class NewChatActivity extends QuezzleBaseActivity {
     @Override
     public void onResume() {
         super.onResume();
-        registerReceiver(receiver, new IntentFilter(CreateChatNotification.ACTION));
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, new IntentFilter(CreateChatNotification.ACTION));
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        unregisterReceiver(receiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
     }
 
 	private void sendMessage() {

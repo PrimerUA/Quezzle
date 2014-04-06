@@ -4,6 +4,7 @@ import android.app.LoaderManager;
 import android.content.*;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -75,13 +76,13 @@ public class ChatsListActivity extends QuezzleBaseActivity implements View.OnCli
     @Override
     public void onResume() {
         super.onResume();
-        registerReceiver(receiver, new IntentFilter(ReloadChatListNotification.ACTION));
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, new IntentFilter(ReloadChatListNotification.ACTION));
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        unregisterReceiver(receiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
     }
 
 	private void reloadChatList() {
