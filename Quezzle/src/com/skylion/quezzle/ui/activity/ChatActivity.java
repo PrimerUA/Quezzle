@@ -5,6 +5,7 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import com.skylion.quezzle.R;
 import com.skylion.quezzle.ui.fragment.ChatFragment;
 
@@ -44,6 +45,22 @@ public class ChatActivity extends Activity {
             } finally {
                 transaction.commit();
             }
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        //get chat key from extra
+        String chatKey = intent.getStringExtra(CHAT_KEY_EXTRA);
+
+        //show new fragment
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        try {
+            transaction.replace(R.id.fragment_container, ChatFragment.newInstance(chatKey));
+        } finally {
+            transaction.commit();
         }
     }
 }
