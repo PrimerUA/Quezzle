@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
 import com.skylion.quezzle.datastorage.table.MessageTable;
+import com.skylion.quezzle.datastorage.table.UserTable;
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,7 +16,7 @@ import com.skylion.quezzle.datastorage.table.MessageTable;
  */
 public class QuezzleSQLStorage extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "quezzle.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     public QuezzleSQLStorage(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -26,6 +27,7 @@ public class QuezzleSQLStorage extends SQLiteOpenHelper {
         //create DB structure
         db.execSQL(ChatPlaceTable.CREATE_TABLE_SQL);
         db.execSQL(MessageTable.CREATE_TABLE_SQL);
+        db.execSQL(UserTable.CREATE_TABLE_SQL);
     }
 
     @Override
@@ -33,6 +35,7 @@ public class QuezzleSQLStorage extends SQLiteOpenHelper {
         //Delete old tables
         db.execSQL(ChatPlaceTable.DROP_TABLE_SQL);
         db.execSQL(MessageTable.DROP_TABLE_SQL);
+        db.execSQL(UserTable.DROP_TABLE_SQL);
 
         //create new tables
         onCreate(db);

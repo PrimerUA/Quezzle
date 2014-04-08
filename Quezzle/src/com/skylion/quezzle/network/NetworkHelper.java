@@ -6,15 +6,17 @@ import android.net.Uri;
 import android.util.Log;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
+import com.parse.ParseUser;
 import com.skylion.quezzle.contentprovider.QuezzleProviderContract;
-import com.skylion.quezzle.datamodel.ChatMessage;
+import com.skylion.quezzle.datamodel.Message;
 import com.skylion.quezzle.datamodel.ChatPlace;
+import com.skylion.quezzle.datamodel.QuezzleUserMetadata;
 import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
 import com.skylion.quezzle.datastorage.table.MessageTable;
+import com.skylion.quezzle.datastorage.table.UserTable;
 import com.skylion.quezzle.utility.Constants;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -74,8 +76,10 @@ public abstract class NetworkHelper {
                                           Date lastMessageDate, ContentResolver contentResolver,
                                           OnResultListener listener) {
         int createdCount = 0;
-        ParseQuery<ChatMessage> query = ParseQuery.getQuery(ChatMessage.class);
-        query.whereEqualTo(ChatMessage.CHAT_ID_FIELD, chatKey);
+        Map<String, ContentValues> users = new HashMap<String, ContentValues>();
+        ParseQuery<Message> query = ParseQuery.getQuery(Message.class);
+        query.include(Message.AUTHOR_FIELD);
+        query.whereEqualTo(Message.CHAT_ID_FIELD, chatKey);
         query.addAscendingOrder("updatedAt");
         if (lastMessageDate != null) {
             query.whereGreaterThan("updatedAt", lastMessageDate);
@@ -86,22 +90,40 @@ public abstract class NetworkHelper {
             boolean hasMoreData = true;
             while (hasMoreData) {
                 query.setSkip(offset);
-                List<ChatMessage> messages = query.find();
+                List<Message> messages = query.find();
 
                 if (!messages.isEmpty()) {
+                    users.clear();
                     ContentValues[] values = new ContentValues[messages.size()];
 
                     for (int i = 0; i < messages.size(); ++i) {
-                        ChatMessage message = messages.get(i);
+                        Message message = messages.get(i);
+                        ParseUser author = message.getAuthor();
+
+                        if (!users.containsKey(author.getObjectId())) {
+                            ContentValues contentValues = new ContentValues();
+                            contentValues.put(UserTable.OBJECT_ID_COLUMN, author.getObjectId());
+                            contentValues.put(UserTable.CREATED_AT_COLUMN, author.getCreatedAt().getTime());
+                            contentValues.put(UserTable.UPDATED_AT_COLUMN, author.getUpdatedAt().getTime());
+                            contentValues.put(UserTable.USERNAME_COLUMN, author.getUsername());
+                            contentValues.put(UserTable.AVATAR_COLUMN, author.getString(QuezzleUserMetadata.AVATAR_URL));
+                            users.put(author.getObjectId(), contentValues);
+                        }
 
                         values[i] = new ContentValues(6);
                         values[i].put(MessageTable.OBJECT_ID_COLUMN, message.getObjectId());
                         values[i].put(MessageTable.CREATED_AT_COLUMN, message.getCreatedAt().getTime());
                         values[i].put(MessageTable.UPDATED_AT_COLUMN, message.getUpdatedAt().getTime());
                         values[i].put(MessageTable.MESSAGE_COLUMN, message.getMessage());
-                        values[i].put(MessageTable.AUTHOR_COLUMN, message.getAuthor());
+                        values[i].put(MessageTable.AUTHOR_ID_COLUMN, author.getObjectId());
                     }
 
+                    //insert users
+                    Collection<ContentValues> usersCollection = users.values();
+                    ContentValues[] usersValues = new ContentValues[usersCollection.size()];
+                    contentResolver.bulkInsert(QuezzleProviderContract.USERS_URI, usersCollection.toArray(usersValues));
+
+                    //insert messages
                     createdCount += contentResolver.bulkInsert(messagesUri, values);
                 }
 
@@ -120,11 +142,11 @@ public abstract class NetworkHelper {
         return createdCount;
     }
 
-    public static void sendMessage(String message, String chatId, String author, OnResultListener listener) {
-        ChatMessage chatMessage = new ChatMessage();
+    public static void sendMessage(String message, String chatId, String authorId, OnResultListener listener) {
+        Message chatMessage = new Message();
         chatMessage.setMessage(message);
         chatMessage.setChatId(chatId);
-        chatMessage.setAuthor(author);
+        chatMessage.setAuthor(ParseUser.createWithoutData(ParseUser.class, authorId));
 
         try {
             chatMessage.save();

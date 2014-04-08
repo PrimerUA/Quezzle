@@ -9,7 +9,7 @@ import android.widget.CursorAdapter;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.skylion.quezzle.R;
-import com.skylion.quezzle.datastorage.table.MessageTable;
+import com.skylion.quezzle.datastorage.table.FullMessageTable;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -19,14 +19,17 @@ import java.util.Date;
  * this template use File | Settings | File Templates.
  */
 public class MessageListAdapter extends CursorAdapter {
-    public static final String[] PROJECTION = new String[] {MessageTable._ID, MessageTable.UPDATED_AT_COLUMN,
-                                                            MessageTable.MESSAGE_COLUMN, MessageTable.AUTHOR_COLUMN };
+    public static final String[] PROJECTION = new String[] {FullMessageTable._ID, FullMessageTable.UPDATED_AT_COLUMN,
+                                                            FullMessageTable.MESSAGE_COLUMN, FullMessageTable.AUTHOR_ID_COLUMN,
+                                                            FullMessageTable.USERNAME_COLUMN, FullMessageTable.USER_AVATAR_COLUMN};
 	private static final String DATE_FORMAT_PATTERN = "[dd.MM.yyyy HH:mm:ss]";
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_PATTERN);
 
-	private int authorColumnIndex = -1;
+	private int authorIdColumnIndex = -1;
 	private int messageColumnIndex = -1;
 	private int updatedAtColumnIndex = -1;
+    private int authorNameColumnIndex = -1;
+    private int authorAvatarColumnIndex = -1;
 
 	public MessageListAdapter(Context context, int flags) {
 		super(context, null, flags);
@@ -58,11 +61,11 @@ public class MessageListAdapter extends CursorAdapter {
 		}
 
 		Date date = new Date(cursor.getLong(updatedAtColumnIndex));
-		holder.author.setText(cursor.getString(authorColumnIndex));
+		holder.author.setText(cursor.getString(authorNameColumnIndex));
 		holder.date.setText(DATE_FORMAT.format(date));
 		holder.text.setText(cursor.getString(messageColumnIndex));
 
-		if (cursor.getPosition() % 2 == 0) {
+        if (cursor.getPosition() % 2 == 0) {
 			holder.content.setBackgroundResource(R.drawable.item);
 		} else {
 			holder.content.setBackgroundResource(R.drawable.item_my);
@@ -74,9 +77,11 @@ public class MessageListAdapter extends CursorAdapter {
 	}
 
 	private void calculateColumnIndexes(Cursor cursor) {
-		authorColumnIndex = cursor.getColumnIndex(MessageTable.AUTHOR_COLUMN);
-		messageColumnIndex = cursor.getColumnIndex(MessageTable.MESSAGE_COLUMN);
-		updatedAtColumnIndex = cursor.getColumnIndex(MessageTable.UPDATED_AT_COLUMN);
+		authorIdColumnIndex = cursor.getColumnIndex(FullMessageTable.AUTHOR_ID_COLUMN);
+		messageColumnIndex = cursor.getColumnIndex(FullMessageTable.MESSAGE_COLUMN);
+		updatedAtColumnIndex = cursor.getColumnIndex(FullMessageTable.UPDATED_AT_COLUMN);
+        authorNameColumnIndex = cursor.getColumnIndex(FullMessageTable.USERNAME_COLUMN);
+        authorAvatarColumnIndex = cursor.getColumnIndex(FullMessageTable.USER_AVATAR_COLUMN);
 	}
 
 	private static class ViewHolder {

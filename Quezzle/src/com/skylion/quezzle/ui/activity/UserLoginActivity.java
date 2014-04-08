@@ -16,6 +16,7 @@ import com.parse.ParseException;
 import com.parse.ParseUser;
 import com.parse.SignUpCallback;
 import com.skylion.quezzle.R;
+import com.skylion.quezzle.datamodel.QuezzleUserMetadata;
 
 public class UserLoginActivity extends QuezzleBaseActivity implements GooglePlayServicesClient.ConnectionCallbacks,
 		GooglePlayServicesClient.OnConnectionFailedListener {
@@ -94,6 +95,7 @@ public class UserLoginActivity extends QuezzleBaseActivity implements GooglePlay
 			user.setUsername(plusClient.getCurrentPerson().getDisplayName());
 			user.setPassword("my pass");
 			user.setEmail(plusClient.getAccountName());
+            user.put(QuezzleUserMetadata.AVATAR_URL, plusClient.getCurrentPerson().getImage().getUrl());
 
 			user.signUpInBackground(new SignUpCallback() {
 				public void done(ParseException e) {
@@ -102,17 +104,17 @@ public class UserLoginActivity extends QuezzleBaseActivity implements GooglePlay
 						finish();
 					} else {
 						ParseUser.logInInBackground(plusClient.getCurrentPerson().getDisplayName(), "my pass", new LogInCallback() {
-							public void done(ParseUser user, ParseException e) {
-								if (user != null) {
-									progressDialog.dismiss();
-									Toast.makeText(UserLoginActivity.this, getString(R.string.welcome), Toast.LENGTH_SHORT).show();
-									finish();
-								} else {
-									progressDialog.dismiss();
-									Toast.makeText(UserLoginActivity.this, "Error code: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-								}
-							}
-						});
+                            public void done(ParseUser user, ParseException e) {
+                                if (user != null) {
+                                    progressDialog.dismiss();
+                                    Toast.makeText(UserLoginActivity.this, getString(R.string.welcome), Toast.LENGTH_SHORT).show();
+                                    finish();
+                                } else {
+                                    progressDialog.dismiss();
+                                    Toast.makeText(UserLoginActivity.this, "Error code: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
 					}
 				}
 			});

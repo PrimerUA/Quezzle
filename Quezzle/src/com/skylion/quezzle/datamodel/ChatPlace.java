@@ -17,6 +17,7 @@ public class ChatPlace extends ParseObject {
     public static final String DESCRIPTION_FIELD = "description";
 
     public ChatPlace() {
+        super();
     }
 
     public String getName() {

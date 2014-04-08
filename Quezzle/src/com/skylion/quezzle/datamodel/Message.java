@@ -2,6 +2,7 @@ package com.skylion.quezzle.datamodel;
 
 import com.parse.ParseClassName;
 import com.parse.ParseObject;
+import com.parse.ParseUser;
 
 /**
  * Created with IntelliJ IDEA.
@@ -10,13 +11,14 @@ import com.parse.ParseObject;
  * Time: 22:40
  * To change this template use File | Settings | File Templates.
  */
-@ParseClassName("ChatMessage")
-public class ChatMessage extends ParseObject {
+@ParseClassName("Message")
+public class Message extends ParseObject {
     public static final String MESSAGE_FIELD = "message";
     public static final String AUTHOR_FIELD = "author";
     public static final String CHAT_ID_FIELD = "chatId";
 
-    public ChatMessage() {
+    public Message() {
+        super();
     }
 
     public String getMessage() {
@@ -27,11 +29,11 @@ public class ChatMessage extends ParseObject {
         put(MESSAGE_FIELD, message);
     }
 
-    public String getAuthor() {
-        return getString(AUTHOR_FIELD);
+    public ParseUser getAuthor() {
+        return getParseUser(AUTHOR_FIELD);
     }
 
-    public void setAuthor(String author) {
+    public void setAuthor(ParseUser author) {
         put(AUTHOR_FIELD, author);
     }
 

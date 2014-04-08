@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,6 +29,7 @@ import com.parse.ParseUser;
 import com.skylion.quezzle.R;
 import com.skylion.quezzle.contentprovider.QuezzleProviderContract;
 import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
+import com.skylion.quezzle.datastorage.table.FullMessageTable;
 import com.skylion.quezzle.datastorage.table.MessageTable;
 import com.skylion.quezzle.notification.SendMessageNotification;
 import com.skylion.quezzle.service.NetworkService;
@@ -38,7 +40,7 @@ import com.skylion.quezzle.ui.adapter.MessageListAdapter;
  * this template use File | Settings | File Templates.
  */
 public class ChatFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
-	private static final String CHAT_MESSAGES_ORDER = MessageTable.UPDATED_AT_COLUMN + " DESC";
+	private static final String CHAT_MESSAGES_ORDER = FullMessageTable.UPDATED_AT_COLUMN + " DESC";
 	private static final int LOAD_CHAT_INFO_ID = 0;
 	private static final int LOAD_MESSAGES_ID = 1;
 	private static final String CHAT_KEY_ARGUMENT = "com.skylion.quezzle.ui.fragment.ChatFragment.CHAT_KEY";
@@ -138,7 +140,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 		if (!TextUtils.isEmpty(text)) {
 			ParseUser user = ParseUser.getCurrentUser();
             if (user != null) {
-                NetworkService.sendMessage(getActivity(), getChatKey(), text, user.getUsername());
+                NetworkService.sendMessage(getActivity(), getChatKey(), text, user.getObjectId());
             } else {
                 Toast.makeText(getActivity(), R.string.not_logged_id, Toast.LENGTH_LONG).show();
             }
@@ -183,7 +185,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
             case LOAD_CHAT_INFO_ID :
                 setChatInfo(cursor);
                 break;
-            case LOAD_MESSAGES_ID:
+            case LOAD_MESSAGES_ID :
                 if (firstLoad && cursor.getCount() == 0) {
                     // try to load chat messages
                     NetworkService.reloadChat(getActivity(), getChatKey());
@@ -198,7 +200,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 	@Override
 	public void onLoaderReset(Loader<Cursor> loader) {
 		switch (loader.getId()) {
-            case LOAD_MESSAGES_ID:
+            case LOAD_MESSAGES_ID :
                 messageListAdapter.swapCursor(null);
                 break;
 		}

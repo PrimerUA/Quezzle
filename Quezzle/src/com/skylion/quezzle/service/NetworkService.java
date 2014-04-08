@@ -12,6 +12,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import com.skylion.quezzle.R;
 import com.skylion.quezzle.contentprovider.QuezzleProviderContract;
 import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
+import com.skylion.quezzle.datastorage.table.FullMessageTable;
 import com.skylion.quezzle.datastorage.table.MessageTable;
 import com.skylion.quezzle.network.NetworkHelper;
 import com.skylion.quezzle.notification.CreateChatNotification;
@@ -60,12 +61,12 @@ public class NetworkService extends IntentService {
         context.startService(intent);
     }
 
-    public static void sendMessage(Context context, String chatKey, String message, String author) {
+    public static void sendMessage(Context context, String chatKey, String message, String authorId) {
 		Intent intent = new Intent(context, NetworkService.class);
 		intent.putExtra(ACTION_EXTRA, ACTION_SEND_MESSAGE);
 		intent.putExtra(CHAT_KEY_EXTRA, chatKey);
 		intent.putExtra(MESSAGE_EXTRA, message);
-		intent.putExtra(AUTHOR_EXTRA, author);
+		intent.putExtra(AUTHOR_EXTRA, authorId);
 
 		context.startService(intent);
 	}
@@ -219,10 +220,10 @@ public class NetworkService extends IntentService {
 
 	private Date getChatLastMessageDate(String chatKey) {
 		Cursor cursor = getContentResolver().query(QuezzleProviderContract.getMessagesUri(chatKey),
-				new String[] { MessageTable.UPDATED_AT_COLUMN }, null, null, MessageTable.UPDATED_AT_COLUMN + " DESC");
+				new String[] { FullMessageTable.UPDATED_AT_COLUMN }, null, null, FullMessageTable.UPDATED_AT_COLUMN + " DESC");
 		try {
 			if (cursor.moveToFirst()) {
-				return new Date(cursor.getLong(cursor.getColumnIndex(MessageTable.UPDATED_AT_COLUMN)));
+				return new Date(cursor.getLong(cursor.getColumnIndex(FullMessageTable.UPDATED_AT_COLUMN)));
 			} else {
 				return null;
 			}
