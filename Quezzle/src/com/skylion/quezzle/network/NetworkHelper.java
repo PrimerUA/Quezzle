@@ -80,7 +80,7 @@ public abstract class NetworkHelper {
         ParseQuery<Message> query = ParseQuery.getQuery(Message.class);
         query.include(Message.AUTHOR_FIELD);
         query.whereEqualTo(Message.CHAT_ID_FIELD, chatKey);
-        query.addAscendingOrder("updatedAt");
+        query.addDescendingOrder("updatedAt");
         if (lastMessageDate != null) {
             query.whereGreaterThan("updatedAt", lastMessageDate);
         }
