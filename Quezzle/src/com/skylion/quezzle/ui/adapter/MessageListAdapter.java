@@ -6,8 +6,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.ImageScaleType;
+import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
 import com.skylion.quezzle.R;
 import com.skylion.quezzle.datastorage.table.FullMessageTable;
 
@@ -31,8 +36,20 @@ public class MessageListAdapter extends CursorAdapter {
     private int authorNameColumnIndex = -1;
     private int authorAvatarColumnIndex = -1;
 
+    private DisplayImageOptions options;
+
 	public MessageListAdapter(Context context, int flags) {
 		super(context, null, flags);
+
+        options = new DisplayImageOptions.Builder()
+//                .showStubImage(R.drawable.stub_image)
+//                .showImageForEmptyUrl(R.drawable.image_for_empty_url)
+                .imageScaleType(ImageScaleType.EXACTLY)
+                .resetViewBeforeLoading(true)
+                .cacheInMemory(true)
+                .cacheOnDisc(true)
+                .displayer(new RoundedBitmapDisplayer(Integer.MAX_VALUE))
+                .build();
 	}
 
 	@Override
@@ -45,6 +62,7 @@ public class MessageListAdapter extends CursorAdapter {
 		ViewHolder holder = new ViewHolder();
 		holder.content = (RelativeLayout) view.findViewById(R.id.contentLayout);
 		holder.author = (TextView) view.findViewById(R.id.message_author);
+        holder.avatar = (ImageView)view.findViewById(R.id.avatar);
 		holder.date = (TextView) view.findViewById(R.id.message_date);
 		holder.text = (TextView) view.findViewById(R.id.message_text);
 		view.setTag(holder);
@@ -62,6 +80,7 @@ public class MessageListAdapter extends CursorAdapter {
 
 		Date date = new Date(cursor.getLong(updatedAtColumnIndex));
 		holder.author.setText(cursor.getString(authorNameColumnIndex));
+        ImageLoader.getInstance().displayImage(cursor.getString(authorAvatarColumnIndex), holder.avatar, options);
 		holder.date.setText(DATE_FORMAT.format(date));
 		holder.text.setText(cursor.getString(messageColumnIndex));
 
@@ -86,7 +105,8 @@ public class MessageListAdapter extends CursorAdapter {
 
 	private static class ViewHolder {
 		public TextView author;
-		public TextView date;
+        public ImageView avatar;
+        public TextView date;
 		public TextView text;
 		public RelativeLayout content;
 	}
