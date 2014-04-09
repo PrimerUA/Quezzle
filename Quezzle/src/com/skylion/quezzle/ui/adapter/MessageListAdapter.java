@@ -42,9 +42,9 @@ public class MessageListAdapter extends CursorAdapter {
 		super(context, null, flags);
 
         options = new DisplayImageOptions.Builder()
-//                .showStubImage(R.drawable.stub_image)
+//                .showImageOnLoading(R.drawable.stub_image)
 //                .showImageForEmptyUrl(R.drawable.image_for_empty_url)
-                .imageScaleType(ImageScaleType.EXACTLY)
+                .imageScaleType(ImageScaleType.EXACTLY_STRETCHED)
                 .resetViewBeforeLoading(true)
                 .cacheInMemory(true)
                 .cacheOnDisc(true)
