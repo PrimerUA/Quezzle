@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -42,7 +41,7 @@ public class MessageListAdapter extends CursorAdapter {
 	public MessageListAdapter(Context context, int flags) {
 		super(context, null, flags);
 
-		options = new DisplayImageOptions.Builder().showImageOnLoading(android.R.color.darker_gray).showImageForEmptyUri(R.drawable.def_icon)
+		options = new DisplayImageOptions.Builder().showImageOnLoading(R.drawable.def_icon).showImageForEmptyUri(R.drawable.def_icon)
 				.imageScaleType(ImageScaleType.EXACTLY_STRETCHED).resetViewBeforeLoading(true).cacheInMemory(true).cacheOnDisc(true)
 				.displayer(new RoundedBitmapDisplayer(Integer.MAX_VALUE)).build();
 	}

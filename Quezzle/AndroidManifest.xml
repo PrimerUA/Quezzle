@@ -24,7 +24,8 @@
     <application
         android:name="QuezzleApplication"
         android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name" >
+        android:label="@string/app_name"
+        android:theme="@style/Theme.AppCompat" >
         <activity
             android:name=".ui.activity.ChatsListActivity"
             android:label="@string/app_name"
@@ -49,6 +50,9 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".ui.activity.UserLoginActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.activity.UserProfileActivity"
             android:screenOrientation="portrait" />
 
         <provider

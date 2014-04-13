@@ -4,6 +4,7 @@
     <string name="action_refresh">Обновить</string>
     <string name="title_activity_new_chat">Создать новый чат</string>
     <string name="title_activity_auth">Вход</string>
+    <string name="title_activity_user_profile">Профиль</string>
     <string name="action_settings">Настройки</string>
     <string name="send">Отправить</string>
     <string name="subtitle">Venues and events chatroom</string>
@@ -13,6 +14,7 @@
     <string name="loading_auth">Авторизация</string>
     <string name="loading_chats">Загрузка чатов</string>
     <string name="loading_messages">Загрузка сообщений</string>
+    <string name="loading_new_chat">Создани нового чата</string>
     <string name="empty_fields">Заполните пустые поля</string>
     <string name="welcome">Добро пожаловать в Quezzle!</string>
     <string name="chat_has_new_message">Новое сообщение в чате \"%1$s\"</string>
@@ -21,4 +23,5 @@
     <string name="error_sending_message">Ошибка отправки сообщения:\n%1$s</string>
     <string name="not_logged_id">Вы не авторизировались</string>
     <string name="empty_message">Текст сообщения пуст</string>
+    <string name="new_chat_created">Вы создали новый чат!</string>
 </resources>

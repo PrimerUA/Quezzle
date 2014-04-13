@@ -13,7 +13,6 @@ import com.skylion.quezzle.R;
 import com.skylion.quezzle.contentprovider.QuezzleProviderContract;
 import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
 import com.skylion.quezzle.datastorage.table.FullMessageTable;
-import com.skylion.quezzle.datastorage.table.MessageTable;
 import com.skylion.quezzle.network.NetworkHelper;
 import com.skylion.quezzle.notification.CreateChatNotification;
 import com.skylion.quezzle.notification.ReloadChatListNotification;
@@ -44,7 +43,7 @@ public class NetworkService extends IntentService {
 	private static final int ACTION_REFRESH_CHAT = 2;
     private static final int ACTION_CREATE_CHAT = 3;
     private static final int ACTION_RELOAD_CHAT_LIST = 4;
-
+    
     public static void reloadChatList(Context context) {
         Intent intent = new Intent(context, NetworkService.class);
         intent.putExtra(ACTION_EXTRA, ACTION_RELOAD_CHAT_LIST);

@@ -25,6 +25,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.parse.ParseUser;
@@ -34,6 +35,7 @@ import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
 import com.skylion.quezzle.datastorage.table.FullMessageTable;
 import com.skylion.quezzle.notification.SendMessageNotification;
 import com.skylion.quezzle.service.NetworkService;
+import com.skylion.quezzle.ui.activity.UserProfileActivity;
 import com.skylion.quezzle.ui.adapter.MessageListAdapter;
 
 /**
@@ -45,7 +47,7 @@ public class ChatFragment extends Fragment implements OnItemClickListener, Loade
 	private static final int LOAD_CHAT_INFO_ID = 0;
 	private static final int LOAD_MESSAGES_ID = 1;
 	private static final String CHAT_KEY_ARGUMENT = "com.skylion.quezzle.ui.fragment.ChatFragment.CHAT_KEY";
-
+	
     private boolean firstLoad = true;
 
 	public static ChatFragment newInstance(String chatKey) {
@@ -61,6 +63,7 @@ public class ChatFragment extends Fragment implements OnItemClickListener, Loade
 	private ImageView send;
 	private EditText message;
 	private ListView messageList;
+	private ProgressBar progressBar;
 	private MessageListAdapter messageListAdapter;
 
 	private NewMessageEventReceiver receiver = new NewMessageEventReceiver();
@@ -83,6 +86,7 @@ public class ChatFragment extends Fragment implements OnItemClickListener, Loade
 				sendMessage();
 			}
 		});
+		progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar_chatFragment);
 		message = (EditText) rootView.findViewById(R.id.message);
 		messageList = (ListView) rootView.findViewById(R.id.messages_list);
 		messageListAdapter = new MessageListAdapter(getActivity(), MessageListAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
@@ -142,6 +146,7 @@ public class ChatFragment extends Fragment implements OnItemClickListener, Loade
 		if (!TextUtils.isEmpty(text)) {
 			ParseUser user = ParseUser.getCurrentUser();
             if (user != null) {
+            	progressBar.setVisibility(View.VISIBLE);
                 NetworkService.sendMessage(getActivity(), getChatKey(), text, user.getObjectId());
             } else {
                 Toast.makeText(getActivity(), R.string.not_logged_id, Toast.LENGTH_LONG).show();
@@ -214,6 +219,7 @@ public class ChatFragment extends Fragment implements OnItemClickListener, Loade
 			if (getChatKey().equals(intent.getStringExtra(NetworkService.CHAT_KEY_EXTRA))) {
 				setResultCode(Activity.RESULT_OK);
 				abortBroadcast();
+				progressBar.setVisibility(View.GONE);
 			}
 		}
 	}
@@ -230,6 +236,7 @@ public class ChatFragment extends Fragment implements OnItemClickListener, Loade
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		// open user profile
+		progressBar.setVisibility(View.GONE);
+		startActivity(new Intent(getActivity(), UserProfileActivity.class));
 	}
 }
