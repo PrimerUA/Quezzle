@@ -14,23 +14,24 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
+
 import com.parse.ParseUser;
 import com.skylion.quezzle.R;
 import com.skylion.quezzle.contentprovider.QuezzleProviderContract;
 import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
 import com.skylion.quezzle.datastorage.table.FullMessageTable;
-import com.skylion.quezzle.datastorage.table.MessageTable;
 import com.skylion.quezzle.notification.SendMessageNotification;
 import com.skylion.quezzle.service.NetworkService;
 import com.skylion.quezzle.ui.adapter.MessageListAdapter;
@@ -39,7 +40,7 @@ import com.skylion.quezzle.ui.adapter.MessageListAdapter;
  * Created with IntelliJ IDEA. User: Kvest Date: 24.03.14 Time: 23:10 To change
  * this template use File | Settings | File Templates.
  */
-public class ChatFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class ChatFragment extends Fragment implements OnItemClickListener, LoaderManager.LoaderCallbacks<Cursor> {
 	private static final String CHAT_MESSAGES_ORDER = FullMessageTable.UPDATED_AT_COLUMN + " DESC";
 	private static final int LOAD_CHAT_INFO_ID = 0;
 	private static final int LOAD_MESSAGES_ID = 1;
@@ -86,6 +87,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 		messageList = (ListView) rootView.findViewById(R.id.messages_list);
 		messageListAdapter = new MessageListAdapter(getActivity(), MessageListAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
 		messageList.setAdapter(messageListAdapter);
+		messageList.setOnItemClickListener(this);
 
 		return rootView;
 	}
@@ -225,4 +227,9 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
             }
         }
     }
+
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+		// open user profile
+	}
 }
