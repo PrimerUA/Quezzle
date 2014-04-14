@@ -9,14 +9,13 @@ import com.skylion.quezzle.R;
 import com.skylion.quezzle.datamodel.QuezzleUserMetadata;
 
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class UserProfileActivity extends ActionBarActivity implements OnClickListener {
+public class UserProfileActivity extends QuezzleBaseActivity implements OnClickListener {
 	
 	private DisplayImageOptions options;
 	
@@ -46,8 +45,8 @@ public class UserProfileActivity extends ActionBarActivity implements OnClickLis
 
 	@Override
 	public void onClick(View v) {
-		// кнопки деавторизация юзера и смены аватара (если это свой профиль)
-		// кнопка открытия приватного чата (если это чужой профиль)
+		// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
+		// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
 	}
 	
 	@Override
