@@ -24,4 +24,6 @@
     <string name="not_logged_id">You are not logged in</string>
     <string name="empty_message">The message is empty</string>
     <string name="new_chat_created">You have created a new chat!</string>
+    <string name="select_picture">Select Picture</string>
+    <string name="save">Save</string>
 </resources>

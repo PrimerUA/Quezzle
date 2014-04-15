@@ -15,45 +15,27 @@ import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class UserProfileActivity extends QuezzleBaseActivity implements OnClickListener {
-	
-	private DisplayImageOptions options;
-	
-	private ImageView avatarView;
-	private TextView nameView;
-
+public class UserProfileActivity extends QuezzleBaseActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.profile_screen);
+		setContentView(R.layout.user_profile);
 		
 		getActionBar().setTitle(R.string.title_activity_user_profile);
 		getActionBar().setHomeButtonEnabled(true);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		getActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.blue));
-		
-		options = new DisplayImageOptions.Builder().showImageOnLoading(R.drawable.def_icon).showImageForEmptyUri(R.drawable.def_icon)
-				.imageScaleType(ImageScaleType.EXACTLY_STRETCHED).resetViewBeforeLoading(true).cacheInMemory(true).cacheOnDisc(true)
-				.displayer(new RoundedBitmapDisplayer(Integer.MAX_VALUE)).build();
-		
-		avatarView = (ImageView) findViewById(R.id.avatarView_profileScreen);
-		nameView = (TextView) findViewById(R.id.nameText_profileScreen);
-		
-		ImageLoader.getInstance().displayImage(ParseUser.getCurrentUser().getString(QuezzleUserMetadata.AVATAR_URL), avatarView, options);
-		nameView.setText(ParseUser.getCurrentUser().getUsername());
-	}
-
-	@Override
-	public void onClick(View v) {
-		// ������ ������������� ����� � ����� ������� (���� ��� ���� �������)
-		// ������ �������� ���������� ���� (���� ��� ����� �������)
 	}
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		int id = item.getItemId();
-		finish();
-		return super.onOptionsItemSelected(item);
+		switch (item.getItemId()) {
+            case android.R.id.home :
+                finish();
+                return true;
+            default :
+                return super.onOptionsItemSelected(item);
+        }
 	}
 
 }

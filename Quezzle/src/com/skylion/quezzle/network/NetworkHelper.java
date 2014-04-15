@@ -2,9 +2,11 @@ package com.skylion.quezzle.network;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
 import com.parse.ParseException;
+import com.parse.ParseFile;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.skylion.quezzle.contentprovider.QuezzleProviderContract;
@@ -16,6 +18,7 @@ import com.skylion.quezzle.datastorage.table.MessageTable;
 import com.skylion.quezzle.datastorage.table.UserTable;
 import com.skylion.quezzle.utility.Constants;
 
+import java.io.ByteArrayOutputStream;
 import java.util.*;
 
 /**
@@ -69,6 +72,26 @@ public abstract class NetworkHelper {
             if (listener != null) {
                 listener.onError(pe.getLocalizedMessage());
             }
+        }
+    }
+
+    public static String uploadImage(Bitmap bitmap, String fileName) {
+        //get raw data of the image
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        byte[] data = stream.toByteArray();
+        try {
+            stream.close();
+        } catch (Exception e) {};
+
+        ParseFile parseFile = new ParseFile(fileName, data);
+        try {
+            parseFile.save();
+            return parseFile.getUrl();
+        } catch (ParseException pe) {
+            Log.e(Constants.LOG_TAG, "Error updating image: " + pe.getMessage());
+
+            return null;
         }
     }
 

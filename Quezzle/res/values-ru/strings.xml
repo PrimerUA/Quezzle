@@ -24,4 +24,6 @@
     <string name="not_logged_id">Вы не авторизировались</string>
     <string name="empty_message">Текст сообщения пуст</string>
     <string name="new_chat_created">Вы создали новый чат!</string>
+    <string name="select_picture">Выбор картинки</string>
+    <string name="save">Сохранить</string>
 </resources>

@@ -5,12 +5,19 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.TextUtils;
+import android.util.Log;
+import com.parse.ParseException;
+import com.parse.ParseUser;
 import com.skylion.quezzle.R;
 import com.skylion.quezzle.contentprovider.QuezzleProviderContract;
+import com.skylion.quezzle.datamodel.QuezzleUserMetadata;
 import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
 import com.skylion.quezzle.datastorage.table.FullMessageTable;
 import com.skylion.quezzle.network.NetworkHelper;
@@ -18,7 +25,9 @@ import com.skylion.quezzle.notification.CreateChatNotification;
 import com.skylion.quezzle.notification.ReloadChatListNotification;
 import com.skylion.quezzle.notification.SendMessageNotification;
 import com.skylion.quezzle.ui.activity.ChatActivity;
+import com.skylion.quezzle.utility.Constants;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Date;
 
 /**
@@ -26,7 +35,10 @@ import java.util.Date;
  * this template use File | Settings | File Templates.
  */
 public class NetworkService extends IntentService {
-	public static final String NEW_MESSAGE_ACTION = "com.skylion.quezzle.service.NetworkService.NEW_MESSAGE_ACTION";
+    private static final String AVATAR_PREFIX = "avatar_";
+    private static final String AVATAR_POSTFIX = ".png";
+
+    public static final String NEW_MESSAGE_ACTION = "com.skylion.quezzle.service.NetworkService.NEW_MESSAGE_ACTION";
     public static final String CHAT_KEY_EXTRA = "com.skylion.quezzle.service.NetworkService.CHAT_KEY";
 
 	private static final String ACTION_EXTRA = "com.skylion.quezzle.service.NetworkService.ACTION";
@@ -35,6 +47,7 @@ public class NetworkService extends IntentService {
 	private static final String AUTHOR_EXTRA = "com.skylion.quezzle.service.NetworkService.AUTHOR";
 	private static final String MESSAGE_EXTRA = "com.skylion.quezzle.service.NetworkService.MESSAGE";
 	private static final String WITH_NOTIFICATION_EXTRA = "com.skylion.quezzle.service.NetworkService.WITH_NOTIFICATION";
+    private static final String AVATAR_FILE_PATH_EXTRA = "com.skylion.quezzle.service.NetworkService.AVATAR_AVATAR_FILE_PATH";
 
 	private static final int NEW_MESSAGE_NOTIFICATION_ID = 1;
 
@@ -43,6 +56,7 @@ public class NetworkService extends IntentService {
 	private static final int ACTION_REFRESH_CHAT = 2;
     private static final int ACTION_CREATE_CHAT = 3;
     private static final int ACTION_RELOAD_CHAT_LIST = 4;
+    private static final int ACTION_UPDATE_USER_PROFILE = 5;
     
     public static void reloadChatList(Context context) {
         Intent intent = new Intent(context, NetworkService.class);
@@ -87,7 +101,15 @@ public class NetworkService extends IntentService {
 		context.startService(intent);
 	}
 
-	public NetworkService() {
+    public static void updateUserProfile(Context context, String avatarFilePath) {
+        Intent intent = new Intent(context, NetworkService.class);
+        intent.putExtra(ACTION_EXTRA, ACTION_UPDATE_USER_PROFILE);
+        intent.putExtra(AVATAR_FILE_PATH_EXTRA, avatarFilePath);
+
+        context.startService(intent);
+    }
+
+    public NetworkService() {
 		super("NetworkService");
 	}
 
@@ -108,6 +130,9 @@ public class NetworkService extends IntentService {
                 break;
             case ACTION_RELOAD_CHAT_LIST :
                 doReloadChatList(intent);
+                break;
+            case ACTION_UPDATE_USER_PROFILE :
+                doUpdateUserProfile(intent);
                 break;
 		}
 	}
@@ -185,6 +210,43 @@ public class NetworkService extends IntentService {
 		// mId allows you to update the notification later on.
 		mNotificationManager.notify(NEW_MESSAGE_NOTIFICATION_ID, builder.build());
 	}
+
+    private void  doUpdateUserProfile(Intent intent) {
+        String avatarFilePath = intent.getStringExtra(AVATAR_FILE_PATH_EXTRA);
+
+        if (TextUtils.isEmpty(avatarFilePath)) {
+            //TODO
+            return;
+        }
+
+        Bitmap bitmap = BitmapFactory.decodeFile(avatarFilePath);
+        ParseUser user = ParseUser.getCurrentUser();
+
+        if (bitmap != null && user != null) {
+            //save image
+            String parseFileNmae = AVATAR_PREFIX + user.getObjectId() + AVATAR_POSTFIX;
+            String avatarUrl = NetworkHelper.uploadImage(bitmap,  parseFileNmae);
+
+            //save user info if image was saved
+            if (!TextUtils.isEmpty(avatarUrl)) {
+                user.put(QuezzleUserMetadata.AVATAR_URL, avatarUrl);
+
+                try {
+                    user.save();
+
+                    //TODO
+                } catch (ParseException pe) {
+                    Log.e(Constants.LOG_TAG, "Error updating user info: " + pe.getMessage());
+
+                    //TODO
+                }
+            } else {
+                //TODO
+            }
+        } else {
+            //TODO
+        }
+    }
 
     private void doReloadChatList(Intent intent) {
         // clear local cache
