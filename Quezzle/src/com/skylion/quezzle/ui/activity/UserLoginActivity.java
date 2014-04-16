@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
@@ -21,6 +22,7 @@ import com.skylion.quezzle.datamodel.QuezzleUserMetadata;
 
 public class UserLoginActivity extends QuezzleBaseActivity implements GooglePlayServicesClient.ConnectionCallbacks,
 		GooglePlayServicesClient.OnConnectionFailedListener {
+    private static final String GPLUS_IMAGE_SIZE_PARAM = "sz";
 
     public static void start(Context context) {
         Intent intent = new Intent(context, UserLoginActivity.class);
@@ -102,7 +104,9 @@ public class UserLoginActivity extends QuezzleBaseActivity implements GooglePlay
 			user.setUsername(plusClient.getCurrentPerson().getDisplayName());
 			user.setPassword("my pass");
 			user.setEmail(plusClient.getAccountName());
-            user.put(QuezzleUserMetadata.AVATAR_URL, plusClient.getCurrentPerson().getImage().getUrl());
+            if (plusClient.getCurrentPerson().hasImage()) {
+                user.put(QuezzleUserMetadata.AVATAR_URL, processAvatarImageLink(plusClient.getCurrentPerson().getImage().getUrl()));
+            }
 
 			user.signUpInBackground(new SignUpCallback() {
 				public void done(ParseException e) {
@@ -142,4 +146,11 @@ public class UserLoginActivity extends QuezzleBaseActivity implements GooglePlay
 		startActivity(startMain);
 	}
 
+    private String processAvatarImageLink(String url) {
+        Uri uri = Uri.parse(url);
+        int avatarSize = StrictMath.round(getResources().getDimension(R.dimen.upload_avatar_size));
+        return uri.buildUpon().clearQuery()
+               .appendQueryParameter(GPLUS_IMAGE_SIZE_PARAM, Integer.toString(avatarSize))
+               .build().toString();
+    }
 }
