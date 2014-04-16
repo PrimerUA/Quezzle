@@ -5,6 +5,8 @@ import android.database.Cursor;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -53,8 +55,14 @@ public class MessageListAdapter extends CursorAdapter {
 		View view;
 		if (cursor.getPosition() % 2 == 0) {
 			view = inflater.inflate(R.layout.message_list_item_left, viewGroup, false);
+			Animation animation = AnimationUtils.loadAnimation(context, R.anim.message_push_in_left);
+			animation.setDuration(500);
+			view.startAnimation(animation);
 		} else {
 			view = inflater.inflate(R.layout.message_list_item_right, viewGroup, false);
+			Animation animation = AnimationUtils.loadAnimation(context, R.anim.message_push_in_right);
+			animation.setDuration(500);
+			view.startAnimation(animation);
 		}
 
 		// create holder

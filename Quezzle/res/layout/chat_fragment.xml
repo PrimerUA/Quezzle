@@ -39,7 +39,7 @@
             android:maxLength="@integer/L140"
             android:maxLines="4"
             android:minHeight="@dimen/d35p"
-            android:paddingLeft="@dimen/d5p"
+            android:paddingLeft="7dp"
             android:textColor="@android:color/black"
             android:textCursorDrawable="@null" />
 

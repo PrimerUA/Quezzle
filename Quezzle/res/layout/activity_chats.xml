@@ -35,6 +35,6 @@
         android:layout_above="@id/createButton"
         android:layout_alignParentRight="true"
         android:background="@drawable/kolba"
-        android:divider="#ffffff"
+        android:divider="#abffffff"
         android:dividerHeight="@dimen/d2p" />
 </RelativeLayout>

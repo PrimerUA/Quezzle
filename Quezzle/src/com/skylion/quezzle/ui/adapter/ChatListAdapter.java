@@ -5,6 +5,8 @@ import android.database.Cursor;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
@@ -51,6 +53,11 @@ public class ChatListAdapter extends CursorAdapter {
         holder.name = (TextView)view.findViewById(R.id.chat_name);
         holder.description = (TextView)view.findViewById(R.id.chat_description);
         view.setTag(holder);
+        
+        Animation animation = AnimationUtils.loadAnimation(context, R.anim.chat_fade_in);
+		animation.setDuration(500);
+		view.startAnimation(animation);
+		animation = null;
 
         return view;
     }

@@ -4,27 +4,34 @@
     android:layout_height="match_parent"
     android:background="@color/pink_bg">
 
-    <ImageView
-        android:id="@+id/avatarView_profileScreen"
-        android:layout_width="@dimen/d100p"
-        android:layout_height="@dimen/d100p"
-        android:layout_marginBottom="@dimen/d10p"
-        android:layout_centerInParent="true"
-        android:src="@drawable/def_icon" />
-
     <TextView
         android:id="@+id/nameText_profileScreen"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
         android:layout_below="@id/avatarView_profileScreen"
-        android:text="User Name"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:text="@string/profile_update_text"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <Button
         android:id="@+id/save_profileScreen"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:layout_margin="@dimen/d10p"
+        android:textStyle="bold"
+        android:background="@drawable/create_button"
         android:text="@string/save" />
+
+    <ImageView
+        android:id="@+id/avatarView_profileScreen"
+        android:layout_width="@dimen/d100p"
+        android:layout_height="@dimen/d100p"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/d25p"
+        android:layout_marginTop="126dp"
+        android:src="@drawable/def_icon" />
+
 </RelativeLayout>

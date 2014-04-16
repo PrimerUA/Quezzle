@@ -2,6 +2,7 @@ package com.skylion.quezzle.ui.fragment;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -15,7 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -40,17 +40,18 @@ public class UserProfileFragment extends Fragment {
 
     private DisplayImageOptions options;
     private ImageView avatarView;
-    private TextView nameView;
+    //private TextView nameView;
     private Button saveButton;
 
     private String avatarFilePath = "";
+    private ProgressDialog progressDialog;
 
     UpdateProfileNotificationReceiver receiver = new UpdateProfileNotificationReceiver();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.user_profile_fragment, container, false);
-
+        
         options = new DisplayImageOptions.Builder().showImageOnLoading(R.drawable.def_icon).showImageForEmptyUri(R.drawable.def_icon)
                 .imageScaleType(ImageScaleType.EXACTLY_STRETCHED).resetViewBeforeLoading(true).cacheInMemory(true).cacheOnDisc(true)
                 .displayer(new RoundedBitmapDisplayer(Integer.MAX_VALUE)).build();
@@ -62,7 +63,7 @@ public class UserProfileFragment extends Fragment {
                 selectAvatar();
             }
         });
-        nameView = (TextView) rootView.findViewById(R.id.nameText_profileScreen);
+        //nameView = (TextView) rootView.findViewById(R.id.nameText_profileScreen);
         saveButton = (Button) rootView.findViewById(R.id.save_profileScreen);
         saveButton.setEnabled(false);
         saveButton.setOnClickListener(new View.OnClickListener() {
@@ -75,7 +76,8 @@ public class UserProfileFragment extends Fragment {
         ParseUser user = ParseUser.getCurrentUser();
         if (user != null) {
             ImageLoader.getInstance().displayImage(user.getString(QuezzleUserMetadata.AVATAR_URL), avatarView, options);
-            nameView.setText(user.getUsername());
+            //nameView.setText(user.getUsername());
+            getActivity().getActionBar().setTitle(user.getUsername());
         }
 
         return rootView;
@@ -114,7 +116,8 @@ public class UserProfileFragment extends Fragment {
     private void save() {
         //set save button disable
         saveButton.setEnabled(false);
-
+        //display progress dialog
+        progressDialog = ProgressDialog.show(getActivity(), getString(R.string.connecting), getString(R.string.loading_profile_update));
         //save user info
         NetworkService.updateUserProfile(getActivity(), avatarFilePath);
     }
@@ -137,6 +140,7 @@ public class UserProfileFragment extends Fragment {
                     Toast.makeText(activity, UpdateProfileNotification.getErrorMessage(intent), Toast.LENGTH_LONG).show();
                 }
             }
+            progressDialog.dismiss();
         }
     }
 }

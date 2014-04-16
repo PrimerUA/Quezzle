@@ -20,8 +20,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -35,7 +34,6 @@ import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
 import com.skylion.quezzle.datastorage.table.FullMessageTable;
 import com.skylion.quezzle.notification.SendMessageNotification;
 import com.skylion.quezzle.service.NetworkService;
-import com.skylion.quezzle.ui.activity.UserProfileActivity;
 import com.skylion.quezzle.ui.adapter.MessageListAdapter;
 
 /**
@@ -47,8 +45,8 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 	private static final int LOAD_CHAT_INFO_ID = 0;
 	private static final int LOAD_MESSAGES_ID = 1;
 	private static final String CHAT_KEY_ARGUMENT = "com.skylion.quezzle.ui.fragment.ChatFragment.CHAT_KEY";
-	
-    private boolean firstLoad = true;
+
+	private boolean firstLoad = true;
 
 	public static ChatFragment newInstance(String chatKey) {
 		Bundle arguments = new Bundle();
@@ -59,7 +57,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 		return result;
 	}
 
-    private String chatKey = null;
+	private String chatKey = null;
 	private ImageView send;
 	private EditText message;
 	private ListView messageList;
@@ -67,12 +65,13 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 	private MessageListAdapter messageListAdapter;
 
 	private NewMessageEventReceiver receiver = new NewMessageEventReceiver();
-    private SendMessageNotificationReceiver sendMessageNotificationReceiver = new SendMessageNotificationReceiver();
+	private SendMessageNotificationReceiver sendMessageNotificationReceiver = new SendMessageNotificationReceiver();
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		setHasOptionsMenu(true);
-
+		
+		getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 		getActivity().getActionBar().setHomeButtonEnabled(true);
 		getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
 		getActivity().getActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.blue));
@@ -100,8 +99,8 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 		super.onResume();
 
 		getActivity().registerReceiver(receiver, new IntentFilter(NetworkService.NEW_MESSAGE_ACTION));
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(sendMessageNotificationReceiver,
-                                                                          new IntentFilter(SendMessageNotification.ACTION));
+		LocalBroadcastManager.getInstance(getActivity()).registerReceiver(sendMessageNotificationReceiver,
+				new IntentFilter(SendMessageNotification.ACTION));
 	}
 
 	@Override
@@ -109,7 +108,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 		super.onPause();
 
 		getActivity().unregisterReceiver(receiver);
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(sendMessageNotificationReceiver);
+		LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(sendMessageNotificationReceiver);
 	}
 
 	@Override
@@ -132,55 +131,55 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 		case R.id.action_refresh:
 			NetworkService.reloadChat(getActivity(), getChatKey());
 			return true;
-        case android.R.id.home :
-            getActivity().finish();
-            return true;
+		case android.R.id.home:
+			getActivity().finish();
+			return true;
 		}
 
-        return super.onOptionsItemSelected(item);
+		return super.onOptionsItemSelected(item);
 	}
 
 	private void sendMessage() {
 		final String text = message.getText().toString().trim();
 		if (!TextUtils.isEmpty(text)) {
 			ParseUser user = ParseUser.getCurrentUser();
-            if (user != null) {
-            	progressBar.setVisibility(View.VISIBLE);
-                NetworkService.sendMessage(getActivity(), getChatKey(), text, user.getObjectId());
-            } else {
-                Toast.makeText(getActivity(), R.string.not_logged_id, Toast.LENGTH_LONG).show();
-            }
-            message.setText("");
+			if (user != null) {
+				progressBar.setVisibility(View.VISIBLE);
+				NetworkService.sendMessage(getActivity(), getChatKey(), text, user.getObjectId());
+			} else {
+				Toast.makeText(getActivity(), R.string.not_logged_id, Toast.LENGTH_LONG).show();
+			}
+			message.setText("");
 		} else {
 			Toast.makeText(getActivity(), getString(R.string.empty_message), Toast.LENGTH_SHORT).show();
 		}
 	}
 
 	private String getChatKey() {
-        if (chatKey == null) {
-            Bundle arguments = getArguments();
-            chatKey = (arguments != null && arguments.containsKey(CHAT_KEY_ARGUMENT)) ? arguments.getString(CHAT_KEY_ARGUMENT) : "";
-        }
+		if (chatKey == null) {
+			Bundle arguments = getArguments();
+			chatKey = (arguments != null && arguments.containsKey(CHAT_KEY_ARGUMENT)) ? arguments.getString(CHAT_KEY_ARGUMENT) : "";
+		}
 
 		return chatKey;
 	}
 
 	private void setChatInfo(Cursor cursor) {
 		if (cursor.moveToFirst()) {
-            String chatName = cursor.getString(cursor.getColumnIndex(ChatPlaceTable.NAME_COLUMN));
-            getActivity().getActionBar().setTitle(chatName);
+			String chatName = cursor.getString(cursor.getColumnIndex(ChatPlaceTable.NAME_COLUMN));
+			getActivity().getActionBar().setTitle(chatName);
 		}
 	}
 
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 		switch (id) {
-		case LOAD_CHAT_INFO_ID :
+		case LOAD_CHAT_INFO_ID:
 			Uri uri = Uri.withAppendedPath(QuezzleProviderContract.CHAT_PLACES_URI, getChatKey());
-			return new CursorLoader(getActivity(), uri, new String[] {ChatPlaceTable.NAME_COLUMN }, null, null, null);
-		case LOAD_MESSAGES_ID :
-			return new CursorLoader(getActivity(), QuezzleProviderContract.getMessagesUri(getChatKey()),
-                                    MessageListAdapter.PROJECTION, null, null,CHAT_MESSAGES_ORDER);
+			return new CursorLoader(getActivity(), uri, new String[] { ChatPlaceTable.NAME_COLUMN }, null, null, null);
+		case LOAD_MESSAGES_ID:
+			return new CursorLoader(getActivity(), QuezzleProviderContract.getMessagesUri(getChatKey()), MessageListAdapter.PROJECTION,
+					null, null, CHAT_MESSAGES_ORDER);
 		}
 		return null;
 	}
@@ -188,27 +187,27 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
 		switch (loader.getId()) {
-            case LOAD_CHAT_INFO_ID :
-                setChatInfo(cursor);
-                break;
-            case LOAD_MESSAGES_ID :
-                if (firstLoad && cursor.getCount() == 0) {
-                    // try to load chat messages
-                    NetworkService.reloadChat(getActivity(), getChatKey());
-                }
-                firstLoad = false;
+		case LOAD_CHAT_INFO_ID:
+			setChatInfo(cursor);
+			break;
+		case LOAD_MESSAGES_ID:
+			if (firstLoad && cursor.getCount() == 0) {
+				// try to load chat messages
+				NetworkService.reloadChat(getActivity(), getChatKey());
+			}
+			firstLoad = false;
 
-                messageListAdapter.swapCursor(cursor);
-                break;
+			messageListAdapter.swapCursor(cursor);
+			break;
 		}
 	}
 
 	@Override
 	public void onLoaderReset(Loader<Cursor> loader) {
 		switch (loader.getId()) {
-            case LOAD_MESSAGES_ID :
-                messageListAdapter.swapCursor(null);
-                break;
+		case LOAD_MESSAGES_ID:
+			messageListAdapter.swapCursor(null);
+			break;
 		}
 	}
 
@@ -223,13 +222,13 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 		}
 	}
 
-    private class SendMessageNotificationReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (!SendMessageNotification.isSuccessful(intent)) {
-                Toast.makeText(getActivity(), getString(R.string.error_sending_message,
-                                SendMessageNotification.getErrorMessage(intent)), Toast.LENGTH_LONG).show();
-            }
-        }
-    }
+	private class SendMessageNotificationReceiver extends BroadcastReceiver {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (!SendMessageNotification.isSuccessful(intent)) {
+				Toast.makeText(getActivity(), getString(R.string.error_sending_message, SendMessageNotification.getErrorMessage(intent)),
+						Toast.LENGTH_LONG).show();
+			}
+		}
+	}
 }

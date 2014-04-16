@@ -19,7 +19,7 @@ public class UserProfileActivity extends QuezzleBaseActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.user_profile);
 		
-		getActionBar().setTitle(R.string.title_activity_user_profile);
+		//getActionBar().setTitle(R.string.title_activity_user_profile);
 		getActionBar().setHomeButtonEnabled(true);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 		getActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.blue));

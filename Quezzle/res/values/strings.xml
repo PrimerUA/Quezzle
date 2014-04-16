@@ -9,13 +9,14 @@
     <string name="send">Send</string>
     <string name="subtitle">Venues and events chatroom</string>
     <string name="create">Create new chat</string>
-    <string name="edit_profile">Edit profile</string>
+    <string name="edit_profile">Change profile photo</string>
     <string name="new_message">New message</string>
     <string name="connecting">Connecting...</string>
     <string name="loading_auth">Authentication</string>
     <string name="loading_chats">Loading chats</string>
     <string name="loading_new_chat">Creating new chat</string>
     <string name="loading_messages">Loading messages</string>
+    <string name="loading_profile_update">Updating profile</string>
     <string name="empty_fields">Fill in empty fields</string>
     <string name="welcome">Welcome to Quezzle!</string>
     <string name="chat_has_new_message">Chat \"%1$s\" has new message</string>
@@ -31,4 +32,5 @@
     <string name="error_uploading_image">Error uploading of the image</string>
     <string name="error_updating_profile">Error updating profile</string>
     <string name="profile_updated">Profile was updated</string>
+    <string name="profile_update_text">Tap the photo to change it</string>
 </resources>
