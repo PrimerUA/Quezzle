@@ -27,4 +27,8 @@
     <string name="new_chat_created">You have created a new chat!</string>
     <string name="select_picture">Select Picture</string>
     <string name="save">Save</string>
+    <string name="image_path_is_empty">Image path is empty</string>
+    <string name="error_uploading_image">Error uploading of the image</string>
+    <string name="error_updating_profile">Error updating profile</string>
+    <string name="profile_updated">Profile was updated</string>
 </resources>

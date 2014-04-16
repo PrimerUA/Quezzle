@@ -24,6 +24,7 @@ import com.skylion.quezzle.network.NetworkHelper;
 import com.skylion.quezzle.notification.CreateChatNotification;
 import com.skylion.quezzle.notification.ReloadChatListNotification;
 import com.skylion.quezzle.notification.SendMessageNotification;
+import com.skylion.quezzle.notification.UpdateProfileNotification;
 import com.skylion.quezzle.ui.activity.ChatActivity;
 import com.skylion.quezzle.utility.Constants;
 import com.skylion.quezzle.utility.Utils;
@@ -216,7 +217,9 @@ public class NetworkService extends IntentService {
         String avatarFilePath = intent.getStringExtra(AVATAR_FILE_PATH_EXTRA);
 
         if (TextUtils.isEmpty(avatarFilePath)) {
-            //TODO
+            //notify UI about error while updating profile
+            sendLocalBroadcast(UpdateProfileNotification.createErrorsResult(getString(R.string.image_path_is_empty)));
+
             return;
         }
 
@@ -236,17 +239,21 @@ public class NetworkService extends IntentService {
                 try {
                     user.save();
 
-                    //TODO
+                    //notify UI about successfully updated profile
+                    sendLocalBroadcast(UpdateProfileNotification.createSuccessResult());
                 } catch (ParseException pe) {
                     Log.e(Constants.LOG_TAG, "Error updating user info: " + pe.getMessage());
 
-                    //TODO
+                    //notify UI about error while updating profile
+                    sendLocalBroadcast(UpdateProfileNotification.createErrorsResult(pe.getMessage()));
                 }
             } else {
-                //TODO
+                //notify UI about error while updating profile
+                sendLocalBroadcast(UpdateProfileNotification.createErrorsResult(getString(R.string.error_uploading_image)));
             }
         } else {
-            //TODO
+            //notify UI about error while updating profile
+            sendLocalBroadcast(UpdateProfileNotification.createErrorsResult(getString(R.string.error_updating_profile)));
         }
     }
 

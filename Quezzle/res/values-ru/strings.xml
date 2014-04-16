@@ -27,4 +27,8 @@
     <string name="new_chat_created">Вы создали новый чат!</string>
     <string name="select_picture">Выбор картинки</string>
     <string name="save">Сохранить</string>
+    <string name="image_path_is_empty">Путь к картинке пуст</string>
+    <string name="error_uploading_image">Ошибка загрузки изображения</string>
+    <string name="error_updating_profile">Ошибка обновления профиля</string>
+    <string name="profile_updated">Профиль обновлен</string>
 </resources>
