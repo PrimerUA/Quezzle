@@ -17,6 +17,7 @@ import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
 import com.skylion.quezzle.datastorage.table.MessageTable;
 import com.skylion.quezzle.datastorage.table.UserTable;
 import com.skylion.quezzle.utility.Constants;
+import com.skylion.quezzle.utility.Utils;
 
 import java.io.ByteArrayOutputStream;
 import java.util.*;
@@ -77,12 +78,7 @@ public abstract class NetworkHelper {
 
     public static String uploadImage(Bitmap bitmap, String fileName) {
         //get raw data of the image
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-        byte[] data = stream.toByteArray();
-        try {
-            stream.close();
-        } catch (Exception e) {};
+        byte[] data = Utils.bitmapToBytearray(bitmap);
 
         ParseFile parseFile = new ParseFile(fileName, data);
         try {

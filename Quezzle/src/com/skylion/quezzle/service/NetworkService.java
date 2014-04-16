@@ -26,6 +26,7 @@ import com.skylion.quezzle.notification.ReloadChatListNotification;
 import com.skylion.quezzle.notification.SendMessageNotification;
 import com.skylion.quezzle.ui.activity.ChatActivity;
 import com.skylion.quezzle.utility.Constants;
+import com.skylion.quezzle.utility.Utils;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Date;
@@ -219,7 +220,8 @@ public class NetworkService extends IntentService {
             return;
         }
 
-        Bitmap bitmap = BitmapFactory.decodeFile(avatarFilePath);
+        int avatarSize = StrictMath.round(getResources().getDimension(R.dimen.upload_avatar_size));
+        Bitmap bitmap =  Utils.loadImageWithSize(avatarFilePath, avatarSize, avatarSize);
         ParseUser user = ParseUser.getCurrentUser();
 
         if (bitmap != null && user != null) {
