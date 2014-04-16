@@ -9,6 +9,7 @@
     <string name="send">Send</string>
     <string name="subtitle">Venues and events chatroom</string>
     <string name="create">Create new chat</string>
+    <string name="edit_profile">Edit profile</string>
     <string name="new_message">New message</string>
     <string name="connecting">Connecting...</string>
     <string name="loading_auth">Authentication</string>

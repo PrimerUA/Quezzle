@@ -5,24 +5,22 @@
     android:layout_height="match_parent"
     android:background="@color/main_bg"
     tools:context="com.skylion.quezzle.ChatsListActivity" >
-
-    <ListView
-        android:id="@+id/chatsList"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/createButton"
-        android:layout_alignParentRight="true"
-        android:background="@drawable/kolba"
-        android:divider="#ffffff"
-        android:dividerHeight="@dimen/d2p" />
-
     <Button
-        android:id="@+id/createButton"
-        android:layout_width="wrap_content"
+        android:id="@+id/editProfileButton"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/create_button"
+        android:text="@string/edit_profile"
+        android:textStyle="bold" />
+    <Button
+        android:id="@+id/createButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/editProfileButton"
         android:layout_marginBottom="10dp"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
@@ -30,5 +28,13 @@
         android:background="@drawable/create_button"
         android:text="@string/create"
         android:textStyle="bold" />
-
+    <ListView
+        android:id="@+id/chatsList"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_above="@id/createButton"
+        android:layout_alignParentRight="true"
+        android:background="@drawable/kolba"
+        android:divider="#ffffff"
+        android:dividerHeight="@dimen/d2p" />
 </RelativeLayout>

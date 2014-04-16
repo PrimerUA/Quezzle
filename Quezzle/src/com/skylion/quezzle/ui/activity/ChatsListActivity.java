@@ -42,7 +42,7 @@ public class ChatsListActivity extends QuezzleBaseActivity implements View.OnCli
 		if (currentUser != null) {
 			// do stuff with the user
 		} else {
-			startActivity(new Intent(this, UserLoginActivity.class));
+            UserLoginActivity.start(this);
 		}
 
 		Log.d(Constants.LOG_TAG, "!=" + getIntent().getAction());
@@ -69,6 +69,13 @@ public class ChatsListActivity extends QuezzleBaseActivity implements View.OnCli
 
 		createButton = (Button) findViewById(R.id.createButton);
 		createButton.setOnClickListener(this);
+
+        findViewById(R.id.editProfileButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                UserProfileActivity.start(ChatsListActivity.this);
+            }
+        });
 
 		getLoaderManager().initLoader(LOAD_CHATS_ID, null, this);
 	}
@@ -110,7 +117,7 @@ public class ChatsListActivity extends QuezzleBaseActivity implements View.OnCli
 
 	@Override
 	public void onClick(View view) {
-		startActivity(new Intent(this, NewChatActivity.class));
+        NewChatActivity.start(this);
 	}
 
 	@Override

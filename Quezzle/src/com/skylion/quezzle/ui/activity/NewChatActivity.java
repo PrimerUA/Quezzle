@@ -18,6 +18,12 @@ import com.skylion.quezzle.service.NetworkService;
  * this template use File | Settings | File Templates.
  */
 public class NewChatActivity extends QuezzleBaseActivity {
+
+    public static void start(Context context) {
+        Intent intent = new Intent(context, NewChatActivity.class);
+        context.startActivity(intent);
+    }
+
 	private EditText nameEdit;
 	private EditText descEdit;
 	private Button createButton;

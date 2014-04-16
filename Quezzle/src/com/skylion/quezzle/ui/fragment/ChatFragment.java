@@ -42,7 +42,7 @@ import com.skylion.quezzle.ui.adapter.MessageListAdapter;
  * Created with IntelliJ IDEA. User: Kvest Date: 24.03.14 Time: 23:10 To change
  * this template use File | Settings | File Templates.
  */
-public class ChatFragment extends Fragment implements OnItemClickListener, LoaderManager.LoaderCallbacks<Cursor> {
+public class ChatFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 	private static final String CHAT_MESSAGES_ORDER = FullMessageTable.UPDATED_AT_COLUMN + " DESC";
 	private static final int LOAD_CHAT_INFO_ID = 0;
 	private static final int LOAD_MESSAGES_ID = 1;
@@ -91,7 +91,6 @@ public class ChatFragment extends Fragment implements OnItemClickListener, Loade
 		messageList = (ListView) rootView.findViewById(R.id.messages_list);
 		messageListAdapter = new MessageListAdapter(getActivity(), MessageListAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
 		messageList.setAdapter(messageListAdapter);
-		messageList.setOnItemClickListener(this);
 
 		return rootView;
 	}
@@ -233,10 +232,4 @@ public class ChatFragment extends Fragment implements OnItemClickListener, Loade
             }
         }
     }
-
-	@Override
-	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		progressBar.setVisibility(View.GONE);
-		startActivity(new Intent(getActivity(), UserProfileActivity.class));
-	}
 }

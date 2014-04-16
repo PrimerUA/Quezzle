@@ -9,6 +9,7 @@
     <string name="send">Отправить</string>
     <string name="subtitle">Venues and events chatroom</string>
     <string name="create">Создать новый чат</string>
+    <string name="edit_profile">Изменить профиль</string>
     <string name="new_message">Новое сообщение</string>
     <string name="connecting">Соединение...</string>
     <string name="loading_auth">Авторизация</string>
