@@ -13,13 +13,13 @@ import com.skylion.quezzle.contentprovider.QuezzleProviderContract;
 import com.skylion.quezzle.datamodel.Message;
 import com.skylion.quezzle.datamodel.ChatPlace;
 import com.skylion.quezzle.datamodel.QuezzleUserMetadata;
+import com.skylion.quezzle.datamodel.Subscriber;
 import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
 import com.skylion.quezzle.datastorage.table.MessageTable;
 import com.skylion.quezzle.datastorage.table.UserTable;
 import com.skylion.quezzle.utility.Constants;
 import com.skylion.quezzle.utility.Utils;
 
-import java.io.ByteArrayOutputStream;
 import java.util.*;
 
 /**
@@ -159,6 +159,40 @@ public abstract class NetworkHelper {
         }
 
         return createdCount;
+    }
+
+    public static boolean subscribeToChat(String chatKey, String subscriberId) {
+        Subscriber subscriber = new Subscriber();
+        subscriber.setChat(ChatPlace.createWithoutData(ChatPlace.class, chatKey));
+        subscriber.setSubscriber(ParseUser.createWithoutData(ParseUser.class, subscriberId));
+
+        try {
+            subscriber.save();
+
+            return true;
+        } catch (ParseException pe) {
+            Log.e(Constants.LOG_TAG, "Error in subscribeToChat: " + pe.getMessage());
+        }
+
+        return false;
+    }
+
+    public static boolean unsubscribeFromChat(String chatKey, String subscriberId) {
+        ParseQuery<Subscriber> query = ParseQuery.getQuery(Subscriber.class);
+        query.whereEqualTo(Subscriber.CHAT_FIELD, ChatPlace.createWithoutData(ChatPlace.class, chatKey));
+        query.whereEqualTo(Subscriber.SUBSCRIBER_FIELD, ParseUser.createWithoutData(ParseUser.class, subscriberId));
+        try {
+            List<Subscriber> subscribers = query.find();
+            for (Subscriber subscriber : subscribers) {
+                subscriber.delete();
+            }
+
+            return true;
+        } catch (ParseException pe) {
+            Log.e(Constants.LOG_TAG, "Error in unsubscribeFromChat: " + pe.getMessage());
+        }
+
+        return false;
     }
 
     public static void sendMessage(String message, String chatId, String authorId, OnResultListener listener) {

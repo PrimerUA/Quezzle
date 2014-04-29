@@ -3,12 +3,7 @@ package com.skylion.quezzle.ui.fragment;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.LoaderManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.CursorLoader;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.Loader;
+import android.content.*;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -21,11 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.ProgressBar;
-import android.widget.Toast;
+import android.widget.*;
 
 import com.parse.ParseUser;
 import com.skylion.quezzle.R;
@@ -35,6 +26,7 @@ import com.skylion.quezzle.datastorage.table.FullMessageTable;
 import com.skylion.quezzle.notification.SendMessageNotification;
 import com.skylion.quezzle.service.NetworkService;
 import com.skylion.quezzle.ui.adapter.MessageListAdapter;
+import com.skylion.quezzle.utility.Constants;
 
 /**
  * Created with IntelliJ IDEA. User: Kvest Date: 24.03.14 Time: 23:10 To change
@@ -64,6 +56,8 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 	private ProgressBar progressBar;
 	private MessageListAdapter messageListAdapter;
 
+    private CheckBox subscribed;
+
 	private NewMessageEventReceiver receiver = new NewMessageEventReceiver();
 	private SendMessageNotificationReceiver sendMessageNotificationReceiver = new SendMessageNotificationReceiver();
 
@@ -87,6 +81,16 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 		});
 		progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar_chatFragment);
 		message = (EditText) rootView.findViewById(R.id.message);
+
+        subscribed = (CheckBox)rootView.findViewById(R.id.subscribe);
+        subscribed.setEnabled(false);
+        subscribed.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setSubscribed(subscribed.isChecked());
+            }
+        });
+
 		messageList = (ListView) rootView.findViewById(R.id.messages_list);
 		messageListAdapter = new MessageListAdapter(getActivity(), MessageListAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
 		messageList.setAdapter(messageListAdapter);
@@ -122,7 +126,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		inflater.inflate(R.menu.main, menu);
+		inflater.inflate(R.menu.chat, menu);
 	}
 
 	@Override
@@ -146,6 +150,11 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 			if (user != null) {
 				progressBar.setVisibility(View.VISIBLE);
 				NetworkService.sendMessage(getActivity(), getChatKey(), text, user.getObjectId());
+
+                //subscribe automatically
+                if (!subscribed.isChecked()) {
+                    setSubscribed(true);
+                }
 			} else {
 				Toast.makeText(getActivity(), R.string.not_logged_id, Toast.LENGTH_LONG).show();
 			}
@@ -168,6 +177,9 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 		if (cursor.moveToFirst()) {
 			String chatName = cursor.getString(cursor.getColumnIndex(ChatPlaceTable.NAME_COLUMN));
 			getActivity().getActionBar().setTitle(chatName);
+
+            subscribed.setChecked(cursor.getInt(cursor.getColumnIndex(ChatPlaceTable.IS_SUBSCRIBED_COLUMN)) != 0);
+            subscribed.setEnabled(true);
 		}
 	}
 
@@ -176,7 +188,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 		switch (id) {
 		case LOAD_CHAT_INFO_ID:
 			Uri uri = Uri.withAppendedPath(QuezzleProviderContract.CHAT_PLACES_URI, getChatKey());
-			return new CursorLoader(getActivity(), uri, new String[] { ChatPlaceTable.NAME_COLUMN }, null, null, null);
+			return new CursorLoader(getActivity(), uri, new String[] { ChatPlaceTable.NAME_COLUMN, ChatPlaceTable.IS_SUBSCRIBED_COLUMN }, null, null, null);
 		case LOAD_MESSAGES_ID:
 			return new CursorLoader(getActivity(), QuezzleProviderContract.getMessagesUri(getChatKey()), MessageListAdapter.PROJECTION,
 					null, null, CHAT_MESSAGES_ORDER);
@@ -187,10 +199,10 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
 		switch (loader.getId()) {
-		case LOAD_CHAT_INFO_ID:
+		case LOAD_CHAT_INFO_ID :
 			setChatInfo(cursor);
 			break;
-		case LOAD_MESSAGES_ID:
+		case LOAD_MESSAGES_ID :
 			if (firstLoad && cursor.getCount() == 0) {
 				// try to load chat messages
 				NetworkService.reloadChat(getActivity(), getChatKey());
@@ -205,11 +217,25 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 	@Override
 	public void onLoaderReset(Loader<Cursor> loader) {
 		switch (loader.getId()) {
-		case LOAD_MESSAGES_ID:
+        case LOAD_CHAT_INFO_ID :
+            subscribed.setEnabled(false);
+            break;
+		case LOAD_MESSAGES_ID :
 			messageListAdapter.swapCursor(null);
 			break;
 		}
 	}
+
+    private void setSubscribed(boolean isSubscribed) {
+        ContentValues values = new ContentValues(2);
+        values.put(ChatPlaceTable.IS_SUBSCRIBED_COLUMN, isSubscribed ? 1 : 0);
+        values.put(ChatPlaceTable.SYNC_STATUS_COLUMN, Constants.SyncStatus.NEED_UPLOAD);
+        Activity activity = getActivity();
+        if (activity != null) {
+            activity.getContentResolver().update(Uri.withAppendedPath(QuezzleProviderContract.CHAT_PLACES_URI, getChatKey()),
+                                                 values, null, null);
+        }
+    }
 
 	private class NewMessageEventReceiver extends BroadcastReceiver {
 		@Override

@@ -7,8 +7,11 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.parse.Parse;
 import com.parse.ParseObject;
 import com.parse.PushService;
+import com.skylion.quezzle.contentprovider.QuezzleProviderContract;
+import com.skylion.quezzle.contentprovider.observer.ChatPlacesObserver;
 import com.skylion.quezzle.datamodel.Message;
 import com.skylion.quezzle.datamodel.ChatPlace;
+import com.skylion.quezzle.datamodel.Subscriber;
 import com.skylion.quezzle.ui.activity.ChatsListActivity;
 import com.skylion.quezzle.utility.Constants;
 
@@ -37,14 +40,21 @@ public class QuezzleApplication extends Application {
         ImageLoader.getInstance().init(config);
 
         initParse();
+        registerContentProviderListeners();
     }
 
     private void initParse() {
         //register classes
         ParseObject.registerSubclass(ChatPlace.class);
         ParseObject.registerSubclass(Message.class);
+        ParseObject.registerSubclass(Subscriber.class);
 
         Parse.initialize(this, Constants.PARSE_APP_ID, Constants.PARSE_CLIENT_KEY);
         PushService.setDefaultPushCallback(this, ChatsListActivity.class);
+    }
+
+    private void registerContentProviderListeners() {
+        getContentResolver().registerContentObserver(QuezzleProviderContract.CHAT_PLACES_URI, true,
+                                                     new ChatPlacesObserver());
     }
 }

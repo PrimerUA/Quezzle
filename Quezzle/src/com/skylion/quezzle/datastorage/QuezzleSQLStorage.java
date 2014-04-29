@@ -16,7 +16,7 @@ import com.skylion.quezzle.datastorage.table.UserTable;
  */
 public class QuezzleSQLStorage extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "quezzle.db";
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
 
     public QuezzleSQLStorage(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);

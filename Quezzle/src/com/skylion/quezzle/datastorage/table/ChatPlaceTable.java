@@ -17,6 +17,8 @@ public class ChatPlaceTable implements BaseColumns {
     public static final String UPDATED_AT_COLUMN = "updated_at";
     public static final String NAME_COLUMN = "name";
     public static final String DESCRIPTION_COLUMN = "description";
+    public static final String IS_SUBSCRIBED_COLUMN = "is_subscribed";
+    public static final String SYNC_STATUS_COLUMN = "sync_status";
 
 
     public static final String[] FULL_PROJECTION = {_ID, OBJECT_ID_COLUMN, CREATED_AT_COLUMN, UPDATED_AT_COLUMN,
@@ -28,7 +30,9 @@ public class ChatPlaceTable implements BaseColumns {
             CREATED_AT_COLUMN + "\" INTEGER DEFAULT 0, \"" +
             UPDATED_AT_COLUMN + "\" INTEGER DEFAULT 0, \"" +
             NAME_COLUMN + "\" TEXT NOT NULL, \"" +
-            DESCRIPTION_COLUMN + "\" TEXT DEFAULT \"\");";
+            DESCRIPTION_COLUMN + "\" TEXT DEFAULT \"\", \"" +
+            IS_SUBSCRIBED_COLUMN + "\" INTEGER DEFAULT 0, \"" +
+            SYNC_STATUS_COLUMN + "\" INTEGER DEFAULT 0);";
 
     public static final String DROP_TABLE_SQL = "DROP TABLE IF EXISTS \"" + TABLE_NAME + "\";";
 }

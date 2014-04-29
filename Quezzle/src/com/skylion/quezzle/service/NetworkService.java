@@ -2,11 +2,11 @@ package com.skylion.quezzle.service;
 
 import android.app.*;
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
@@ -29,7 +29,6 @@ import com.skylion.quezzle.ui.activity.ChatActivity;
 import com.skylion.quezzle.utility.Constants;
 import com.skylion.quezzle.utility.Utils;
 
-import java.io.ByteArrayOutputStream;
 import java.util.Date;
 
 /**
@@ -59,6 +58,7 @@ public class NetworkService extends IntentService {
     private static final int ACTION_CREATE_CHAT = 3;
     private static final int ACTION_RELOAD_CHAT_LIST = 4;
     private static final int ACTION_UPDATE_USER_PROFILE = 5;
+    private static final int ACTION_UPLOAD_CHAT_SUBSCRIPTION = 6;
     
     public static void reloadChatList(Context context) {
         Intent intent = new Intent(context, NetworkService.class);
@@ -72,6 +72,13 @@ public class NetworkService extends IntentService {
         intent.putExtra(ACTION_EXTRA, ACTION_CREATE_CHAT);
         intent.putExtra(CHAT_NAME_EXTRA, chatName);
         intent.putExtra(CHAT_DESCRIPTION_EXTRA, chatDescription);
+
+        context.startService(intent);
+    }
+
+    public static void uploadChatSubscriptions(Context context) {
+        Intent intent = new Intent(context, NetworkService.class);
+        intent.putExtra(ACTION_EXTRA, ACTION_UPLOAD_CHAT_SUBSCRIPTION);
 
         context.startService(intent);
     }
@@ -135,6 +142,9 @@ public class NetworkService extends IntentService {
                 break;
             case ACTION_UPDATE_USER_PROFILE :
                 doUpdateUserProfile(intent);
+                break;
+            case ACTION_UPLOAD_CHAT_SUBSCRIPTION :
+                doUploadChatSubscriptions(intent);
                 break;
 		}
 	}
@@ -255,6 +265,43 @@ public class NetworkService extends IntentService {
             //notify UI about error while updating profile
             sendLocalBroadcast(UpdateProfileNotification.createErrorsResult(getString(R.string.error_updating_profile)));
         }
+    }
+
+    private void doUploadChatSubscriptions(Intent intent) {
+        //get all chats that need to be updated
+        String[] projection = new String[]{ChatPlaceTable.OBJECT_ID_COLUMN, ChatPlaceTable.IS_SUBSCRIBED_COLUMN};
+        String selection = ChatPlaceTable.SYNC_STATUS_COLUMN + " & " + Constants.SyncStatus.NEED_UPLOAD  + " = " + Constants.SyncStatus.NEED_UPLOAD;
+        Cursor cursor =  getContentResolver().query(QuezzleProviderContract.CHAT_PLACES_URI, projection, selection, null, null);
+        int isSubscribedColumnIndex = cursor.getColumnIndex(ChatPlaceTable.IS_SUBSCRIBED_COLUMN);
+        int chatKeyColumnIndex = cursor.getColumnIndex(ChatPlaceTable.OBJECT_ID_COLUMN);
+        String userId = ParseUser.getCurrentUser().getObjectId();
+
+        try {
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                String chatKey = cursor.getString(chatKeyColumnIndex);
+                if (cursor.getInt(isSubscribedColumnIndex) != 0) {
+                    if (NetworkHelper.subscribeToChat(chatKey, userId)) {
+                        setSubscriptionUpdated(chatKey, true);
+                    }
+                } else {
+                    if (NetworkHelper.unsubscribeFromChat(chatKey, userId)) {
+                        setSubscriptionUpdated(chatKey, false);
+                    }
+                }
+
+                cursor.moveToNext();
+            }
+        } finally {
+            cursor.close();
+        }
+    }
+
+    private void setSubscriptionUpdated(String chatKey, boolean isSubscribed) {
+        ContentValues values = new ContentValues(2);
+        values.put(ChatPlaceTable.IS_SUBSCRIBED_COLUMN, isSubscribed ? 1 : 0);
+        values.put(ChatPlaceTable.SYNC_STATUS_COLUMN, Constants.SyncStatus.UP_TO_DATE);
+        getContentResolver().update(Uri.withAppendedPath(QuezzleProviderContract.CHAT_PLACES_URI, chatKey), values, null, null);
     }
 
     private void doReloadChatList(Intent intent) {
