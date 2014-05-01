@@ -308,8 +308,10 @@ public class NetworkService extends IntentService {
         // clear local cache
         getContentResolver().delete(QuezzleProviderContract.CHAT_PLACES_URI, null, null);
 
+        String userId = ParseUser.getCurrentUser().getObjectId();
+
         // query all chats
-        NetworkHelper.loadAllChats(getContentResolver(), new NetworkHelper.OnResultListener() {
+        NetworkHelper.loadAllChats(userId, getContentResolver(), new NetworkHelper.OnResultListener() {
             @Override
             public void onSuccess() {
                 //notify UI about success reloading chats

@@ -1,9 +1,12 @@
 package com.skylion.quezzle.network;
 
+import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.OperationApplicationException;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.RemoteException;
 import android.util.Log;
 import com.parse.ParseException;
 import com.parse.ParseFile;
@@ -32,8 +35,9 @@ import java.util.*;
 public abstract class NetworkHelper {
     private static final int LOAD_MESSAGES_LIMIT = 20;
     private static final int LOAD_CHATS_LIMIT = 20;
+    private static final int LOAD_SUBSCRIPTION_LIMIT = 100;
 
-    public static void loadAllChats(ContentResolver contentResolver, OnResultListener listener) {
+    public static void loadAllChats(String subscriberId, ContentResolver contentResolver, OnResultListener listener) {
         ParseQuery<ChatPlace> query = ParseQuery.getQuery(ChatPlace.class);
         query.setLimit(LOAD_CHATS_LIMIT);
         int offset = 0;
@@ -62,6 +66,8 @@ public abstract class NetworkHelper {
                 hasMoreData = !chats.isEmpty();
             }
 
+            updateSubscription(subscriberId, contentResolver);
+
             //emit success result
             if (listener != null) {
                 listener.onSuccess();
@@ -73,6 +79,45 @@ public abstract class NetworkHelper {
             if (listener != null) {
                 listener.onError(pe.getLocalizedMessage());
             }
+        }
+    }
+
+    private static void updateSubscription(String subscriberId, ContentResolver contentResolver) {
+        ParseQuery<Subscriber> query = ParseQuery.getQuery(Subscriber.class);
+        query.whereEqualTo(Subscriber.SUBSCRIBER_FIELD, ParseUser.createWithoutData(ParseUser.class, subscriberId));
+        query.setLimit(LOAD_SUBSCRIPTION_LIMIT);
+        int offset = 0;
+
+        boolean hasMoreData = true;
+        try {
+            while (hasMoreData) {
+                query.setSkip(offset);
+                List<Subscriber> subscribers = query.find();
+
+                ArrayList<ContentProviderOperation> operations = new ArrayList<ContentProviderOperation>(subscribers.size());
+                for (Subscriber subscriber : subscribers) {
+                    ContentValues values = new ContentValues(1);
+                    values.put(ChatPlaceTable.IS_SUBSCRIBED_COLUMN, 1);
+                    operations.add(ContentProviderOperation
+                                    .newUpdate(Uri.withAppendedPath(QuezzleProviderContract.CHAT_PLACES_URI, subscriber.getChat().getObjectId()))
+                                    .withValues(values)
+                                    .build());
+                }
+                try {
+                    contentResolver.applyBatch(QuezzleProviderContract.AUTHORITY, operations);
+                } catch (RemoteException re) {
+                    Log.e(Constants.LOG_TAG, re.getMessage());
+                    re.printStackTrace();
+                } catch (OperationApplicationException oae) {
+                    Log.e(Constants.LOG_TAG, oae.getMessage());
+                    oae.printStackTrace();
+                }
+
+                offset += subscribers.size();
+                hasMoreData = !subscribers.isEmpty();
+            }
+        } catch (ParseException pe) {
+            Log.e(Constants.LOG_TAG, "Error loading subscription: " + pe.getMessage());
         }
     }
 

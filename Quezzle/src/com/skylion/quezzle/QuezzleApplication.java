@@ -2,16 +2,16 @@ package com.skylion.quezzle;
 
 import android.app.Application;
 
+import android.os.Handler;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.parse.Parse;
 import com.parse.ParseObject;
 import com.parse.PushService;
-import com.skylion.quezzle.contentprovider.QuezzleProviderContract;
-import com.skylion.quezzle.contentprovider.observer.ChatPlacesObserver;
 import com.skylion.quezzle.datamodel.Message;
 import com.skylion.quezzle.datamodel.ChatPlace;
 import com.skylion.quezzle.datamodel.Subscriber;
+import com.skylion.quezzle.service.NetworkService;
 import com.skylion.quezzle.ui.activity.ChatsListActivity;
 import com.skylion.quezzle.utility.Constants;
 
@@ -23,6 +23,8 @@ import com.skylion.quezzle.utility.Constants;
  * To change this template use File | Settings | File Templates.
  */
 public class QuezzleApplication extends Application {
+    private static final int SYNC_DELAY = 5000;
+
     private static QuezzleApplication application;
 
     public static QuezzleApplication getApplication() {
@@ -40,7 +42,7 @@ public class QuezzleApplication extends Application {
         ImageLoader.getInstance().init(config);
 
         initParse();
-        registerContentProviderListeners();
+        startSync();
     }
 
     private void initParse() {
@@ -53,8 +55,13 @@ public class QuezzleApplication extends Application {
         PushService.setDefaultPushCallback(this, ChatsListActivity.class);
     }
 
-    private void registerContentProviderListeners() {
-        getContentResolver().registerContentObserver(QuezzleProviderContract.CHAT_PLACES_URI, true,
-                                                     new ChatPlacesObserver());
+    private void startSync() {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                NetworkService.uploadChatSubscriptions(application);
+            }
+        }, SYNC_DELAY);
+
     }
 }

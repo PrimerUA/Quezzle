@@ -234,6 +234,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         if (activity != null) {
             activity.getContentResolver().update(Uri.withAppendedPath(QuezzleProviderContract.CHAT_PLACES_URI, getChatKey()),
                                                  values, null, null);
+            NetworkService.uploadChatSubscriptions(activity);
         }
     }
 
