@@ -9,11 +9,14 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 import com.skylion.quezzle.datastorage.QuezzleSQLStorage;
 import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
 import com.skylion.quezzle.datastorage.table.FullMessageTable;
 import com.skylion.quezzle.datastorage.table.MessageTable;
 import com.skylion.quezzle.datastorage.table.UserTable;
+
+import java.net.URI;
 
 /**
  * Created with IntelliJ IDEA.
@@ -102,10 +105,11 @@ public class QuezzleProvider extends ContentProvider {
         switch (uriMatcher.match(uri)) {
             case CHAT_PLACES_URI_INDICATOR :
                 //replace works as insert or update
+                values.put(ChatPlaceTable._ID, System.currentTimeMillis());
                 rowId = db.replace(ChatPlaceTable.TABLE_NAME, null, values);
                 if (rowId > 0)
                 {
-                    Uri resultUri = ContentUris.withAppendedId(uri, rowId);
+                    Uri resultUri = Uri.withAppendedPath(uri, values.getAsString(ChatPlaceTable.OBJECT_ID_COLUMN));
                     getContext().getContentResolver().notifyChange(resultUri, null);
                     return resultUri;
                 }
@@ -119,7 +123,7 @@ public class QuezzleProvider extends ContentProvider {
                 rowId = db.replace(MessageTable.TABLE_NAME, null, values);
                 if (rowId > 0)
                 {
-                    Uri resultUri = ContentUris.withAppendedId(uri, rowId);
+                    Uri resultUri = Uri.withAppendedPath(uri, values.getAsString(MessageTable.OBJECT_ID_COLUMN));
                     getContext().getContentResolver().notifyChange(resultUri, null);
                     return resultUri;
                 }
@@ -129,7 +133,7 @@ public class QuezzleProvider extends ContentProvider {
                 rowId = db.replace(UserTable.TABLE_NAME, null, values);
                 if (rowId > 0)
                 {
-                    Uri resultUri = ContentUris.withAppendedId(uri, rowId);
+                    Uri resultUri = Uri.withAppendedPath(uri, values.getAsString(UserTable.OBJECT_ID_COLUMN));
                     getContext().getContentResolver().notifyChange(resultUri, null);
                     return resultUri;
                 }
