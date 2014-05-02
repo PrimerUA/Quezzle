@@ -2,7 +2,6 @@ package com.skylion.quezzle.datamodel;
 
 import com.parse.ParseClassName;
 import com.parse.ParseObject;
-import com.parse.ParseUser;
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,26 +12,26 @@ import com.parse.ParseUser;
  */
 @ParseClassName("Subscriber")
 public class Subscriber extends ParseObject {
-    public static final String SUBSCRIBER_FIELD = "subscriber";
-    public static final String CHAT_FIELD = "chat";
+    public static final String SUBSCRIBER_ID_FIELD = "subscriber_id";
+    public static final String CHAT_ID_FIELD = "chat_id";
 
     public Subscriber() {
         super();
     }
 
-    public ParseUser getSubscriber() {
-        return getParseUser(SUBSCRIBER_FIELD);
+    public String getSubscriberId() {
+        return getString(SUBSCRIBER_ID_FIELD);
     }
 
-    public void setSubscriber(ParseUser author) {
-        put(SUBSCRIBER_FIELD, author);
+    public void setSubscriberId(String subscriberId) {
+        put(SUBSCRIBER_ID_FIELD, subscriberId);
     }
 
-    public ChatPlace getChat() {
-        return (ChatPlace)get(CHAT_FIELD);
+    public String getChatId() {
+        return getString(CHAT_ID_FIELD);
     }
 
-    public void setChat(ChatPlace chat) {
-        put(CHAT_FIELD, chat);
+    public void setChatId(String chatId) {
+        put(CHAT_ID_FIELD, chatId);
     }
 }

@@ -274,7 +274,11 @@ public class NetworkService extends IntentService {
         Cursor cursor =  getContentResolver().query(QuezzleProviderContract.CHAT_PLACES_URI, projection, selection, null, null);
         int isSubscribedColumnIndex = cursor.getColumnIndex(ChatPlaceTable.IS_SUBSCRIBED_COLUMN);
         int chatKeyColumnIndex = cursor.getColumnIndex(ChatPlaceTable.OBJECT_ID_COLUMN);
-        String userId = ParseUser.getCurrentUser().getObjectId();
+        ParseUser currentUser = ParseUser.getCurrentUser();
+        if (currentUser == null) {
+            return;
+        }
+        String userId = currentUser.getObjectId();
 
         try {
             cursor.moveToFirst();

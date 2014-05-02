@@ -84,7 +84,7 @@ public abstract class NetworkHelper {
 
     private static void updateSubscription(String subscriberId, ContentResolver contentResolver) {
         ParseQuery<Subscriber> query = ParseQuery.getQuery(Subscriber.class);
-        query.whereEqualTo(Subscriber.SUBSCRIBER_FIELD, ParseUser.createWithoutData(ParseUser.class, subscriberId));
+        query.whereEqualTo(Subscriber.SUBSCRIBER_ID_FIELD, subscriberId);
         query.setLimit(LOAD_SUBSCRIPTION_LIMIT);
         int offset = 0;
 
@@ -99,7 +99,7 @@ public abstract class NetworkHelper {
                     ContentValues values = new ContentValues(1);
                     values.put(ChatPlaceTable.IS_SUBSCRIBED_COLUMN, 1);
                     operations.add(ContentProviderOperation
-                                    .newUpdate(Uri.withAppendedPath(QuezzleProviderContract.CHAT_PLACES_URI, subscriber.getChat().getObjectId()))
+                                    .newUpdate(Uri.withAppendedPath(QuezzleProviderContract.CHAT_PLACES_URI, subscriber.getChatId()))
                                     .withValues(values)
                                     .build());
                 }
@@ -208,8 +208,8 @@ public abstract class NetworkHelper {
 
     public static boolean subscribeToChat(String chatKey, String subscriberId) {
         Subscriber subscriber = new Subscriber();
-        subscriber.setChat(ChatPlace.createWithoutData(ChatPlace.class, chatKey));
-        subscriber.setSubscriber(ParseUser.createWithoutData(ParseUser.class, subscriberId));
+        subscriber.setChatId(chatKey);
+        subscriber.setSubscriberId(subscriberId);
 
         try {
             subscriber.save();
@@ -224,8 +224,8 @@ public abstract class NetworkHelper {
 
     public static boolean unsubscribeFromChat(String chatKey, String subscriberId) {
         ParseQuery<Subscriber> query = ParseQuery.getQuery(Subscriber.class);
-        query.whereEqualTo(Subscriber.CHAT_FIELD, ChatPlace.createWithoutData(ChatPlace.class, chatKey));
-        query.whereEqualTo(Subscriber.SUBSCRIBER_FIELD, ParseUser.createWithoutData(ParseUser.class, subscriberId));
+        query.whereEqualTo(Subscriber.CHAT_ID_FIELD, chatKey);
+        query.whereEqualTo(Subscriber.SUBSCRIBER_ID_FIELD, subscriberId);
         try {
             List<Subscriber> subscribers = query.find();
             for (Subscriber subscriber : subscribers) {
