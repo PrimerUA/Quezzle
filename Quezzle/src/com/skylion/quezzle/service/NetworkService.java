@@ -183,28 +183,33 @@ public class NetworkService extends IntentService {
     }
 
 	private void doRefreshChat(Intent intent) {
-		// load needed data from db
+		//get chat key
 		final String chatKey = intent.getStringExtra(CHAT_KEY_EXTRA);
-		Date lastMessageDate = getChatLastMessageDate(chatKey);
-		Uri messagesUri = QuezzleProviderContract.getMessagesUri(chatKey);
 
-		// load new data
-		int createdCount = NetworkHelper.loadAllChatMessages(chatKey, messagesUri, lastMessageDate,
-                                                             getContentResolver(), null);
+        //refresh only if we subscribed for this chat
+        if (isSubscribedForChat(chatKey)) {
+            // load needed data from db
+            Date lastMessageDate = getChatLastMessageDate(chatKey);
+            Uri messagesUri = QuezzleProviderContract.getMessagesUri(chatKey);
 
-		// show notification if needed
-		if (createdCount > 0 && intent.getBooleanExtra(WITH_NOTIFICATION_EXTRA, false)) {
-			Intent broadcastIntent = new Intent(NEW_MESSAGE_ACTION);
-			broadcastIntent.putExtra(CHAT_KEY_EXTRA, chatKey);
-			sendOrderedBroadcast(broadcastIntent, null, new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    if (getResultCode() != Activity.RESULT_OK) {
-                        showNewMessageNotification(chatKey);
+            // load new data
+            int createdCount = NetworkHelper.loadAllChatMessages(chatKey, messagesUri, lastMessageDate,
+                                                                 getContentResolver(), null);
+
+            // show notification if needed
+            if (createdCount > 0 && intent.getBooleanExtra(WITH_NOTIFICATION_EXTRA, false)) {
+                Intent broadcastIntent = new Intent(NEW_MESSAGE_ACTION);
+                broadcastIntent.putExtra(CHAT_KEY_EXTRA, chatKey);
+                sendOrderedBroadcast(broadcastIntent, null, new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        if (getResultCode() != Activity.RESULT_OK) {
+                            showNewMessageNotification(chatKey);
+                        }
                     }
-                }
-            }, null, 0, null, null);
-		}
+                }, null, 0, null, null);
+            }
+        }
 	}
 
 	private void showNewMessageNotification(String chatKey) {
@@ -340,6 +345,20 @@ public class NetworkService extends IntentService {
 		// load new data
         NetworkHelper.loadAllChatMessages(chatKey, messagesUri, null, getContentResolver(), null);
 	}
+
+    private boolean isSubscribedForChat(String chatKey) {
+        Uri uri = Uri.withAppendedPath(QuezzleProviderContract.CHAT_PLACES_URI, chatKey);
+        Cursor cursor = getContentResolver().query(uri, new String[] { ChatPlaceTable.IS_SUBSCRIBED_COLUMN }, null, null, null);
+        try {
+            if (cursor.moveToFirst()) {
+                return cursor.getInt(cursor.getColumnIndex(ChatPlaceTable.IS_SUBSCRIBED_COLUMN)) != 0;
+            } else {
+                return false;
+            }
+        } finally {
+            cursor.close();
+        }
+    }
 
 	private Date getChatLastMessageDate(String chatKey) {
 		Cursor cursor = getContentResolver().query(QuezzleProviderContract.getMessagesUri(chatKey),
