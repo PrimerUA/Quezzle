@@ -105,7 +105,6 @@ public class QuezzleProvider extends ContentProvider {
         switch (uriMatcher.match(uri)) {
             case CHAT_PLACES_URI_INDICATOR :
                 //replace works as insert or update
-                values.put(ChatPlaceTable._ID, System.currentTimeMillis());
                 rowId = db.replace(ChatPlaceTable.TABLE_NAME, null, values);
                 if (rowId > 0)
                 {

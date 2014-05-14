@@ -36,7 +36,7 @@ public class ChatsListActivity extends QuezzleBaseActivity implements View.OnCli
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_chats);
-		
+
 		ParseUser currentUser = ParseUser.getCurrentUser();
 		getActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.blue));
 		if (currentUser != null) {
