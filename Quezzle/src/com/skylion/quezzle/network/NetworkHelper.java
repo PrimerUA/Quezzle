@@ -171,6 +171,8 @@ public abstract class NetworkHelper {
                             contentValues.put(UserTable.UPDATED_AT_COLUMN, author.getUpdatedAt().getTime());
                             contentValues.put(UserTable.USERNAME_COLUMN, author.getUsername());
                             contentValues.put(UserTable.AVATAR_COLUMN, author.getString(QuezzleUserMetadata.AVATAR_URL));
+                            contentValues.put(UserTable.GPLUS_LINK_COLUMN, author.getString(QuezzleUserMetadata.GPLUS_LINK));
+                            contentValues.put(UserTable.IS_ADMIN_COLUMN, author.getBoolean(QuezzleUserMetadata.IS_ADMIN) ? 1 : 0);
                             users.put(author.getObjectId(), contentValues);
                         }
 

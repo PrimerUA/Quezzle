@@ -9,4 +9,6 @@ package com.skylion.quezzle.datamodel;
  */
 public abstract class QuezzleUserMetadata {
     public static final String AVATAR_URL = "avatar";
+    public static final String GPLUS_LINK = "gplus_link";
+    public static final String IS_ADMIN = "is_admin";
 }

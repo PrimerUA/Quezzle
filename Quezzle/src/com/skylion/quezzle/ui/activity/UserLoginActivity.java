@@ -23,6 +23,7 @@ import com.skylion.quezzle.datamodel.QuezzleUserMetadata;
 public class UserLoginActivity extends QuezzleBaseActivity implements GooglePlayServicesClient.ConnectionCallbacks,
 		GooglePlayServicesClient.OnConnectionFailedListener {
     private static final String GPLUS_IMAGE_SIZE_PARAM = "sz";
+    private static final String DEFAULT_PASSWORD = "my pass";
 
     public static void start(Context context) {
         Intent intent = new Intent(context, UserLoginActivity.class);
@@ -102,11 +103,14 @@ public class UserLoginActivity extends QuezzleBaseActivity implements GooglePlay
 		if (plusClient != null) {
 			ParseUser user = new ParseUser();
 			user.setUsername(plusClient.getCurrentPerson().getDisplayName());
-			user.setPassword("my pass");
+			user.setPassword(DEFAULT_PASSWORD);
 			user.setEmail(plusClient.getAccountName());
+            user.put(QuezzleUserMetadata.IS_ADMIN, false);
+            user.put(QuezzleUserMetadata.GPLUS_LINK, plusClient.getCurrentPerson().getUrl());
             if (plusClient.getCurrentPerson().hasImage()) {
                 user.put(QuezzleUserMetadata.AVATAR_URL, processAvatarImageLink(plusClient.getCurrentPerson().getImage().getUrl()));
             }
+
 
 			user.signUpInBackground(new SignUpCallback() {
 				public void done(ParseException e) {
@@ -114,9 +118,13 @@ public class UserLoginActivity extends QuezzleBaseActivity implements GooglePlay
 						progressDialog.dismiss();
 						finish();
 					} else {
-						ParseUser.logInInBackground(plusClient.getCurrentPerson().getDisplayName(), "my pass", new LogInCallback() {
+						ParseUser.logInInBackground(plusClient.getCurrentPerson().getDisplayName(), DEFAULT_PASSWORD, new LogInCallback() {
                             public void done(ParseUser user, ParseException e) {
                                 if (user != null) {
+                                    //update user info
+                                    user.put(QuezzleUserMetadata.GPLUS_LINK, plusClient.getCurrentPerson().getUrl());
+                                    user.saveInBackground();
+
                                     progressDialog.dismiss();
                                     Toast.makeText(UserLoginActivity.this, getString(R.string.welcome), Toast.LENGTH_SHORT).show();
                                     finish();

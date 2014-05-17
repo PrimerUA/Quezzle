@@ -34,4 +34,5 @@
     <string name="profile_updated">Профиль обновлен</string>
     <string name="profile_update_text">Нажмите на миниатюру для выбора нового фото</string>
     <string name="subscribe">Подписаться</string>
+    <string name="no_gplus_link">Ссылка на G+ аккаунт отсутствует</string>
 </resources>

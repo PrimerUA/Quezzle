@@ -21,7 +21,10 @@ public class FullMessageTable {
     public static final String CHAT_KEY_COLUMN = MessageTable.TABLE_NAME + "." + MessageTable.CHAT_KEY_COLUMN;
     public static final String USERNAME_COLUMN = UserTable.TABLE_NAME + "." + UserTable.USERNAME_COLUMN;
     public static final String USER_AVATAR_COLUMN = UserTable.TABLE_NAME + "." + UserTable.AVATAR_COLUMN;
+    public static final String GPLUS_LINK_COLUMN = UserTable.TABLE_NAME + "." + UserTable.GPLUS_LINK_COLUMN;
+    public static final String IS_ADMIN_COLUMN = UserTable.TABLE_NAME + "." + UserTable.IS_ADMIN_COLUMN;
 
     public static final String[] FULL_PROJECTION = {_ID, OBJECT_ID_COLUMN, CREATED_AT_COLUMN, UPDATED_AT_COLUMN,
-                                MESSAGE_COLUMN, AUTHOR_ID_COLUMN, CHAT_KEY_COLUMN, USERNAME_COLUMN, USER_AVATAR_COLUMN};
+                                MESSAGE_COLUMN, AUTHOR_ID_COLUMN, CHAT_KEY_COLUMN, USERNAME_COLUMN, USER_AVATAR_COLUMN,
+                                GPLUS_LINK_COLUMN, IS_ADMIN_COLUMN};
 }

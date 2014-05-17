@@ -34,4 +34,5 @@
     <string name="profile_updated">Profile was updated</string>
     <string name="profile_update_text">Tap the photo to change it</string>
     <string name="subscribe">Subscribe</string>
+    <string name="no_gplus_link">Link to the G+ account is absent</string>
 </resources>

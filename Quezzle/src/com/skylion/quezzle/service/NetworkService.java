@@ -314,10 +314,14 @@ public class NetworkService extends IntentService {
     }
 
     private void doReloadChatList(Intent intent) {
+        ParseUser currentUser = ParseUser.getCurrentUser();
+        if (currentUser == null) {
+            return;
+        }
+        String userId = currentUser.getObjectId();
+
         // clear local cache
         getContentResolver().delete(QuezzleProviderContract.CHAT_PLACES_URI, null, null);
-
-        String userId = ParseUser.getCurrentUser().getObjectId();
 
         // query all chats
         NetworkHelper.loadAllChats(userId, getContentResolver(), new NetworkHelper.OnResultListener() {

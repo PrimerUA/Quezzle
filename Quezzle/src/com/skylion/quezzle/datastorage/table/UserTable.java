@@ -17,9 +17,11 @@ public class UserTable implements BaseColumns {
     public static final String UPDATED_AT_COLUMN = "updated_at";
     public static final String USERNAME_COLUMN = "username";
     public static final String AVATAR_COLUMN = "avatar";
+    public static final String GPLUS_LINK_COLUMN = "gplus_link";
+    public static final String IS_ADMIN_COLUMN = "is_admin";
 
     public static final String[] FULL_PROJECTION = {_ID, OBJECT_ID_COLUMN, CREATED_AT_COLUMN, UPDATED_AT_COLUMN,
-                                                    USERNAME_COLUMN, AVATAR_COLUMN};
+                                                    USERNAME_COLUMN, AVATAR_COLUMN, GPLUS_LINK_COLUMN, IS_ADMIN_COLUMN};
 
     public static final String CREATE_TABLE_SQL = "CREATE TABLE \"" + TABLE_NAME + "\" (\"" +
             _ID + "\" INTEGER PRIMARY KEY, \"" +
@@ -27,7 +29,9 @@ public class UserTable implements BaseColumns {
             CREATED_AT_COLUMN + "\" INTEGER DEFAULT 0, \"" +
             UPDATED_AT_COLUMN + "\" INTEGER DEFAULT 0, \"" +
             USERNAME_COLUMN + "\" TEXT NOT NULL, \"" +
-            AVATAR_COLUMN + "\" TEXT);";
+            AVATAR_COLUMN + "\" TEXT, \"" +
+            GPLUS_LINK_COLUMN + "\" TEXT, \"" +
+            IS_ADMIN_COLUMN  + "\" INTEGER DEFAULT 0);";
 
     public static final String DROP_TABLE_SQL = "DROP TABLE IF EXISTS \"" + TABLE_NAME + "\";";
 }

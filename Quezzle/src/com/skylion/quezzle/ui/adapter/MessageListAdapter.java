@@ -1,16 +1,17 @@
 package com.skylion.quezzle.ui.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.CursorAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.widget.*;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
@@ -28,7 +29,7 @@ import java.util.Date;
 public class MessageListAdapter extends CursorAdapter {
 	public static final String[] PROJECTION = new String[] { FullMessageTable._ID, FullMessageTable.UPDATED_AT_COLUMN,
 			FullMessageTable.MESSAGE_COLUMN, FullMessageTable.AUTHOR_ID_COLUMN, FullMessageTable.USERNAME_COLUMN,
-			FullMessageTable.USER_AVATAR_COLUMN };
+			FullMessageTable.USER_AVATAR_COLUMN, FullMessageTable.GPLUS_LINK_COLUMN, FullMessageTable.IS_ADMIN_COLUMN };
 	private static final String DATE_FORMAT_PATTERN = "[dd.MM.yyyy HH:mm:ss]";
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_PATTERN);
 
@@ -37,15 +38,32 @@ public class MessageListAdapter extends CursorAdapter {
 	private int updatedAtColumnIndex = -1;
 	private int authorNameColumnIndex = -1;
 	private int authorAvatarColumnIndex = -1;
+	private int gplusLinkColumnIndex = -1;
+	private int isAdminColumnIndex = -1;
 
+    private Context context;
 	private DisplayImageOptions options;
+    private View.OnClickListener onAvatarClickListener;
 
 	public MessageListAdapter(Context context, int flags) {
 		super(context, null, flags);
 
+        this.context = context;
+
 		options = new DisplayImageOptions.Builder().showImageOnLoading(R.drawable.def_icon).showImageForEmptyUri(R.drawable.def_icon)
 				.imageScaleType(ImageScaleType.EXACTLY_STRETCHED).resetViewBeforeLoading(true).cacheInMemory(true).cacheOnDisc(true)
 				.displayer(new RoundedBitmapDisplayer(Integer.MAX_VALUE)).build();
+        onAvatarClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View avatar) {
+                String gplusLink = (String)avatar.getTag();
+                if (!TextUtils.isEmpty(gplusLink)) {
+                    showLink(gplusLink);
+                } else {
+                    Toast.makeText(MessageListAdapter.this.context, R.string.no_gplus_link, Toast.LENGTH_SHORT).show();
+                }
+            }
+        };
 	}
 
 	@Override
@@ -70,6 +88,7 @@ public class MessageListAdapter extends CursorAdapter {
 		holder.content = (LinearLayout) view.findViewById(R.id.contentLayout);
 		holder.author = (TextView) view.findViewById(R.id.message_author);
 		holder.avatar = (ImageView) view.findViewById(R.id.avatar);
+        holder.avatar.setOnClickListener(onAvatarClickListener);
 		holder.date = (TextView) view.findViewById(R.id.message_date);
 		holder.text = (TextView) view.findViewById(R.id.message_text);
 		view.setTag(holder);
@@ -87,10 +106,15 @@ public class MessageListAdapter extends CursorAdapter {
 
 		Date date = new Date(cursor.getLong(updatedAtColumnIndex));
 		holder.author.setText(cursor.getString(authorNameColumnIndex));
-		ImageLoader.getInstance().displayImage(cursor.getString(authorAvatarColumnIndex), holder.avatar, options);
+        holder.avatar.setTag(cursor.getString(gplusLinkColumnIndex));
+        ImageLoader.getInstance().displayImage(cursor.getString(authorAvatarColumnIndex), holder.avatar, options);
 		holder.date.setText(DATE_FORMAT.format(date));
 		holder.text.setText(cursor.getString(messageColumnIndex));
-	}
+        int color = context.getResources().getColor(cursor.getInt(isAdminColumnIndex) == 1 ?
+                                                    R.color.admin_message_text_color :
+                                                    R.color.user_message_text_color);
+        holder.text.setTextColor(color);
+    }
 
 	private boolean isColumnIndexesCalculated() {
 		return (messageColumnIndex >= 0);
@@ -102,7 +126,15 @@ public class MessageListAdapter extends CursorAdapter {
 		updatedAtColumnIndex = cursor.getColumnIndex(FullMessageTable.UPDATED_AT_COLUMN);
 		authorNameColumnIndex = cursor.getColumnIndex(FullMessageTable.USERNAME_COLUMN);
 		authorAvatarColumnIndex = cursor.getColumnIndex(FullMessageTable.USER_AVATAR_COLUMN);
+        gplusLinkColumnIndex = cursor.getColumnIndex(FullMessageTable.GPLUS_LINK_COLUMN);
+        isAdminColumnIndex = cursor.getColumnIndex(FullMessageTable.IS_ADMIN_COLUMN);
 	}
+
+    private void showLink(String url) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse(url));
+        context.startActivity(intent);
+    }
 
 	private static class ViewHolder {
 		public TextView author;

@@ -4,4 +4,6 @@
 	<color name="main_bg_transparent">#acC2E6FF</color>
 	<color name="title">#46d3c2</color>
 	<color name="pink_bg">#BDAEC6</color>
+    <color name="admin_message_text_color">#ff0000</color>
+    <color name="user_message_text_color">#000000</color>
 </resources>
