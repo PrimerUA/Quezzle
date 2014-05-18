@@ -19,6 +19,12 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.*;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesClient;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.parse.ParseUser;
 import com.skylion.quezzle.R;
 import com.skylion.quezzle.contentprovider.QuezzleProviderContract;
@@ -33,7 +39,7 @@ import com.skylion.quezzle.utility.Constants;
  * Created with IntelliJ IDEA. User: Kvest Date: 24.03.14 Time: 23:10 To change
  * this template use File | Settings | File Templates.
  */
-public class ChatFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class ChatFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, LocationListener {
 	private static final String CHAT_MESSAGES_ORDER = FullMessageTable.UPDATED_AT_COLUMN + " DESC";
     private static final String[] CHAT_INFO_PROJECTION = new String[] {ChatPlaceTable.NAME_COLUMN, ChatPlaceTable.IS_SUBSCRIBED_COLUMN,
                                                                        ChatPlaceTable.CHAT_TYPE_COLUMN, ChatPlaceTable.LONGITUDE_COLUMN,
@@ -41,8 +47,16 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 	private static final int LOAD_CHAT_INFO_ID = 0;
 	private static final int LOAD_MESSAGES_ID = 1;
 	private static final String CHAT_KEY_ARGUMENT = "com.skylion.quezzle.ui.fragment.ChatFragment.CHAT_KEY";
-
-	private boolean firstLoad = true;
+    // Milliseconds per second
+    private static final int MILLISECONDS_PER_SECOND = 1000;
+    // Update frequency in seconds
+    public static final int UPDATE_INTERVAL_IN_SECONDS = 30;
+    // Update frequency in milliseconds
+    private static final long UPDATE_INTERVAL = MILLISECONDS_PER_SECOND * UPDATE_INTERVAL_IN_SECONDS;
+    // The fastest update frequency, in seconds
+    private static final int FASTEST_INTERVAL_IN_SECONDS = 5;
+    // A fast frequency ceiling in milliseconds
+    private static final long FASTEST_INTERVAL = MILLISECONDS_PER_SECOND * FASTEST_INTERVAL_IN_SECONDS;
 
 	public static ChatFragment newInstance(String chatKey) {
 		Bundle arguments = new Bundle();
@@ -52,6 +66,8 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 		result.setArguments(arguments);
 		return result;
 	}
+
+    private boolean firstLoad = true;
 
 	private String chatKey = null;
 	private ImageView send;
@@ -66,6 +82,10 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     private double chatLongitude;
     private double chatLatitude;
     private int chatRadius;
+    private Location currentUserLocation;
+    float[] distanceResults = new float[1];
+
+    private LocationClient locationClient;
 
     private NewMessageEventReceiver receiver = new NewMessageEventReceiver();
 	private SendMessageNotificationReceiver sendMessageNotificationReceiver = new SendMessageNotificationReceiver();
@@ -108,6 +128,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         chatLongitude = 0d;
         chatLatitude = 0d;
         chatRadius = 0;
+        currentUserLocation = null;
 
 		return rootView;
 	}
@@ -125,8 +146,18 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 	public void onPause() {
 		super.onPause();
 
-		getActivity().unregisterReceiver(receiver);
-		LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(sendMessageNotificationReceiver);
+        Activity activity = getActivity();
+        activity.unregisterReceiver(receiver);
+		LocalBroadcastManager.getInstance(activity).unregisterReceiver(sendMessageNotificationReceiver);
+
+        //stop tracking location
+        currentUserLocation = null;
+        if (activity != null && activity.isFinishing()) {
+            if (locationClient != null) {
+                locationClient.disconnect();
+                locationClient = null;
+            }
+        }
 	}
 
 	@Override
@@ -160,23 +191,47 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 	private void sendMessage() {
 		final String text = message.getText().toString().trim();
 		if (!TextUtils.isEmpty(text)) {
-			ParseUser user = ParseUser.getCurrentUser();
-			if (user != null) {
-				progressBar.setVisibility(View.VISIBLE);
-				NetworkService.sendMessage(getActivity(), getChatKey(), text, user.getObjectId());
+            if (canSendMessage()) {
+                ParseUser user = ParseUser.getCurrentUser();
+                if (user != null) {
+                    progressBar.setVisibility(View.VISIBLE);
+                    NetworkService.sendMessage(getActivity(), getChatKey(), text, user.getObjectId());
 
-                //subscribe automatically
-                if (!subscribed.isChecked()) {
-                    setSubscribed(true);
+                    //subscribe automatically
+                    if (!subscribed.isChecked()) {
+                        setSubscribed(true);
+                    }
+                } else {
+                    showToast(R.string.not_logged_id);
                 }
-			} else {
-				Toast.makeText(getActivity(), R.string.not_logged_id, Toast.LENGTH_LONG).show();
-			}
-			message.setText("");
+                message.setText("");
+            }
 		} else {
-			Toast.makeText(getActivity(), getString(R.string.empty_message), Toast.LENGTH_SHORT).show();
+            showToast(R.string.empty_message);
 		}
 	}
+
+    private boolean canSendMessage() {
+        if (chatType == Constants.ChatType.GEO) {
+            if (currentUserLocation == null) {
+                showToast(R.string.no_location_error);
+                return false;
+            } else {
+                Location.distanceBetween(chatLatitude, chatLongitude, currentUserLocation.getLatitude(),
+                                         currentUserLocation.getLongitude(), distanceResults);
+                if (distanceResults[0] > chatRadius) {
+                    showToast(R.string.not_in_zone_error);
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private void showToast(int stringId) {
+        Toast.makeText(getActivity(), stringId, Toast.LENGTH_SHORT).show();
+    }
 
 	private String getChatKey() {
 		if (chatKey == null) {
@@ -250,8 +305,49 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 	}
 
     private void startTrackUserPosition() {
-        //TODO
+        if (!servicesConnected()) {
+            showToast(R.string.playservices_unavailable);
+            return;
+        }
+
+        if (locationClient != null) {
+            locationClient.disconnect();
+            locationClient = null;
+        }
+
+        locationClient = new LocationClient(getActivity(), new GooglePlayServicesClient.ConnectionCallbacks() {
+            @Override
+            public void onConnected(Bundle bundle) {
+                LocationRequest locationRequest = LocationRequest.create();
+                locationRequest.setInterval(UPDATE_INTERVAL);
+                locationRequest.setFastestInterval(FASTEST_INTERVAL);
+                locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+
+                locationClient.requestLocationUpdates(locationRequest, ChatFragment.this);
+            }
+
+            @Override
+            public void onDisconnected() {
+                currentUserLocation = null;
+            }
+        }, new GooglePlayServicesClient.OnConnectionFailedListener() {
+            @Override
+            public void onConnectionFailed(ConnectionResult connectionResult) {
+                currentUserLocation = null;
+
+                showToast(R.string.location_connecting_error);
+            }
+        });
+        locationClient.connect();
     }
+
+    private boolean servicesConnected() {
+        // Check that Google Play services is available
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getActivity());
+        // If Google Play services is available
+        return  (ConnectionResult.SUCCESS == resultCode);
+    }
+
 
     private void setSubscribed(boolean isSubscribed) {
         ContentValues values = new ContentValues(2);
@@ -265,7 +361,12 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         }
     }
 
-	private class NewMessageEventReceiver extends BroadcastReceiver {
+    @Override
+    public void onLocationChanged(Location location) {
+        currentUserLocation = location;
+    }
+
+    private class NewMessageEventReceiver extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (getChatKey().equals(intent.getStringExtra(NetworkService.CHAT_KEY_EXTRA))) {

@@ -292,6 +292,15 @@ public abstract class NetworkHelper {
             values.put(ChatPlaceTable.UPDATED_AT_COLUMN, chatPlace.getUpdatedAt().getTime());
             values.put(ChatPlaceTable.NAME_COLUMN, chatPlace.getName());
             values.put(ChatPlaceTable.DESCRIPTION_COLUMN, chatPlace.getDescription());
+            values.put(ChatPlaceTable.CHAT_TYPE_COLUMN, chatPlace.getChatType());
+            if (chatPlace.getChatType() == Constants.ChatType.GEO) {
+                ParseGeoPoint location = chatPlace.getLocation();
+                if (location != null) {
+                    values.put(ChatPlaceTable.LATITUDE_COLUMN, location.getLatitude());
+                    values.put(ChatPlaceTable.LONGITUDE_COLUMN, location.getLongitude());
+                }
+                values.put(ChatPlaceTable.RADIUS_COLUMN, chatPlace.getRadius());
+            }
             contentResolver.insert(QuezzleProviderContract.CHAT_PLACES_URI, values);
 
             //emit success result
