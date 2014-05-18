@@ -19,4 +19,9 @@ public abstract class Constants {
         public static final int NEED_UPLOAD = 2;
         public static final int NEED_REFRESH = 4;
     }
+
+    public interface ChatType {
+        public static final int USUAL = 0;
+        public static final int GEO = 1;
+    }
 }

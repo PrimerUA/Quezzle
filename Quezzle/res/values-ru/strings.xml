@@ -17,7 +17,7 @@
     <string name="loading_messages">Загрузка сообщений</string>
     <string name="loading_new_chat">Создани нового чата</string>
     <string name="loading_profile_update">Обновление профиля</string>
-    <string name="empty_fields">Заполните пустые поля</string>
+    <string name="empty_field">Пустое поле</string>
     <string name="welcome">Добро пожаловать в Quezzle!</string>
     <string name="chat_has_new_message">Новое сообщение в чате \"%1$s\"</string>
     <string name="error_creating_chat">Ошибка при создании нового чата:\n%1$s</string>
@@ -35,4 +35,11 @@
     <string name="profile_update_text">Нажмите на миниатюру для выбора нового фото</string>
     <string name="subscribe">Подписаться</string>
     <string name="no_gplus_link">Ссылка на G+ аккаунт отсутствует</string>
+    <string name="usual_chat">Обычный чат</string>
+    <string name="geo_chat">Geo чат</string>
+    <string name="chat_name">Имя чата :</string>
+    <string name="brief_description">Краткое описание :</string>
+    <string name="chat_latitude">Широта :</string>
+    <string name="chat_longitude">Долгота :</string>
+    <string name="chat_radius">Радиус доступности(м) :</string>
 </resources>

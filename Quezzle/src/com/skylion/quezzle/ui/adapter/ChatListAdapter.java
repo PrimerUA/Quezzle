@@ -7,11 +7,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.AdapterView;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
 import com.skylion.quezzle.R;
 import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
+import com.skylion.quezzle.utility.Constants;
 
 /**
  * Created with IntelliJ IDEA.
@@ -22,10 +22,12 @@ import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
  */
 public class ChatListAdapter extends CursorAdapter {
     public static final String[] PROJECTION = new String[] {ChatPlaceTable._ID, ChatPlaceTable.NAME_COLUMN,
-                                                             ChatPlaceTable.DESCRIPTION_COLUMN, ChatPlaceTable.OBJECT_ID_COLUMN };
+                                                            ChatPlaceTable.DESCRIPTION_COLUMN, ChatPlaceTable.OBJECT_ID_COLUMN,
+                                                            ChatPlaceTable.CHAT_TYPE_COLUMN};
     private int nameColumnIndex = -1;
     private int descriptionColumnIndex = -1;
     private int objectIdColumnIndex = -1;
+    private int chatTypeColumnIndex = -1;
 
     public ChatListAdapter(Context context, int flags) {
         super(context, null, flags);
@@ -39,6 +41,7 @@ public class ChatListAdapter extends CursorAdapter {
         nameColumnIndex = cursor.getColumnIndex(ChatPlaceTable.NAME_COLUMN);
         descriptionColumnIndex = cursor.getColumnIndex(ChatPlaceTable.DESCRIPTION_COLUMN);
         objectIdColumnIndex = cursor.getColumnIndex(ChatPlaceTable.OBJECT_ID_COLUMN);
+        chatTypeColumnIndex = cursor.getColumnIndex(ChatPlaceTable.CHAT_TYPE_COLUMN);
     }
 
     @Override
@@ -73,6 +76,14 @@ public class ChatListAdapter extends CursorAdapter {
         holder.objectId = cursor.getString(objectIdColumnIndex);
         holder.name.setText(cursor.getString(nameColumnIndex));
         holder.description.setText(cursor.getString(descriptionColumnIndex));
+        switch (cursor.getInt(chatTypeColumnIndex)) {
+            case Constants.ChatType.USUAL :
+                //TODO mark chat as usual
+                break;
+            case Constants.ChatType.GEO :
+                //TODO mark chat as geo
+                break;
+        }
     }
 
     public String getChatKey(View view, int position, long id) {

@@ -5,6 +5,7 @@ import android.app.Fragment;
 import android.app.LoaderManager;
 import android.content.*;
 import android.database.Cursor;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
@@ -34,6 +35,9 @@ import com.skylion.quezzle.utility.Constants;
  */
 public class ChatFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 	private static final String CHAT_MESSAGES_ORDER = FullMessageTable.UPDATED_AT_COLUMN + " DESC";
+    private static final String[] CHAT_INFO_PROJECTION = new String[] {ChatPlaceTable.NAME_COLUMN, ChatPlaceTable.IS_SUBSCRIBED_COLUMN,
+                                                                       ChatPlaceTable.CHAT_TYPE_COLUMN, ChatPlaceTable.LONGITUDE_COLUMN,
+                                                                       ChatPlaceTable.LATITUDE_COLUMN, ChatPlaceTable.RADIUS_COLUMN };
 	private static final int LOAD_CHAT_INFO_ID = 0;
 	private static final int LOAD_MESSAGES_ID = 1;
 	private static final String CHAT_KEY_ARGUMENT = "com.skylion.quezzle.ui.fragment.ChatFragment.CHAT_KEY";
@@ -58,7 +62,12 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private CheckBox subscribed;
 
-	private NewMessageEventReceiver receiver = new NewMessageEventReceiver();
+    private int chatType;
+    private double chatLongitude;
+    private double chatLatitude;
+    private int chatRadius;
+
+    private NewMessageEventReceiver receiver = new NewMessageEventReceiver();
 	private SendMessageNotificationReceiver sendMessageNotificationReceiver = new SendMessageNotificationReceiver();
 
 	@Override
@@ -94,6 +103,11 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 		messageList = (ListView) rootView.findViewById(R.id.messages_list);
 		messageListAdapter = new MessageListAdapter(getActivity(), MessageListAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
 		messageList.setAdapter(messageListAdapter);
+
+        chatType = Constants.ChatType.USUAL;
+        chatLongitude = 0d;
+        chatLatitude = 0d;
+        chatRadius = 0;
 
 		return rootView;
 	}
@@ -180,6 +194,15 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
             subscribed.setChecked(cursor.getInt(cursor.getColumnIndex(ChatPlaceTable.IS_SUBSCRIBED_COLUMN)) != 0);
             subscribed.setEnabled(true);
+
+            chatType = cursor.getInt(cursor.getColumnIndex(ChatPlaceTable.CHAT_TYPE_COLUMN));
+            chatLongitude = cursor.getDouble(cursor.getColumnIndex(ChatPlaceTable.LONGITUDE_COLUMN));
+            chatLatitude = cursor.getDouble(cursor.getColumnIndex(ChatPlaceTable.LATITUDE_COLUMN));
+            chatRadius = cursor.getInt(cursor.getColumnIndex(ChatPlaceTable.RADIUS_COLUMN));
+
+            if (chatType == Constants.ChatType.GEO) {
+                startTrackUserPosition();
+            }
 		}
 	}
 
@@ -188,7 +211,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 		switch (id) {
 		case LOAD_CHAT_INFO_ID:
 			Uri uri = Uri.withAppendedPath(QuezzleProviderContract.CHAT_PLACES_URI, getChatKey());
-			return new CursorLoader(getActivity(), uri, new String[] { ChatPlaceTable.NAME_COLUMN, ChatPlaceTable.IS_SUBSCRIBED_COLUMN }, null, null, null);
+			return new CursorLoader(getActivity(), uri, CHAT_INFO_PROJECTION, null, null, null);
 		case LOAD_MESSAGES_ID:
 			return new CursorLoader(getActivity(), QuezzleProviderContract.getMessagesUri(getChatKey()), MessageListAdapter.PROJECTION,
 					null, null, CHAT_MESSAGES_ORDER);
@@ -225,6 +248,10 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 			break;
 		}
 	}
+
+    private void startTrackUserPosition() {
+        //TODO
+    }
 
     private void setSubscribed(boolean isSubscribed) {
         ContentValues values = new ContentValues(2);

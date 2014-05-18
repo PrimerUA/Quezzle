@@ -45,6 +45,10 @@ public class NetworkService extends IntentService {
 	private static final String ACTION_EXTRA = "com.skylion.quezzle.service.NetworkService.ACTION";
 	private static final String CHAT_NAME_EXTRA = "com.skylion.quezzle.service.NetworkService.CHAT_NAME";
 	private static final String CHAT_DESCRIPTION_EXTRA = "com.skylion.quezzle.service.NetworkService.CHAT_DESCRIPTION";
+    private static final String CHAT_TYPE_EXTRA = "com.skylion.quezzle.service.NetworkService.CHAT_TYPE";
+    private static final String CHAT_LATITUDE_EXTRA = "com.skylion.quezzle.service.NetworkService.CHAT_LATITUDE";
+    private static final String CHAT_LONGITUDE_EXTRA = "com.skylion.quezzle.service.NetworkService.CHAT_LONGITUDE";
+    private static final String CHAT_RADIUS_EXTRA = "com.skylion.quezzle.service.NetworkService.CHAT_RADIUS";
 	private static final String AUTHOR_EXTRA = "com.skylion.quezzle.service.NetworkService.AUTHOR";
 	private static final String MESSAGE_EXTRA = "com.skylion.quezzle.service.NetworkService.MESSAGE";
 	private static final String WITH_NOTIFICATION_EXTRA = "com.skylion.quezzle.service.NetworkService.WITH_NOTIFICATION";
@@ -67,13 +71,34 @@ public class NetworkService extends IntentService {
         context.startService(intent);
     }
 
-    public static void createChat(Context context, String chatName, String chatDescription) {
+    public static void createGeoChat(Context context, String chatName, String chatDescription,
+                                     double latitude, double longitude, int radius) {
         Intent intent = new Intent(context, NetworkService.class);
         intent.putExtra(ACTION_EXTRA, ACTION_CREATE_CHAT);
-        intent.putExtra(CHAT_NAME_EXTRA, chatName);
-        intent.putExtra(CHAT_DESCRIPTION_EXTRA, chatDescription);
+
+        setCreateChatParams(intent, chatName, chatDescription, Constants.ChatType.GEO, latitude, longitude, radius);
 
         context.startService(intent);
+    }
+
+    public static void createUsualChat(Context context, String chatName, String chatDescription) {
+        Intent intent = new Intent(context, NetworkService.class);
+        intent.putExtra(ACTION_EXTRA, ACTION_CREATE_CHAT);
+
+        setCreateChatParams(intent, chatName, chatDescription, Constants.ChatType.USUAL, 0d, 0d, 0);
+
+        context.startService(intent);
+    }
+
+    private static void setCreateChatParams(Intent intent, String chatName, String chatDescription,
+                                            int chatType, double latitude, double longitude, int radius) {
+
+        intent.putExtra(CHAT_NAME_EXTRA, chatName);
+        intent.putExtra(CHAT_DESCRIPTION_EXTRA, chatDescription);
+        intent.putExtra(CHAT_TYPE_EXTRA, chatType);
+        intent.putExtra(CHAT_LATITUDE_EXTRA, latitude);
+        intent.putExtra(CHAT_LONGITUDE_EXTRA, longitude);
+        intent.putExtra(CHAT_RADIUS_EXTRA, radius);
     }
 
     public static void uploadChatSubscriptions(Context context) {
@@ -167,6 +192,8 @@ public class NetworkService extends IntentService {
 
     private void doCreateChat(Intent intent) {
         NetworkHelper.createChat(intent.getStringExtra(CHAT_NAME_EXTRA), intent.getStringExtra(CHAT_DESCRIPTION_EXTRA),
+                                 intent.getIntExtra(CHAT_TYPE_EXTRA, Constants.ChatType.USUAL), intent.getDoubleExtra(CHAT_LATITUDE_EXTRA, 0d),
+                                 intent.getDoubleExtra(CHAT_LONGITUDE_EXTRA, 0d), intent.getIntExtra(CHAT_RADIUS_EXTRA, 0),
                                  getContentResolver(), new NetworkHelper.OnResultListener() {
             @Override
             public void onSuccess() {

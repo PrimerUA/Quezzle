@@ -17,7 +17,7 @@
     <string name="loading_new_chat">Creating new chat</string>
     <string name="loading_messages">Loading messages</string>
     <string name="loading_profile_update">Updating profile</string>
-    <string name="empty_fields">Fill in empty fields</string>
+    <string name="empty_field">Empty field</string>
     <string name="welcome">Welcome to Quezzle!</string>
     <string name="chat_has_new_message">Chat \"%1$s\" has new message</string>
     <string name="error_creating_chat">Error creating new chat:\n%1$s</string>
@@ -35,4 +35,11 @@
     <string name="profile_update_text">Tap the photo to change it</string>
     <string name="subscribe">Subscribe</string>
     <string name="no_gplus_link">Link to the G+ account is absent</string>
+    <string name="usual_chat">Usual chat</string>
+    <string name="geo_chat">Geo chat</string>
+    <string name="chat_name">Chat name :</string>
+    <string name="brief_description">Brief description :</string>
+    <string name="chat_latitude">Latitude :</string>
+    <string name="chat_longitude">Longitude :</string>
+    <string name="chat_radius">Accessibility radius(m) :</string>
 </resources>

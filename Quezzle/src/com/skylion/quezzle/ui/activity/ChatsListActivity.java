@@ -17,6 +17,7 @@ import android.widget.Toast;
 import com.parse.ParseUser;
 import com.skylion.quezzle.R;
 import com.skylion.quezzle.contentprovider.QuezzleProviderContract;
+import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
 import com.skylion.quezzle.notification.ReloadChatListNotification;
 import com.skylion.quezzle.service.NetworkService;
 import com.skylion.quezzle.ui.adapter.ChatListAdapter;
@@ -24,6 +25,7 @@ import com.skylion.quezzle.utility.Constants;
 
 public class ChatsListActivity extends QuezzleBaseActivity implements View.OnClickListener, LoaderManager.LoaderCallbacks<Cursor> {
 	private static final int LOAD_CHATS_ID = 0;
+    private static final String CHARTS_ORDER = ChatPlaceTable.CREATED_AT_COLUMN + " DESC";
 
     private boolean firstLoad = true;
 	private ListView chatsList;
@@ -124,7 +126,7 @@ public class ChatsListActivity extends QuezzleBaseActivity implements View.OnCli
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 		switch (id) {
 		case LOAD_CHATS_ID:
-			return new CursorLoader(this, QuezzleProviderContract.CHAT_PLACES_URI, ChatListAdapter.PROJECTION, null, null, null);
+			return new CursorLoader(this, QuezzleProviderContract.CHAT_PLACES_URI, ChatListAdapter.PROJECTION, null, null, CHARTS_ORDER);
 		}
 		return null;
 	}

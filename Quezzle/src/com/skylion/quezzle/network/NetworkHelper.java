@@ -8,10 +8,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.util.Log;
-import com.parse.ParseException;
-import com.parse.ParseFile;
-import com.parse.ParseQuery;
-import com.parse.ParseUser;
+import com.parse.*;
 import com.skylion.quezzle.contentprovider.QuezzleProviderContract;
 import com.skylion.quezzle.datamodel.Message;
 import com.skylion.quezzle.datamodel.ChatPlace;
@@ -51,12 +48,21 @@ public abstract class NetworkHelper {
                     ContentValues[] values = new ContentValues[chats.size()];
                     for (int i = 0; i < values.length; ++i) {
                         ChatPlace chatPlace = chats.get(i);
-                        values[i] = new ContentValues(5);
+                        values[i] = new ContentValues(9);
                         values[i].put(ChatPlaceTable.OBJECT_ID_COLUMN, chatPlace.getObjectId());
                         values[i].put(ChatPlaceTable.CREATED_AT_COLUMN, chatPlace.getCreatedAt().getTime());
                         values[i].put(ChatPlaceTable.UPDATED_AT_COLUMN, chatPlace.getUpdatedAt().getTime());
                         values[i].put(ChatPlaceTable.NAME_COLUMN, chatPlace.getName());
                         values[i].put(ChatPlaceTable.DESCRIPTION_COLUMN, chatPlace.getDescription());
+                        values[i].put(ChatPlaceTable.CHAT_TYPE_COLUMN, chatPlace.getChatType());
+                        if (chatPlace.getChatType() == Constants.ChatType.GEO) {
+                            ParseGeoPoint location = chatPlace.getLocation();
+                            if (location != null) {
+                                values[i].put(ChatPlaceTable.LATITUDE_COLUMN, location.getLatitude());
+                                values[i].put(ChatPlaceTable.LONGITUDE_COLUMN, location.getLongitude());
+                            }
+                            values[i].put(ChatPlaceTable.RADIUS_COLUMN, chatPlace.getRadius());
+                        }
                     }
 
                     contentResolver.bulkInsert(QuezzleProviderContract.CHAT_PLACES_URI, values);
@@ -266,10 +272,14 @@ public abstract class NetworkHelper {
     }
 
     public static void createChat(String chatName, String chatDescription,
+                                  int chatType, double latitude, double longitude, int radius,
                                   ContentResolver contentResolver, OnResultListener listener) {
         ChatPlace chatPlace = new ChatPlace();
         chatPlace.setName(chatName);
         chatPlace.setDescription(chatDescription);
+        chatPlace.setChatType(chatType);
+        chatPlace.setLocation(new ParseGeoPoint(latitude, longitude));
+        chatPlace.setRadius(radius);
 
         try {
             //save chat in server
