@@ -8,7 +8,7 @@
         android:id="@+id/nameText_profileScreen"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/avatarView_profileScreen"
+        android:layout_below="@+id/avatarView_profileScreen"
         android:layout_centerHorizontal="true"
         android:gravity="center"
         android:text="@string/profile_update_text"
