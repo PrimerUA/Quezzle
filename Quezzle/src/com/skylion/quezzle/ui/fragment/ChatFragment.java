@@ -5,6 +5,7 @@ import android.app.Fragment;
 import android.app.LoaderManager;
 import android.content.*;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -17,6 +18,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.*;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -25,6 +28,13 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.CircleOptions;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.parse.ParseUser;
 import com.skylion.quezzle.R;
 import com.skylion.quezzle.contentprovider.QuezzleProviderContract;
@@ -40,6 +50,7 @@ import com.skylion.quezzle.utility.Constants;
  * this template use File | Settings | File Templates.
  */
 public class ChatFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, LocationListener {
+    private static final float DEFAULT_CAMERA_ZOOM_LEVEL = 15f;
 	private static final String CHAT_MESSAGES_ORDER = FullMessageTable.UPDATED_AT_COLUMN + " DESC";
     private static final String[] CHAT_INFO_PROJECTION = new String[] {ChatPlaceTable.NAME_COLUMN, ChatPlaceTable.IS_SUBSCRIBED_COLUMN,
                                                                        ChatPlaceTable.CHAT_TYPE_COLUMN, ChatPlaceTable.LONGITUDE_COLUMN,
@@ -79,8 +90,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     private CheckBox subscribed;
 
     private int chatType;
-    private double chatLongitude;
-    private double chatLatitude;
+    private LatLng chatPosition;
     private int chatRadius;
     private Location currentUserLocation;
     float[] distanceResults = new float[1];
@@ -89,6 +99,10 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private NewMessageEventReceiver receiver = new NewMessageEventReceiver();
 	private SendMessageNotificationReceiver sendMessageNotificationReceiver = new SendMessageNotificationReceiver();
+
+    private GoogleMap map;
+    private MenuItem showChatPositionItem;
+    private View mapContainer;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -100,6 +114,9 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 		getActivity().getActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.blue));
 
 		View rootView = inflater.inflate(R.layout.chat_fragment, container, false);
+
+        map = ((MapFragment)getFragmentManager().findFragmentById(R.id.map)).getMap();
+        map.setMyLocationEnabled(true);
 
 		send = (ImageView) rootView.findViewById(R.id.send);
 		send.setOnClickListener(new View.OnClickListener() {
@@ -124,9 +141,16 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 		messageListAdapter = new MessageListAdapter(getActivity(), MessageListAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
 		messageList.setAdapter(messageListAdapter);
 
+        mapContainer = rootView.findViewById(R.id.map_container);
+        rootView.findViewById(R.id.hide_map).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideChatPosition();
+            }
+        });
+
         chatType = Constants.ChatType.USUAL;
-        chatLongitude = 0d;
-        chatLatitude = 0d;
+        chatPosition = new LatLng(0d, 0d);
         chatRadius = 0;
         currentUserLocation = null;
 
@@ -172,6 +196,9 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		inflater.inflate(R.menu.chat, menu);
+        showChatPositionItem = menu.findItem(R.id.show_chat_position);
+        showChatPositionItem.setShowAsAction(chatType == Constants.ChatType.GEO ? MenuItem.SHOW_AS_ACTION_ALWAYS :
+                                                                                  MenuItem.SHOW_AS_ACTION_NEVER);
 	}
 
 	@Override
@@ -180,6 +207,9 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 		case R.id.action_refresh:
 			NetworkService.reloadChat(getActivity(), getChatKey());
 			return true;
+        case R.id.show_chat_position :
+            showChatPosition();
+            return true;
 		case android.R.id.home:
 			getActivity().finish();
 			return true;
@@ -217,7 +247,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
                 showToast(R.string.no_location_error);
                 return false;
             } else {
-                Location.distanceBetween(chatLatitude, chatLongitude, currentUserLocation.getLatitude(),
+                Location.distanceBetween(chatPosition.latitude, chatPosition.longitude, currentUserLocation.getLatitude(),
                                          currentUserLocation.getLongitude(), distanceResults);
                 if (distanceResults[0] > chatRadius) {
                     showToast(R.string.not_in_zone_error);
@@ -231,6 +261,45 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private void showToast(int stringId) {
         Toast.makeText(getActivity(), stringId, Toast.LENGTH_SHORT).show();
+    }
+
+    private void hideChatPosition() {
+        if (mapContainer != null && mapContainer.getVisibility() == View.VISIBLE) {
+
+            //animate
+            Activity activity = getActivity();
+            if (activity != null) {
+                Animation hideAnimation = AnimationUtils.loadAnimation(activity, R.anim.slide_up);
+                hideAnimation.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {}
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        mapContainer.setVisibility(View.INVISIBLE);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {}
+                });
+                mapContainer.clearAnimation();
+                mapContainer.startAnimation(hideAnimation);
+            }
+        }
+    }
+
+    private void showChatPosition() {
+        if (mapContainer != null && mapContainer.getVisibility() != View.VISIBLE) {
+            mapContainer.setVisibility(View.VISIBLE);
+
+            //animate
+            Activity activity = getActivity();
+            if (activity != null) {
+                Animation showAnimation = AnimationUtils.loadAnimation(activity, R.anim.slide_down);
+                mapContainer.clearAnimation();
+                mapContainer.startAnimation(showAnimation);
+            }
+        }
     }
 
 	private String getChatKey() {
@@ -251,12 +320,40 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
             subscribed.setEnabled(true);
 
             chatType = cursor.getInt(cursor.getColumnIndex(ChatPlaceTable.CHAT_TYPE_COLUMN));
-            chatLongitude = cursor.getDouble(cursor.getColumnIndex(ChatPlaceTable.LONGITUDE_COLUMN));
-            chatLatitude = cursor.getDouble(cursor.getColumnIndex(ChatPlaceTable.LATITUDE_COLUMN));
+            chatPosition = new LatLng(cursor.getDouble(cursor.getColumnIndex(ChatPlaceTable.LATITUDE_COLUMN)),
+                                      cursor.getDouble(cursor.getColumnIndex(ChatPlaceTable.LONGITUDE_COLUMN)));
             chatRadius = cursor.getInt(cursor.getColumnIndex(ChatPlaceTable.RADIUS_COLUMN));
 
             if (chatType == Constants.ChatType.GEO) {
+                //enable "show_chat_position"
+                if (showChatPositionItem != null) {
+                    showChatPositionItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+                }
+
+                //setup map
+                if (map != null) {
+                    map.clear();
+
+                    //add marker of the chat
+                    map.addMarker(new MarkerOptions().position(chatPosition).title(chatName).draggable(false));
+
+                    //add area of the chat
+                    CircleOptions circleOptions = new CircleOptions().center(chatPosition).radius(chatRadius)
+                                                        .strokeColor(getResources().getColor(R.color.chat_area_border_color))
+                                                        .fillColor(getResources().getColor(R.color.chat_area_color));
+                    map.addCircle(circleOptions);
+
+                    //move camera to the marker
+                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(chatPosition, DEFAULT_CAMERA_ZOOM_LEVEL));
+                }
+
+                //start tracking position
                 startTrackUserPosition();
+            } else {
+                //disable "show_chat_position"
+                if (showChatPositionItem != null) {
+                    showChatPositionItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+                }
             }
 		}
 	}

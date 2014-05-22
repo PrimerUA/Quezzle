@@ -46,4 +46,5 @@
     <string name="location_connecting_error">Error connecting to the location service</string>
     <string name="no_location_error">You can not send message : Your location is unknown</string>
     <string name="not_in_zone_error">You can not send message : You are not in the zone of chat </string>
+    <string name="hide">Hide</string>
 </resources>
