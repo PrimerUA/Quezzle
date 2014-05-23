@@ -16,9 +16,7 @@ import android.widget.*;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.model.CircleOptions;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.*;
 import com.skylion.quezzle.R;
 import com.skylion.quezzle.notification.CreateChatNotification;
 import com.skylion.quezzle.service.NetworkService;
@@ -54,6 +52,8 @@ public class NewChatActivity extends QuezzleBaseActivity {
 
     private GoogleMap map;
     private View mapContainer;
+    private Circle chatAreaCircle;
+    private Marker chatMarker;
 
 	private CreateChatNotificationReceiver receiver = new CreateChatNotificationReceiver();
 
@@ -89,11 +89,18 @@ public class NewChatActivity extends QuezzleBaseActivity {
 
         //setup map
         map = ((MapFragment)getFragmentManager().findFragmentById(R.id.map)).getMap();
-        map.setMyLocationEnabled(true);
+        setupMap();
         mapContainer = findViewById(R.id.map_container);
-        findViewById(R.id.hide_map).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                hideMap();
+            }
+        });
+        findViewById(R.id.apply).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                applyNewChatPosition();
                 hideMap();
             }
         });
@@ -112,6 +119,34 @@ public class NewChatActivity extends QuezzleBaseActivity {
             }
         });
 	}
+
+    private void setupMap() {
+        if (map != null) {
+            map.setMyLocationEnabled(true);
+            map.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+                @Override
+                public void onMarkerDragStart(Marker marker) {
+                    if (chatAreaCircle != null) {
+                        chatAreaCircle.setCenter(marker.getPosition());
+                    }
+                }
+
+                @Override
+                public void onMarkerDrag(Marker marker) {
+                    if (chatAreaCircle != null) {
+                        chatAreaCircle.setCenter(marker.getPosition());
+                    }
+                }
+
+                @Override
+                public void onMarkerDragEnd(Marker marker) {
+                    if (chatAreaCircle != null) {
+                        chatAreaCircle.setCenter(marker.getPosition());
+                    }
+                }
+            });
+        }
+    }
 
     private void setDefaultValues() {
         radius.setText(Integer.toString(DEFAULT_RADIUS));
@@ -209,7 +244,6 @@ public class NewChatActivity extends QuezzleBaseActivity {
         }
 	}
 
-
     private void hideMap() {
         if (mapContainer != null && mapContainer.getVisibility() == View.VISIBLE) {
             //animate
@@ -232,15 +266,24 @@ public class NewChatActivity extends QuezzleBaseActivity {
     }
 
     private void showMap() {
-        if (mapContainer != null && mapContainer.getVisibility() != View.VISIBLE) {
-            addCurrentChatPosition();
+        if (isEditTextNotEmpty(longitude) && isEditTextNotEmpty(latitude) && isEditTextNotEmpty(radius)) {
+            if (mapContainer != null && mapContainer.getVisibility() != View.VISIBLE) {
+                addCurrentChatPosition();
 
-            mapContainer.setVisibility(View.VISIBLE);
+                mapContainer.setVisibility(View.VISIBLE);
 
-            //animate
-            Animation showAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down);
-            mapContainer.clearAnimation();
-            mapContainer.startAnimation(showAnimation);
+                //animate
+                Animation showAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down);
+                mapContainer.clearAnimation();
+                mapContainer.startAnimation(showAnimation);
+            }
+        }
+    }
+
+    private void applyNewChatPosition() {
+        if (chatMarker != null) {
+            latitude.setText(Double.toString(chatMarker.getPosition().latitude));
+            longitude.setText(Double.toString(chatMarker.getPosition().longitude));
         }
     }
 
@@ -253,16 +296,25 @@ public class NewChatActivity extends QuezzleBaseActivity {
             int chatRadius = Integer.parseInt(radius.getText().toString());
 
             //add marker of the chat
-            map.addMarker(new MarkerOptions().position(chatPosition).title(nameEdit.getText().toString()).draggable(true));
+            chatMarker = map.addMarker(new MarkerOptions().position(chatPosition).title(nameEdit.getText().toString()).draggable(true));
 
             //add area of the chat
             CircleOptions circleOptions = new CircleOptions().center(chatPosition).radius(chatRadius)
                     .strokeColor(getResources().getColor(R.color.chat_area_border_color))
                     .fillColor(getResources().getColor(R.color.chat_area_color));
-            map.addCircle(circleOptions);
+            chatAreaCircle = map.addCircle(circleOptions);
 
             //move camera to the marker
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(chatPosition, DEFAULT_CAMERA_ZOOM_LEVEL));
+        }
+    }
+
+    private boolean isEditTextNotEmpty(EditText target) {
+        if (TextUtils.isEmpty(target.getText())) {
+            target.setError(getString(R.string.empty_field));
+            return false;
+        } else {
+            return true;
         }
     }
 
