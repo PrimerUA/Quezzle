@@ -16,9 +16,10 @@
           android:orderInCategory="100"
           android:showAsAction="always" />
     
-    <item android:id="@+id/action_new_chat"
-          android:title="@string/edit_create"
+    <item android:id="@+id/action_create"
+          android:title="@string/create"
           android:icon="@drawable/plus"
           android:orderInCategory="100"
           android:showAsAction="always" />
+    
 </menu>

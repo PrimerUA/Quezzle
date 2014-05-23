@@ -79,7 +79,7 @@ public class ChatListAdapter extends CursorAdapter {
 			holder.type.setImageResource(R.drawable.point_main);
 			break;
 		case Constants.ChatType.GEO:
-			holder.type.setImageResource(android.R.drawable.ic_menu_compass);
+			holder.type.setImageResource(R.drawable.geo_number_icon);
 			break;
 		}
 	}

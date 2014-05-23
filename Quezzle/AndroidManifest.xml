@@ -53,8 +53,8 @@
         </activity>
         <activity
             android:name=".ui.activity.ChatActivity"
-            android:parentActivityName=".ui.activity.ChatsListActivity"
             android:launchMode="singleTop"
+            android:parentActivityName=".ui.activity.ChatsListActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".ui.activity.UserLoginActivity"
@@ -99,9 +99,10 @@
 
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyA9k7csvw0pzKzMAQL8ODravLCSHVw2nLk" />
-        <!-- AIzaSyA9k7csvw0pzKzMAQL8ODravLCSHVw2nLk -M -->
-        <!-- AIzaSyAewZDzTaCvF2MfX70A792m63xTPJOdLbw -К -->
+            android:value="AIzaSyBX7HOWPHeiy1Mx1addGDzLj2jXATlewzQ" />
+        <!-- AIzaSyBX7HOWPHeiy1Mx1addGDzLj2jXATlewzQ -Production -->
+        <!-- AIzaSyA9k7csvw0pzKzMAQL8ODravLCSHVw2nLk -Mike -->
+        <!-- AIzaSyAewZDzTaCvF2MfX70A792m63xTPJOdLbw -Roman -->
     </application>
 
 </manifest>

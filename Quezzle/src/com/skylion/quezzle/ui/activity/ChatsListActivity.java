@@ -107,7 +107,7 @@ public class ChatsListActivity extends QuezzleBaseActivity implements LoaderMana
 		if (id == R.id.action_profile) {
 			UserProfileActivity.start(ChatsListActivity.this);
 		}
-		if (id == R.id.action_new) {
+		if (id == R.id.action_create) {
 			NewChatActivity.start(this);
 		}
 		return super.onOptionsItemSelected(item);
