@@ -50,7 +50,7 @@ import com.skylion.quezzle.utility.Constants;
  * this template use File | Settings | File Templates.
  */
 public class ChatFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, LocationListener {
-    private static final float DEFAULT_CAMERA_ZOOM_LEVEL = 15f;
+    private static final float DEFAULT_CAMERA_ZOOM_LEVEL = 14f;
 	private static final String CHAT_MESSAGES_ORDER = FullMessageTable.UPDATED_AT_COLUMN + " DESC";
     private static final String[] CHAT_INFO_PROJECTION = new String[] {ChatPlaceTable.NAME_COLUMN, ChatPlaceTable.IS_SUBSCRIBED_COLUMN,
                                                                        ChatPlaceTable.CHAT_TYPE_COLUMN, ChatPlaceTable.LONGITUDE_COLUMN,

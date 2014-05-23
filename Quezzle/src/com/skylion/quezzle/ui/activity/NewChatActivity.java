@@ -1,5 +1,6 @@
 package com.skylion.quezzle.ui.activity;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.*;
 import android.location.Criteria;
@@ -9,7 +10,15 @@ import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.*;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.CircleOptions;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.skylion.quezzle.R;
 import com.skylion.quezzle.notification.CreateChatNotification;
 import com.skylion.quezzle.service.NetworkService;
@@ -19,6 +28,7 @@ import com.skylion.quezzle.service.NetworkService;
  * this template use File | Settings | File Templates.
  */
 public class NewChatActivity extends QuezzleBaseActivity {
+    private static final float DEFAULT_CAMERA_ZOOM_LEVEL = 14f;
     private static final int DEFAULT_RADIUS = 1000;
     private static final double MIN_LATITUDE = -90d;
     private static final double MAX_LATITUDE = 90d;
@@ -35,12 +45,15 @@ public class NewChatActivity extends QuezzleBaseActivity {
 	private EditText nameEdit;
 	private EditText descEdit;
     private RadioGroup chatType;
-    private LinearLayout geoChatParams;
+    private View geoChatParams;
     private EditText longitude;
     private EditText latitude;
     private EditText radius;
     private Button createButton;
 	private ProgressDialog progressDialog;
+
+    private GoogleMap map;
+    private View mapContainer;
 
 	private CreateChatNotificationReceiver receiver = new CreateChatNotificationReceiver();
 
@@ -59,7 +72,7 @@ public class NewChatActivity extends QuezzleBaseActivity {
         longitude = (EditText) findViewById(R.id.longitude);
         latitude = (EditText) findViewById(R.id.latitude);
         radius = (EditText) findViewById(R.id.radius);
-        geoChatParams = (LinearLayout) findViewById(R.id.geo_chat_params);
+        geoChatParams = findViewById(R.id.geo_chat_params);
         chatType = (RadioGroup) findViewById(R.id.chat_type);
         chatType.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -74,6 +87,17 @@ public class NewChatActivity extends QuezzleBaseActivity {
 
         setDefaultValues();
 
+        //setup map
+        map = ((MapFragment)getFragmentManager().findFragmentById(R.id.map)).getMap();
+        map.setMyLocationEnabled(true);
+        mapContainer = findViewById(R.id.map_container);
+        findViewById(R.id.hide_map).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideMap();
+            }
+        });
+
 		createButton = (Button) findViewById(R.id.createLocalChatButton);
 		createButton.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -81,6 +105,12 @@ public class NewChatActivity extends QuezzleBaseActivity {
                 createChat();
 			}
 		});
+        findViewById(R.id.show_map).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showMap();
+            }
+        });
 	}
 
     private void setDefaultValues() {
@@ -178,6 +208,63 @@ public class NewChatActivity extends QuezzleBaseActivity {
             NetworkService.createUsualChat(this, nameEdit.getText().toString(), descEdit.getText().toString());
         }
 	}
+
+
+    private void hideMap() {
+        if (mapContainer != null && mapContainer.getVisibility() == View.VISIBLE) {
+            //animate
+            Animation hideAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_up);
+            hideAnimation.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {}
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    mapContainer.setVisibility(View.INVISIBLE);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {}
+            });
+            mapContainer.clearAnimation();
+            mapContainer.startAnimation(hideAnimation);
+        }
+    }
+
+    private void showMap() {
+        if (mapContainer != null && mapContainer.getVisibility() != View.VISIBLE) {
+            addCurrentChatPosition();
+
+            mapContainer.setVisibility(View.VISIBLE);
+
+            //animate
+            Animation showAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down);
+            mapContainer.clearAnimation();
+            mapContainer.startAnimation(showAnimation);
+        }
+    }
+
+    private void addCurrentChatPosition() {
+        if (map != null) {
+            map.clear();
+
+            LatLng chatPosition = new LatLng(Double.parseDouble(latitude.getText().toString()),
+                                         Double.parseDouble(longitude.getText().toString()));
+            int chatRadius = Integer.parseInt(radius.getText().toString());
+
+            //add marker of the chat
+            map.addMarker(new MarkerOptions().position(chatPosition).title(nameEdit.getText().toString()).draggable(true));
+
+            //add area of the chat
+            CircleOptions circleOptions = new CircleOptions().center(chatPosition).radius(chatRadius)
+                    .strokeColor(getResources().getColor(R.color.chat_area_border_color))
+                    .fillColor(getResources().getColor(R.color.chat_area_color));
+            map.addCircle(circleOptions);
+
+            //move camera to the marker
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(chatPosition, DEFAULT_CAMERA_ZOOM_LEVEL));
+        }
+    }
 
 	private class CreateChatNotificationReceiver extends BroadcastReceiver {
 		@Override
