@@ -57,7 +57,7 @@
             android:layout_height="@dimen/avatar_size"
             android:layout_marginLeft="@dimen/d5p"
             android:layout_marginRight="@dimen/d5p"
-            android:src="@drawable/def_icon" />
+            android:src="@drawable/default_avatar" />
 
     </LinearLayout>
 

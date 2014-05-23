@@ -9,4 +9,16 @@
           android:icon="@drawable/refresh"
           android:orderInCategory="100"
           android:showAsAction="always" />
+    
+    <item android:id="@+id/action_profile"
+          android:title="@string/edit_profile"
+          android:icon="@drawable/settings"
+          android:orderInCategory="100"
+          android:showAsAction="always" />
+    
+    <item android:id="@+id/action_new_chat"
+          android:title="@string/edit_create"
+          android:icon="@drawable/plus"
+          android:orderInCategory="100"
+          android:showAsAction="always" />
 </menu>

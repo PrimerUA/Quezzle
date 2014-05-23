@@ -52,7 +52,7 @@ public class UserProfileFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.user_profile_fragment, container, false);
         
-        options = new DisplayImageOptions.Builder().showImageOnLoading(R.drawable.def_icon).showImageForEmptyUri(R.drawable.def_icon)
+        options = new DisplayImageOptions.Builder().showImageOnLoading(R.drawable.default_avatar).showImageForEmptyUri(R.drawable.default_avatar)
                 .imageScaleType(ImageScaleType.EXACTLY_STRETCHED).resetViewBeforeLoading(true).cacheInMemory(true).cacheOnDisc(true)
                 .displayer(new RoundedBitmapDisplayer(Integer.MAX_VALUE)).build();
 

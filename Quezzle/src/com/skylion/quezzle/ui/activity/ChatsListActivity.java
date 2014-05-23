@@ -10,7 +10,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ListView;
 
 import android.widget.Toast;
@@ -23,16 +22,15 @@ import com.skylion.quezzle.service.NetworkService;
 import com.skylion.quezzle.ui.adapter.ChatListAdapter;
 import com.skylion.quezzle.utility.Constants;
 
-public class ChatsListActivity extends QuezzleBaseActivity implements View.OnClickListener, LoaderManager.LoaderCallbacks<Cursor> {
+public class ChatsListActivity extends QuezzleBaseActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 	private static final int LOAD_CHATS_ID = 0;
-    private static final String CHARTS_ORDER = ChatPlaceTable.CREATED_AT_COLUMN + " DESC";
+	private static final String CHARTS_ORDER = ChatPlaceTable.CREATED_AT_COLUMN + " DESC";
 
-    private boolean firstLoad = true;
+	private boolean firstLoad = true;
 	private ListView chatsList;
 	private ChatListAdapter adapter;
-	private Button createButton;
 
-    private ReloadChatListNotificationReceiver receiver = new ReloadChatListNotificationReceiver();
+	private ReloadChatListNotificationReceiver receiver = new ReloadChatListNotificationReceiver();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -40,11 +38,13 @@ public class ChatsListActivity extends QuezzleBaseActivity implements View.OnCli
 		setContentView(R.layout.activity_chats);
 
 		ParseUser currentUser = ParseUser.getCurrentUser();
-		getActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.blue));
+		getActionBar().setDisplayShowHomeEnabled(false);
+		getActionBar().setDisplayShowTitleEnabled(false);
+		getActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.name_top));
 		if (currentUser != null) {
 			// do stuff with the user
 		} else {
-            UserLoginActivity.start(this);
+			UserLoginActivity.start(this);
 		}
 
 		Log.d(Constants.LOG_TAG, "!=" + getIntent().getAction());
@@ -61,41 +61,31 @@ public class ChatsListActivity extends QuezzleBaseActivity implements View.OnCli
 		chatsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //get chat key from adapter
-                String chatKey = adapter.getChatKey(view, position, id);
+				// get chat key from adapter
+				String chatKey = adapter.getChatKey(view, position, id);
 
-                //show chat
-                ChatActivity.start(ChatsListActivity.this, chatKey);
-            }
+				// show chat
+				ChatActivity.start(ChatsListActivity.this, chatKey);
+			}
 		});
-
-		createButton = (Button) findViewById(R.id.createButton);
-		createButton.setOnClickListener(this);
-
-        findViewById(R.id.editProfileButton).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                UserProfileActivity.start(ChatsListActivity.this);
-            }
-        });
 
 		getLoaderManager().initLoader(LOAD_CHATS_ID, null, this);
 	}
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, new IntentFilter(ReloadChatListNotification.ACTION));
-    }
+	@Override
+	public void onResume() {
+		super.onResume();
+		LocalBroadcastManager.getInstance(this).registerReceiver(receiver, new IntentFilter(ReloadChatListNotification.ACTION));
+	}
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
-    }
+	@Override
+	public void onPause() {
+		super.onPause();
+		LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+	}
 
 	private void reloadChatList() {
-        NetworkService.reloadChatList(this);
+		NetworkService.reloadChatList(this);
 	}
 
 	@Override
@@ -114,12 +104,13 @@ public class ChatsListActivity extends QuezzleBaseActivity implements View.OnCli
 		if (id == R.id.action_refresh) {
 			reloadChatList();
 		}
+		if (id == R.id.action_profile) {
+			UserProfileActivity.start(ChatsListActivity.this);
+		}
+		if (id == R.id.action_new) {
+			NewChatActivity.start(this);
+		}
 		return super.onOptionsItemSelected(item);
-	}
-
-	@Override
-	public void onClick(View view) {
-        NewChatActivity.start(this);
 	}
 
 	@Override
@@ -133,10 +124,10 @@ public class ChatsListActivity extends QuezzleBaseActivity implements View.OnCli
 
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        if (firstLoad && cursor.getCount() == 0) {
-            reloadChatList();
-        }
-        firstLoad = false;
+		if (firstLoad && cursor.getCount() == 0) {
+			reloadChatList();
+		}
+		firstLoad = false;
 
 		adapter.swapCursor(cursor);
 	}
@@ -146,14 +137,14 @@ public class ChatsListActivity extends QuezzleBaseActivity implements View.OnCli
 		adapter.swapCursor(null);
 	}
 
-    private class ReloadChatListNotificationReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (!ReloadChatListNotification.isSuccessful(intent)) {
-                Toast.makeText(ChatsListActivity.this, getString(R.string.error_reloading_chat_list,
-                        ReloadChatListNotification.getErrorMessage(intent)),
-                        Toast.LENGTH_LONG).show();
-            }
-        }
-    }
+	private class ReloadChatListNotificationReceiver extends BroadcastReceiver {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (!ReloadChatListNotification.isSuccessful(intent)) {
+				Toast.makeText(ChatsListActivity.this,
+						getString(R.string.error_reloading_chat_list, ReloadChatListNotification.getErrorMessage(intent)),
+						Toast.LENGTH_LONG).show();
+			}
+		}
+	}
 }

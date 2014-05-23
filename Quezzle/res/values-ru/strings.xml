@@ -46,7 +46,10 @@
     <string name="location_connecting_error">Ошибка подключения к сервису геопозиционирования</string>
     <string name="no_location_error">Вы не можете отправить сообщение : Ваше местоположение неизвестно</string>
     <string name="not_in_zone_error">Вы не можете отправить сообщение : Вы не в зоне чата </string>
-    <string name="hide">Спрятать</string>
+    <string name="hide">Спрятать карту</string>
     <string name="cancel">Отмена</string>
     <string name="apply">Применить</string>
+    <string name="message_hint">Введите сообщение</string>
+    <string name="chat_unsubscribed">Отписались от этого чата</string>
+    <string name="chat_subscribed">Подписались на этот чат</string>
 </resources>

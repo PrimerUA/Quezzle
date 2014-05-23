@@ -20,9 +20,10 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_margin="@dimen/d10p"
-        android:textStyle="bold"
         android:background="@drawable/create_button"
-        android:text="@string/save" />
+        android:text="@string/save"
+        android:textColor="@android:color/white"
+        android:textStyle="bold" />
 
     <ImageView
         android:id="@+id/avatarView_profileScreen"
@@ -32,6 +33,6 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="@dimen/d25p"
         android:layout_marginTop="126dp"
-        android:src="@drawable/def_icon" />
+        android:src="@drawable/default_avatar" />
 
 </RelativeLayout>

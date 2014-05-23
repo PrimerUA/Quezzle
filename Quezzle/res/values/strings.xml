@@ -49,4 +49,7 @@
     <string name="hide">Hide</string>
     <string name="cancel">Cancel</string>
     <string name="apply">Apply</string>
+    <string name="message_hint">Input message</string>
+    <string name="chat_unsubscribed">Unsubscribed from current chat</string>
+    <string name="chat_subscribed">Subscribed to current chat</string>
 </resources>

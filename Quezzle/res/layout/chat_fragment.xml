@@ -2,11 +2,12 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
      android:layout_width="match_parent"
      android:layout_height="match_parent">
+
     <LinearLayout
         android:id="@+id/LinearLayout1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/main_bg"
+        android:background="@android:color/white"
         android:gravity="center"
         android:orientation="vertical" >
 
@@ -22,13 +23,9 @@
             android:id="@+id/messages_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
-
-        <CheckBox
-            android:id="@+id/subscribe"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/subscribe" />
+            android:layout_weight="1"
+            android:divider="@color/chat_separator"
+            android:dividerHeight="1dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -37,13 +34,22 @@
             android:gravity="center"
             android:orientation="horizontal" >
 
+            <CheckBox
+                android:id="@+id/subscribe"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/user_nickname" />
+
             <EditText
                 android:id="@+id/message"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_marginTop="5dp"
                 android:layout_weight="1"
-                android:background="@drawable/textlines"
+                android:background="@drawable/messege_field"
+                android:hint="@string/message_hint"
                 android:inputType="textCapSentences|textMultiLine"
                 android:maxLength="@integer/L140"
                 android:maxLines="4"
@@ -57,7 +63,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="@dimen/d5p"
-                android:src="@drawable/sent_button" />
+                android:src="@drawable/send" />
 
         </LinearLayout>
 
@@ -67,13 +73,19 @@
         android:id="@+id/map_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/main_bg"
         android:visibility="invisible" >
+
         <Button
             android:id="@+id/hide_map"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:text="@string/hide" />
+            android:layout_margin="1dp"
+            android:background="@drawable/create_button"
+            android:text="@string/hide"
+            android:textColor="@android:color/white" />
+
         <fragment
             xmlns:map="http://schemas.android.com/apk/res-auto"
             android:id="@+id/map"

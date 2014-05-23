@@ -1,90 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_height="fill_parent" >
 
     <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-
-            android:gravity="center"
-            android:background="#BDAEC6">
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="#BDAEC6"
+        android:gravity="center"
+        android:orientation="vertical" >
 
         <TextView
+            android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="@string/chat_name"
-            android:id="@+id/textView" />
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <EditText
+            android:id="@+id/nameEdit"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/nameEdit" />
+            android:layout_height="wrap_content" />
 
         <TextView
+            android:id="@+id/textView2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="@string/brief_description"
-            android:id="@+id/textView2" />
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <EditText
+            android:id="@+id/descriptionEdit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textMultiLine"
             android:ems="10"
-            android:id="@+id/descriptionEdit" />
+            android:inputType="textMultiLine" />
 
         <LinearLayout
             android:id="@+id/geo_chat_params"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:visibility="gone">
+            android:visibility="gone" >
+
             <TextView
+                android:id="@+id/textView2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="@string/chat_latitude"
-                android:id="@+id/textView2" />
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
             <EditText
                 android:id="@+id/latitude"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal|numberSigned" />
+
             <TextView
+                android:id="@+id/textView2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="@string/chat_longitude"
-                android:id="@+id/textView2" />
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
             <EditText
                 android:id="@+id/longitude"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal|numberSigned" />
+
             <TextView
+                android:id="@+id/textView2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="@string/chat_radius"
-                android:id="@+id/textView2" />
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
             <EditText
                 android:id="@+id/radius"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="number" />
+
             <ImageButton
                 android:id="@+id/show_map"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_dialog_map" />
+                android:src="@drawable/map" />
         </LinearLayout>
 
         <RadioGroup
@@ -92,7 +97,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:weightSum="2">
+            android:weightSum="2" >
+
             <RadioButton
                 android:id="@+id/type_usual"
                 android:layout_width="0dip"
@@ -100,6 +106,7 @@
                 android:layout_weight="1"
                 android:checked="true"
                 android:text="@string/usual_chat" />
+
             <RadioButton
                 android:id="@+id/type_geo"
                 android:layout_width="0dip"
@@ -119,38 +126,49 @@
     </LinearLayout>
 
     <RelativeLayout
-    android:id="@+id/map_container"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:visibility="invisible" >
-    <View
-        android:id="@+id/anchor"
-        android:layout_width="1px"
-        android:layout_height="1px"
-        android:layout_centerHorizontal="true"
-        android:background="@android:color/transparent" />
-    <Button
-        android:id="@+id/cancel"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_toLeftOf="@id/anchor"
-        android:text="@string/cancel" />
-    <Button
-        android:id="@+id/apply"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_toRightOf="@id/anchor"
-        android:text="@string/apply" />
-    <fragment
-        xmlns:map="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/map"
+        android:id="@+id/map_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/cancel"
-        android:name="com.google.android.gms.maps.MapFragment"
-        map:mapType="normal"
-        map:uiCompass="false" />
+        android:visibility="invisible" >
+
+        <View
+            android:id="@+id/anchor"
+            android:layout_width="1px"
+            android:layout_height="1px"
+            android:layout_centerHorizontal="true"
+            android:background="@android:color/transparent" />
+
+        <Button
+            android:id="@+id/cancel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="1dp"
+            android:layout_toLeftOf="@id/anchor"
+            android:background="@drawable/create_button"
+            android:text="@string/cancel"
+            android:textColor="@android:color/white" />
+
+        <Button
+            android:id="@+id/apply"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="1dp"
+            android:layout_toRightOf="@id/anchor"
+            android:background="@drawable/create_button"
+            android:text="@string/apply"
+            android:textColor="@android:color/white" />
+
+        <fragment
+            xmlns:map="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.MapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@id/cancel"
+            map:mapType="normal"
+            map:uiCompass="false" />
     </RelativeLayout>
+
 </FrameLayout>

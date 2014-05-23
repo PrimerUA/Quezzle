@@ -50,7 +50,7 @@ public class MessageListAdapter extends CursorAdapter {
 
         this.context = context;
 
-		options = new DisplayImageOptions.Builder().showImageOnLoading(R.drawable.def_icon).showImageForEmptyUri(R.drawable.def_icon)
+		options = new DisplayImageOptions.Builder().showImageOnLoading(R.drawable.default_avatar).showImageForEmptyUri(R.drawable.default_avatar)
 				.imageScaleType(ImageScaleType.EXACTLY_STRETCHED).resetViewBeforeLoading(true).cacheInMemory(true).cacheOnDisc(true)
 				.displayer(new RoundedBitmapDisplayer(Integer.MAX_VALUE)).build();
         onAvatarClickListener = new View.OnClickListener() {
@@ -71,17 +71,17 @@ public class MessageListAdapter extends CursorAdapter {
 		// create view
 		LayoutInflater inflater = LayoutInflater.from(context);
 		View view;
-		if (cursor.getPosition() % 2 == 0) {
+//		if (cursor.getPosition() % 2 == 0) {
 			view = inflater.inflate(R.layout.message_list_item_left, viewGroup, false);
 			Animation animation = AnimationUtils.loadAnimation(context, R.anim.message_push_in_left);
 			animation.setDuration(500);
 			view.startAnimation(animation);
-		} else {
-			view = inflater.inflate(R.layout.message_list_item_right, viewGroup, false);
-			Animation animation = AnimationUtils.loadAnimation(context, R.anim.message_push_in_right);
-			animation.setDuration(500);
-			view.startAnimation(animation);
-		}
+//		} else {
+//			view = inflater.inflate(R.layout.message_list_item_right, viewGroup, false);
+//			Animation animation = AnimationUtils.loadAnimation(context, R.anim.message_push_in_right);
+//			animation.setDuration(500);
+//			view.startAnimation(animation);
+//		}
 
 		// create holder
 		ViewHolder holder = new ViewHolder();
@@ -110,10 +110,16 @@ public class MessageListAdapter extends CursorAdapter {
         ImageLoader.getInstance().displayImage(cursor.getString(authorAvatarColumnIndex), holder.avatar, options);
 		holder.date.setText(DATE_FORMAT.format(date));
 		holder.text.setText(cursor.getString(messageColumnIndex));
-        int color = context.getResources().getColor(cursor.getInt(isAdminColumnIndex) == 1 ?
-                                                    R.color.admin_message_text_color :
-                                                    R.color.user_message_text_color);
-        holder.text.setTextColor(color);
+		if(cursor.getInt(isAdminColumnIndex) == 1)
+			holder.content.setBackgroundColor(context.getResources().getColor(R.color.message_admin_background));
+		else
+			holder.content.setBackgroundColor(context.getResources().getColor(R.color.message_user_background));
+		// int color =
+		// context.getResources().getColor(cursor.getInt(isAdminColumnIndex) ==
+		// 1 ?
+		// R.color.admin_message_text_color :
+		// R.color.user_message_text_color);
+        //holder.text.setTextColor(color);
     }
 
 	private boolean isColumnIndexesCalculated() {
