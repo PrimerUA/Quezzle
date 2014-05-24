@@ -40,6 +40,7 @@ import com.skylion.quezzle.R;
 import com.skylion.quezzle.contentprovider.QuezzleProviderContract;
 import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
 import com.skylion.quezzle.datastorage.table.FullMessageTable;
+import com.skylion.quezzle.datastorage.table.MessageTable;
 import com.skylion.quezzle.notification.SendMessageNotification;
 import com.skylion.quezzle.service.NetworkService;
 import com.skylion.quezzle.ui.adapter.MessageListAdapter;
@@ -51,7 +52,6 @@ import com.skylion.quezzle.utility.Constants;
  */
 public class ChatFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, LocationListener {
 	private static final float DEFAULT_CAMERA_ZOOM_LEVEL = 14f;
-	private static final String CHAT_MESSAGES_ORDER = FullMessageTable.UPDATED_AT_COLUMN + " DESC";
 	private static final String[] CHAT_INFO_PROJECTION = new String[] { ChatPlaceTable.NAME_COLUMN, ChatPlaceTable.IS_SUBSCRIBED_COLUMN,
 			ChatPlaceTable.CHAT_TYPE_COLUMN, ChatPlaceTable.LONGITUDE_COLUMN, ChatPlaceTable.LATITUDE_COLUMN, ChatPlaceTable.RADIUS_COLUMN };
 	private static final int LOAD_CHAT_INFO_ID = 0;
@@ -367,7 +367,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 			return new CursorLoader(getActivity(), uri, CHAT_INFO_PROJECTION, null, null, null);
 		case LOAD_MESSAGES_ID:
 			return new CursorLoader(getActivity(), QuezzleProviderContract.getMessagesUri(getChatKey()), MessageListAdapter.PROJECTION,
-					null, null, CHAT_MESSAGES_ORDER);
+					null, null, FullMessageTable.MESSAGES_ORDER_DESC);
 		}
 		return null;
 	}

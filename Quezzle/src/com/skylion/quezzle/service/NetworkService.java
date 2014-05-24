@@ -393,7 +393,7 @@ public class NetworkService extends IntentService {
 
 	private Date getChatLastMessageDate(String chatKey) {
 		Cursor cursor = getContentResolver().query(QuezzleProviderContract.getMessagesUri(chatKey),
-				new String[] { FullMessageTable.UPDATED_AT_COLUMN }, null, null, FullMessageTable.UPDATED_AT_COLUMN + " DESC");
+				new String[] { FullMessageTable.UPDATED_AT_COLUMN }, null, null, FullMessageTable.MESSAGES_ORDER_DESC);
 		try {
 			if (cursor.moveToFirst()) {
 				return new Date(cursor.getLong(cursor.getColumnIndex(FullMessageTable.UPDATED_AT_COLUMN)));

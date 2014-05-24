@@ -69,10 +69,12 @@ public class QuezzleProvider extends ContentProvider {
                 break;
             case CHAT_MESSAGES_URI_INDICATOR :
                 queryBuilder.setTables(FullMessageTable.TABLE_NAME);
+                queryBuilder.setProjectionMap(FullMessageTable.PROJECTION_MAP);
                 queryBuilder.appendWhere(FullMessageTable.CHAT_KEY_COLUMN + "=" + addQuotes(uri.getPathSegments().get(1)));
                 break;
             case CHAT_MESSAGE_URI_INDICATOR :
                 queryBuilder.setTables(FullMessageTable.TABLE_NAME);
+                queryBuilder.setProjectionMap(FullMessageTable.PROJECTION_MAP);
                 queryBuilder.appendWhere(FullMessageTable.CHAT_KEY_COLUMN + "=" + addQuotes(uri.getPathSegments().get(1)));
                 queryBuilder.appendWhere(FullMessageTable.OBJECT_ID_COLUMN + "=" + addQuotes(uri.getLastPathSegment()));
                 break;
