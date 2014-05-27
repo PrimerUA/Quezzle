@@ -86,14 +86,10 @@
             android:text="@string/hide"
             android:textColor="@android:color/white" />
 
-        <fragment
-            xmlns:map="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/map"
+        <FrameLayout
+            android:id="@+id/map_fragment_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@id/hide_map"
-            android:name="com.google.android.gms.maps.MapFragment"
-            map:mapType="normal"
-            map:uiCompass="false" />
+            android:layout_above="@id/hide_map" />
     </RelativeLayout>
 </FrameLayout>

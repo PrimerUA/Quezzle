@@ -32,7 +32,7 @@ public class ChatsListActivity extends QuezzleBaseActivity implements LoaderMana
 
 	private ReloadChatListNotificationReceiver receiver = new ReloadChatListNotificationReceiver();
 
-	@Override
+    @Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_chats);

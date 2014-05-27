@@ -2,6 +2,7 @@ package com.skylion.quezzle.ui.fragment;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.app.LoaderManager;
 import android.content.*;
 import android.database.Cursor;
@@ -9,6 +10,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -99,7 +101,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 	private NewMessageEventReceiver receiver = new NewMessageEventReceiver();
 	private SendMessageNotificationReceiver sendMessageNotificationReceiver = new SendMessageNotificationReceiver();
 
-	private GoogleMap map;
+    private MapFragment mapFragment;
 	private MenuItem showChatPositionItem;
 	private View mapContainer;
 
@@ -114,8 +116,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
 		View rootView = inflater.inflate(R.layout.chat_fragment, container, false);
 
-		map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
-		map.setMyLocationEnabled(true);
+        addMapFragment();
 
 		send = (ImageView) rootView.findViewById(R.id.send);
 		send.setOnClickListener(new View.OnClickListener() {
@@ -155,6 +156,17 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
 		return rootView;
 	}
+
+    private void addMapFragment() {
+        //add and setup map
+        mapFragment = new MapFragment();
+        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+        try {
+            fragmentTransaction.add(R.id.map_fragment_container, mapFragment);
+        } finally {
+            fragmentTransaction.commit();
+        }
+    }
 
 	@Override
 	public void onResume() {
@@ -331,9 +343,15 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 					showChatPositionItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 				}
 
+                GoogleMap map = mapFragment.getMap();
 				// setup map
 				if (map != null) {
 					map.clear();
+
+                    //setup map
+                    map.setMyLocationEnabled(true);
+                    map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                    map.getUiSettings().setCompassEnabled(false);
 
 					// add marker of the chat
 					map.addMarker(new MarkerOptions().position(chatPosition).title(chatName).draggable(false));
