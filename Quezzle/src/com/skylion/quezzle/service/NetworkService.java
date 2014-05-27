@@ -248,7 +248,7 @@ public class NetworkService extends IntentService {
 		// Creates an explicit intent for an Activity in your app
 		Intent resultIntent = ChatActivity.getIntent(this, chatKey);
 		PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent,
-				PendingIntent.FLAG_UPDATE_CURRENT);
+				PendingIntent.FLAG_CANCEL_CURRENT);
 		builder.setContentIntent(resultPendingIntent);
 		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		// mId allows you to update the notification later on.
