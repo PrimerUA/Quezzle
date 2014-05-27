@@ -19,6 +19,7 @@ import com.parse.ParseUser;
 import com.parse.SignUpCallback;
 import com.skylion.quezzle.R;
 import com.skylion.quezzle.datamodel.QuezzleUserMetadata;
+import com.skylion.quezzle.service.NetworkService;
 
 public class UserLoginActivity extends QuezzleBaseActivity implements GooglePlayServicesClient.ConnectionCallbacks,
 		GooglePlayServicesClient.OnConnectionFailedListener {
@@ -116,6 +117,10 @@ public class UserLoginActivity extends QuezzleBaseActivity implements GooglePlay
 				public void done(ParseException e) {
 					if (e == null) {
 						progressDialog.dismiss();
+
+                        //update chat list
+                        NetworkService.reloadChatList(UserLoginActivity.this);
+
 						finish();
 					} else {
 						ParseUser.logInInBackground(plusClient.getCurrentPerson().getDisplayName(), DEFAULT_PASSWORD, new LogInCallback() {
@@ -127,6 +132,10 @@ public class UserLoginActivity extends QuezzleBaseActivity implements GooglePlay
 
                                     progressDialog.dismiss();
                                     Toast.makeText(UserLoginActivity.this, getString(R.string.welcome), Toast.LENGTH_SHORT).show();
+
+                                    //update chat list
+                                    NetworkService.reloadChatList(UserLoginActivity.this);
+
                                     finish();
                                 } else {
                                     progressDialog.dismiss();
