@@ -5,6 +5,7 @@ import android.content.*;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,6 +30,7 @@ public class ChatsListActivity extends QuezzleBaseActivity implements LoaderMana
 	private boolean firstLoad = true;
 	private ListView chatsList;
 	private ChatListAdapter adapter;
+    private SwipeRefreshLayout refresh;
 
 	private ReloadChatListNotificationReceiver receiver = new ReloadChatListNotificationReceiver();
 
@@ -68,6 +70,15 @@ public class ChatsListActivity extends QuezzleBaseActivity implements LoaderMana
 				ChatActivity.start(ChatsListActivity.this, chatKey);
 			}
 		});
+        refresh = (SwipeRefreshLayout)findViewById(R.id.refresh);
+        refresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                refresh.setRefreshing(false);
+
+                reloadChatList();
+            }
+        });
 
 		getLoaderManager().initLoader(LOAD_CHATS_ID, null, this);
 	}
