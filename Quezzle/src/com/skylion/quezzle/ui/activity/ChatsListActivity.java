@@ -11,12 +11,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
 
 import android.widget.Toast;
 import com.parse.ParseUser;
 import com.skylion.quezzle.R;
 import com.skylion.quezzle.contentprovider.QuezzleProviderContract;
+import com.skylion.quezzle.datastorage.SettingsSPStorage;
 import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
 import com.skylion.quezzle.notification.ReloadChatListNotification;
 import com.skylion.quezzle.service.NetworkService;
@@ -31,6 +33,7 @@ public class ChatsListActivity extends QuezzleBaseActivity implements LoaderMana
 	private ListView chatsList;
 	private ChatListAdapter adapter;
     private SwipeRefreshLayout refresh;
+    private ImageView reloadHint;
 
 	private ReloadChatListNotificationReceiver receiver = new ReloadChatListNotificationReceiver();
 
@@ -79,7 +82,18 @@ public class ChatsListActivity extends QuezzleBaseActivity implements LoaderMana
                 reloadChatList();
             }
         });
+        reloadHint = (ImageView)findViewById(R.id.reload_hint);
+        reloadHint.setVisibility(SettingsSPStorage.isReloadHintShown(this) ? View.INVISIBLE : View.VISIBLE);
+        reloadHint.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View hintView) {
+                //hide hint
+                reloadHint.setVisibility(View.INVISIBLE);
 
+                //save that hint was shown
+                SettingsSPStorage.setReloadHintShown(ChatsListActivity.this, true);
+            }
+        });
 		getLoaderManager().initLoader(LOAD_CHATS_ID, null, this);
 	}
 
@@ -112,13 +126,9 @@ public class ChatsListActivity extends QuezzleBaseActivity implements LoaderMana
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
-		if (id == R.id.action_refresh) {
-			reloadChatList();
-		}
 		if (id == R.id.action_profile) {
 			UserProfileActivity.start(ChatsListActivity.this);
-		}
-		if (id == R.id.action_create) {
+		} else if (id == R.id.action_create) {
 			NewChatActivity.start(this);
 		}
 		return super.onOptionsItemSelected(item);
