@@ -77,8 +77,6 @@ public class ChatsListActivity extends QuezzleBaseActivity implements LoaderMana
         refresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                refresh.setRefreshing(false);
-
                 reloadChatList();
             }
         });
@@ -166,6 +164,9 @@ public class ChatsListActivity extends QuezzleBaseActivity implements LoaderMana
 						getString(R.string.error_reloading_chat_list, ReloadChatListNotification.getErrorMessage(intent)),
 						Toast.LENGTH_LONG).show();
 			}
+
+            //hide progress
+            refresh.setRefreshing(false);
 		}
 	}
 }
