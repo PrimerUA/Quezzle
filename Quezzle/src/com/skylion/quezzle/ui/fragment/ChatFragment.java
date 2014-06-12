@@ -6,12 +6,11 @@ import android.app.FragmentTransaction;
 import android.app.LoaderManager;
 import android.content.*;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -35,14 +34,13 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.parse.ParseUser;
 import com.skylion.quezzle.R;
 import com.skylion.quezzle.contentprovider.QuezzleProviderContract;
 import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
 import com.skylion.quezzle.datastorage.table.FullMessageTable;
-import com.skylion.quezzle.datastorage.table.MessageTable;
+import com.skylion.quezzle.notification.ReloadChatNotification;
 import com.skylion.quezzle.notification.SendMessageNotification;
 import com.skylion.quezzle.service.NetworkService;
 import com.skylion.quezzle.ui.adapter.MessageListAdapter;
@@ -85,7 +83,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 	private ImageView send;
 	private EditText message;
 	private ListView messageList;
-	private ProgressBar progressBar;
+    private SwipeRefreshLayout refresh;
 	private MessageListAdapter messageListAdapter;
 
 	private CheckBox subscribed;
@@ -100,6 +98,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
 	private NewMessageEventReceiver receiver = new NewMessageEventReceiver();
 	private SendMessageNotificationReceiver sendMessageNotificationReceiver = new SendMessageNotificationReceiver();
+    private ReloadChatNotificationReceiver reloadChatNotificationReceiver = new ReloadChatNotificationReceiver();
 
     private MapFragment mapFragment;
 	private MenuItem showChatPositionItem;
@@ -118,6 +117,14 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
         addMapFragment();
 
+        refresh = (SwipeRefreshLayout)rootView.findViewById(R.id.refresh);
+        refresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                NetworkService.reloadChat(getActivity(), getChatKey());
+            }
+        });
+
 		send = (ImageView) rootView.findViewById(R.id.send);
 		send.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -125,7 +132,6 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 				sendMessage();
 			}
 		});
-		progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar_chatFragment);
 		message = (EditText) rootView.findViewById(R.id.message);
 
 		subscribed = (CheckBox) rootView.findViewById(R.id.subscribe);
@@ -175,6 +181,8 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 		getActivity().registerReceiver(receiver, new IntentFilter(NetworkService.NEW_MESSAGE_ACTION));
 		LocalBroadcastManager.getInstance(getActivity()).registerReceiver(sendMessageNotificationReceiver,
 				new IntentFilter(SendMessageNotification.ACTION));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(reloadChatNotificationReceiver,
+                new IntentFilter(ReloadChatNotification.ACTION));
 	}
 
 	@Override
@@ -184,6 +192,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 		Activity activity = getActivity();
 		activity.unregisterReceiver(receiver);
 		LocalBroadcastManager.getInstance(activity).unregisterReceiver(sendMessageNotificationReceiver);
+        LocalBroadcastManager.getInstance(activity).unregisterReceiver(reloadChatNotificationReceiver);
 
 		// stop tracking location
 		currentUserLocation = null;
@@ -215,15 +224,12 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.action_refresh:
-			NetworkService.reloadChat(getActivity(), getChatKey());
-			return true;
-		case R.id.show_chat_position:
-			showChatPosition();
-			return true;
-		case android.R.id.home:
-			getActivity().finish();
-			return true;
+            case R.id.show_chat_position:
+                showChatPosition();
+                return true;
+            case android.R.id.home:
+                getActivity().finish();
+                return true;
 		}
 
 		return super.onOptionsItemSelected(item);
@@ -235,7 +241,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 			if (canSendMessage()) {
 				ParseUser user = ParseUser.getCurrentUser();
 				if (user != null) {
-					progressBar.setVisibility(View.VISIBLE);
+					showProgress();
 					NetworkService.sendMessage(getActivity(), getChatKey(), text, user.getObjectId());
 
 					// subscribe automatically
@@ -251,6 +257,14 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 			showToast(R.string.empty_message);
 		}
 	}
+
+    private void showProgress() {
+        refresh.setRefreshing(true);
+    }
+
+    private void hideProgress() {
+        refresh.setRefreshing(false);
+    }
 
 	private boolean canSendMessage() {
 		if (chatType == Constants.ChatType.GEO) {
@@ -491,7 +505,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 			if (getChatKey().equals(intent.getStringExtra(NetworkService.CHAT_KEY_EXTRA))) {
 				setResultCode(Activity.RESULT_OK);
 				abortBroadcast();
-				progressBar.setVisibility(View.GONE);
+                hideProgress();
 			}
 		}
 	}
@@ -505,4 +519,11 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 			}
 		}
 	}
+
+    private class ReloadChatNotificationReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            hideProgress();
+        }
+    }
 }

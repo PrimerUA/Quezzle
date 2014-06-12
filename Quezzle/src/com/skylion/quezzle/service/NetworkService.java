@@ -21,10 +21,7 @@ import com.skylion.quezzle.datamodel.QuezzleUserMetadata;
 import com.skylion.quezzle.datastorage.table.ChatPlaceTable;
 import com.skylion.quezzle.datastorage.table.FullMessageTable;
 import com.skylion.quezzle.network.NetworkHelper;
-import com.skylion.quezzle.notification.CreateChatNotification;
-import com.skylion.quezzle.notification.ReloadChatListNotification;
-import com.skylion.quezzle.notification.SendMessageNotification;
-import com.skylion.quezzle.notification.UpdateProfileNotification;
+import com.skylion.quezzle.notification.*;
 import com.skylion.quezzle.ui.activity.ChatActivity;
 import com.skylion.quezzle.utility.Constants;
 import com.skylion.quezzle.utility.Utils;
@@ -375,6 +372,9 @@ public class NetworkService extends IntentService {
 
 		// load new data
         NetworkHelper.loadAllChatMessages(chatKey, messagesUri, null, getContentResolver(), null);
+
+        //notify reload chat finished
+        sendLocalBroadcast(ReloadChatNotification.createResult());
 	}
 
     private boolean isSubscribedForChat(String chatKey) {
