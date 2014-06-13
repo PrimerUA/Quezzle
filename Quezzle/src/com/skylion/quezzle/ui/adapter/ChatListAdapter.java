@@ -26,8 +26,8 @@ public class ChatListAdapter extends CursorAdapter {
 	private int objectIdColumnIndex = -1;
 	private int chatTypeColumnIndex = -1;
 
-	public ChatListAdapter(Context context, int flags) {
-		super(context, null, flags);
+	public ChatListAdapter(Context context) {
+		super(context, null, 0);
 	}
 
 	private boolean isColumnIndexesCalculated() {

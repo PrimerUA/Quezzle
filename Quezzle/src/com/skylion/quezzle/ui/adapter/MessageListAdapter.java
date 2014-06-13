@@ -44,8 +44,8 @@ public class MessageListAdapter extends CursorAdapter {
 	private DisplayImageOptions options;
     private View.OnClickListener onAvatarClickListener;
 
-	public MessageListAdapter(Context context, int flags) {
-		super(context, null, flags);
+	public MessageListAdapter(Context context) {
+		super(context, null, 0);
 
         this.context = context;
 

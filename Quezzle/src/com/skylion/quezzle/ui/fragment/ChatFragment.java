@@ -144,7 +144,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 		});
 
 		messageList = (ListView) rootView.findViewById(R.id.messages_list);
-		messageListAdapter = new MessageListAdapter(getActivity(), MessageListAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+		messageListAdapter = new MessageListAdapter(getActivity());
 		messageList.setAdapter(messageListAdapter);
 
 		mapContainer = rootView.findViewById(R.id.map_container);

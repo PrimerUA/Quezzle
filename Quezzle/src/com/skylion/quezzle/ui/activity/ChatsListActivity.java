@@ -60,7 +60,7 @@ public class ChatsListActivity extends QuezzleBaseActivity implements LoaderMana
 			}
 		}
 
-		adapter = new ChatListAdapter(this, ChatListAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+		adapter = new ChatListAdapter(this);
 		chatsList = (ListView) findViewById(R.id.chatsList);
 		chatsList.setAdapter(adapter);
 		chatsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
