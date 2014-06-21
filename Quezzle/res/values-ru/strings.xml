@@ -52,4 +52,7 @@
     <string name="message_hint">Введите сообщение</string>
     <string name="chat_unsubscribed">Отписались от этого чата</string>
     <string name="chat_subscribed">Подписались на этот чат</string>
+    <string name="choose_location"> - укажите расположение чата на карте</string>
+    <string name="hint_refresh">Потяните пальцем вниз для обновления</string>
+    <string name="start">Начните общение зайдя в один из чатов или создайте свой</string>
 </resources>

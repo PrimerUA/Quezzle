@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent" >
+
     <android.support.v4.widget.SwipeRefreshLayout
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/refresh"
@@ -20,15 +21,45 @@
             android:background="@android:color/white"
             android:divider="@color/chat_separator"
             android:dividerHeight="1dp" />
-
     </android.support.v4.widget.SwipeRefreshLayout>
+
     <ImageView
         android:id="@+id/reload_hint"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clickable="true"
         android:alpha="0.8"
-        android:scaleType="center"
         android:background="@android:color/black"
-        android:src="@drawable/reload_hint" />
+        android:clickable="true"
+        android:scaleType="center"
+        android:src="@drawable/reload" />
+
+    <TextView
+        android:id="@+id/r1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/d25p"
+        android:text="@string/welcome"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/r2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/d50p"
+        android:gravity="center"
+        android:text="@string/start"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/r3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="@dimen/d25p"
+        android:text="@string/hint_refresh"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
 </FrameLayout>

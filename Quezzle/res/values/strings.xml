@@ -52,4 +52,7 @@
     <string name="message_hint">Input message</string>
     <string name="chat_unsubscribed">Unsubscribed from current chat</string>
     <string name="chat_subscribed">Subscribed to current chat</string>
+    <string name="choose_location"> - choose chat location on a map</string>
+    <string name="hint_refresh">Pull down to refresh chats list</string>
+    <string name="start">Start chatting by entering the desired chatroom or create new one</string>
 </resources>

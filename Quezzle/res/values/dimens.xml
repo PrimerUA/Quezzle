@@ -10,4 +10,5 @@
     <dimen name="d10p">10dp</dimen>
     <dimen name="d100p">100dp</dimen>
     <dimen name="upload_avatar_size">150px</dimen>
+    <dimen name="d50p">50dp</dimen>
 </resources>

@@ -89,6 +89,7 @@ public class UserLoginActivity extends QuezzleBaseActivity implements GooglePlay
 	public void onConnectionFailed(ConnectionResult result) {
 		if (result.hasResolution()) {
 			try {
+				progressDialog.dismiss();
 				result.startResolutionForResult(this, REQUEST_CODE_RESOLVE_ERR);
 			} catch (IntentSender.SendIntentException e) {
 				plusClient.connect();
@@ -108,10 +109,10 @@ public class UserLoginActivity extends QuezzleBaseActivity implements GooglePlay
 			user.setEmail(plusClient.getAccountName());
             user.put(QuezzleUserMetadata.IS_ADMIN, false);
             user.put(QuezzleUserMetadata.GPLUS_LINK, plusClient.getCurrentPerson().getUrl());
+            
             if (plusClient.getCurrentPerson().hasImage()) {
                 user.put(QuezzleUserMetadata.AVATAR_URL, processAvatarImageLink(plusClient.getCurrentPerson().getImage().getUrl()));
             }
-
 
 			user.signUpInBackground(new SignUpCallback() {
 				public void done(ParseException e) {

@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import android.widget.Toast;
 import com.parse.ParseUser;
@@ -32,12 +33,15 @@ public class ChatsListActivity extends QuezzleBaseActivity implements LoaderMana
 	private boolean firstLoad = true;
 	private ListView chatsList;
 	private ChatListAdapter adapter;
-    private SwipeRefreshLayout refresh;
-    private ImageView reloadHint;
+	private SwipeRefreshLayout refresh;
+	private ImageView reloadHint;
+	private TextView textHint1;
+	private TextView textHint2;
+	private TextView textHint3;
 
 	private ReloadChatListNotificationReceiver receiver = new ReloadChatListNotificationReceiver();
 
-    @Override
+	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_chats);
@@ -73,25 +77,35 @@ public class ChatsListActivity extends QuezzleBaseActivity implements LoaderMana
 				ChatActivity.start(ChatsListActivity.this, chatKey);
 			}
 		});
-        refresh = (SwipeRefreshLayout)findViewById(R.id.refresh);
-        refresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                reloadChatList();
-            }
-        });
-        reloadHint = (ImageView)findViewById(R.id.reload_hint);
-        reloadHint.setVisibility(SettingsSPStorage.isReloadHintShown(this) ? View.INVISIBLE : View.VISIBLE);
-        reloadHint.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View hintView) {
-                //hide hint
-                reloadHint.setVisibility(View.INVISIBLE);
+		refresh = (SwipeRefreshLayout) findViewById(R.id.refresh);
+		refresh.setColorScheme(R.color.main_bg, android.R.color.black, R.color.main_bg, android.R.color.white);
+		refresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+			@Override
+			public void onRefresh() {
+				reloadChatList();
+			}
+		});
+		reloadHint = (ImageView) findViewById(R.id.reload_hint);
+		textHint1 = (TextView) findViewById(R.id.r1);
+		textHint2 = (TextView) findViewById(R.id.r2);
+		textHint3 = (TextView) findViewById(R.id.r3);
+		textHint1.setVisibility(SettingsSPStorage.isReloadHintShown(this) ? View.INVISIBLE : View.VISIBLE);
+		textHint2.setVisibility(SettingsSPStorage.isReloadHintShown(this) ? View.INVISIBLE : View.VISIBLE);
+		textHint3.setVisibility(SettingsSPStorage.isReloadHintShown(this) ? View.INVISIBLE : View.VISIBLE);
+		reloadHint.setVisibility(SettingsSPStorage.isReloadHintShown(this) ? View.INVISIBLE : View.VISIBLE);
+		reloadHint.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View hintView) {
+				// hide hint
+				reloadHint.setVisibility(View.INVISIBLE);
+				textHint1.setVisibility(View.INVISIBLE);
+				textHint2.setVisibility(View.INVISIBLE);
+				textHint3.setVisibility(View.INVISIBLE);
 
-                //save that hint was shown
-                SettingsSPStorage.setReloadHintShown(ChatsListActivity.this, true);
-            }
-        });
+				// save that hint was shown
+				SettingsSPStorage.setReloadHintShown(ChatsListActivity.this, true);
+			}
+		});
 		getLoaderManager().initLoader(LOAD_CHATS_ID, null, this);
 	}
 
@@ -165,8 +179,8 @@ public class ChatsListActivity extends QuezzleBaseActivity implements LoaderMana
 						Toast.LENGTH_LONG).show();
 			}
 
-            //hide progress
-            refresh.setRefreshing(false);
+			// hide progress
+			refresh.setRefreshing(false);
 		}
 	}
 }

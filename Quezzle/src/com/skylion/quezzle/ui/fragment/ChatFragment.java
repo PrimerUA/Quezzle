@@ -118,6 +118,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         addMapFragment();
 
         refresh = (SwipeRefreshLayout)rootView.findViewById(R.id.refresh);
+        refresh.setColorScheme(R.color.main_bg, android.R.color.black, R.color.main_bg, android.R.color.white);
         refresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
