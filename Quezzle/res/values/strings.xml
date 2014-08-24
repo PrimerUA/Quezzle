@@ -55,4 +55,6 @@
     <string name="choose_location"> - choose chat location on a map</string>
     <string name="hint_refresh">Pull down to refresh chats list</string>
     <string name="start">Start chatting by entering the desired chatroom or create new one</string>
+    <string name="action_show_map">Show map</string>
+    <string name="message_share_template">\'%1$s\': \'%2$s\' - a quote from the chat \'%3$s\' in the Quezzle \'https://play.google.com/store/apps/details?id=com.skylion.quezzle\'</string>
 </resources>

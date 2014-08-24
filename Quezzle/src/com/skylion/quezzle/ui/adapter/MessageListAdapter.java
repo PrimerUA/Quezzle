@@ -141,6 +141,18 @@ public class MessageListAdapter extends CursorAdapter {
         context.startActivity(intent);
     }
 
+    public static String extractMessageAuthor(View view) {
+        ViewHolder holder = (ViewHolder) view.getTag();
+
+        return holder.author.getText().toString();
+    }
+
+    public static String extractMessageText(View view) {
+        ViewHolder holder = (ViewHolder) view.getTag();
+
+        return holder.text.getText().toString();
+    }
+
 	private static class ViewHolder {
 		public TextView author;
 		public ImageView avatar;

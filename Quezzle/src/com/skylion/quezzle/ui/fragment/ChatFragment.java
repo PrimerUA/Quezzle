@@ -80,6 +80,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 	private boolean firstLoad = true;
 
 	private String chatKey = null;
+    private String chatName = "";
 	private ImageView send;
 	private EditText message;
 	private ListView messageList;
@@ -101,7 +102,6 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     private ReloadChatNotificationReceiver reloadChatNotificationReceiver = new ReloadChatNotificationReceiver();
 
     private MapFragment mapFragment;
-	private MenuItem showChatPositionItem;
 	private View mapContainer;
 
 	@Override
@@ -147,6 +147,13 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 		messageList = (ListView) rootView.findViewById(R.id.messages_list);
 		messageListAdapter = new MessageListAdapter(getActivity());
 		messageList.setAdapter(messageListAdapter);
+        messageList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                onMessageSelected(MessageListAdapter.extractMessageAuthor(view),
+                                  MessageListAdapter.extractMessageText(view));
+            }
+        });
 
 		mapContainer = rootView.findViewById(R.id.map_container);
 		rootView.findViewById(R.id.hide_map).setOnClickListener(new View.OnClickListener() {
@@ -216,10 +223,9 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		inflater.inflate(R.menu.chat, menu);
-		showChatPositionItem = menu.findItem(R.id.show_chat_position);
-		showChatPositionItem.setShowAsAction(chatType == Constants.ChatType.GEO ? MenuItem.SHOW_AS_ACTION_ALWAYS
-				: MenuItem.SHOW_AS_ACTION_NEVER);
+        if (chatType == Constants.ChatType.GEO) {
+		    inflater.inflate(R.menu.chat, menu);
+        }
 	}
 
 	@Override
@@ -341,7 +347,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
 	private void setChatInfo(Cursor cursor) {
 		if (cursor.moveToFirst()) {
-			String chatName = cursor.getString(cursor.getColumnIndex(ChatPlaceTable.NAME_COLUMN));
+			chatName = cursor.getString(cursor.getColumnIndex(ChatPlaceTable.NAME_COLUMN));
 			getActivity().getActionBar().setTitle(chatName);
 
 			subscribed.setChecked(cursor.getInt(cursor.getColumnIndex(ChatPlaceTable.IS_SUBSCRIBED_COLUMN)) != 0);
@@ -353,11 +359,6 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 			chatRadius = cursor.getInt(cursor.getColumnIndex(ChatPlaceTable.RADIUS_COLUMN));
 
 			if (chatType == Constants.ChatType.GEO) {
-				// enable "show_chat_position"
-				if (showChatPositionItem != null) {
-					showChatPositionItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-				}
-
                 GoogleMap map = mapFragment.getMap();
 				// setup map
 				if (map != null) {
@@ -383,12 +384,10 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
 				// start tracking position
 				startTrackUserPosition();
-			} else {
-				// disable "show_chat_position"
-				if (showChatPositionItem != null) {
-					showChatPositionItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-				}
 			}
+
+            //recreate options menu to use chart type
+            getActivity().invalidateOptionsMenu();
 		}
 	}
 
@@ -494,6 +493,18 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 			NetworkService.uploadChatSubscriptions(activity);
 		}
 	}
+
+    private void onMessageSelected(String messageAuthor, String messageText) {
+        //prepare text
+        String text = getString(R.string.message_share_template, messageAuthor, messageText, chatName);
+
+        //share
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, text);
+        sendIntent.setType("text/plain");
+        startActivity(sendIntent);
+    }
 
 	@Override
 	public void onLocationChanged(Location location) {

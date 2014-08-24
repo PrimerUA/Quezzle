@@ -111,7 +111,7 @@ public class QuezzleProvider extends ContentProvider {
                 if (rowId > 0)
                 {
                     Uri resultUri = Uri.withAppendedPath(uri, values.getAsString(ChatPlaceTable.OBJECT_ID_COLUMN));
-                    getContext().getContentResolver().notifyChange(resultUri, null);
+                    getContext().getContentResolver().notifyChange(uri, null);
                     return resultUri;
                 }
                 break;
@@ -125,7 +125,7 @@ public class QuezzleProvider extends ContentProvider {
                 if (rowId > 0)
                 {
                     Uri resultUri = Uri.withAppendedPath(uri, values.getAsString(MessageTable.OBJECT_ID_COLUMN));
-                    getContext().getContentResolver().notifyChange(resultUri, null);
+                    getContext().getContentResolver().notifyChange(uri, null);
                     return resultUri;
                 }
                 break;
@@ -135,7 +135,7 @@ public class QuezzleProvider extends ContentProvider {
                 if (rowId > 0)
                 {
                     Uri resultUri = Uri.withAppendedPath(uri, values.getAsString(UserTable.OBJECT_ID_COLUMN));
-                    getContext().getContentResolver().notifyChange(resultUri, null);
+                    getContext().getContentResolver().notifyChange(uri, null);
                     return resultUri;
                 }
                 break;

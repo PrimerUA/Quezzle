@@ -55,4 +55,6 @@
     <string name="choose_location"> - укажите расположение чата на карте</string>
     <string name="hint_refresh">Потяните пальцем вниз для обновления</string>
     <string name="start">Начните общение зайдя в один из чатов или создайте свой</string>
+    <string name="action_show_map">Показать карту</string>
+    <string name="message_share_template">\'%1$s\': \'%2$s\' - цитата из чата \'%3$s\' в Quezzle \'https://play.google.com/store/apps/details?id=com.skylion.quezzle\'</string>
 </resources>
