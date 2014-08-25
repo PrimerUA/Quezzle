@@ -69,18 +69,7 @@ public class MessageListAdapter extends CursorAdapter {
 	public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
 		// create view
 		LayoutInflater inflater = LayoutInflater.from(context);
-		View view;
-//		if (cursor.getPosition() % 2 == 0) {
-			view = inflater.inflate(R.layout.message_list_item_left, viewGroup, false);
-			Animation animation = AnimationUtils.loadAnimation(context, R.anim.message_push_in_left);
-			animation.setDuration(500);
-			view.startAnimation(animation);
-//		} else {
-//			view = inflater.inflate(R.layout.message_list_item_right, viewGroup, false);
-//			Animation animation = AnimationUtils.loadAnimation(context, R.anim.message_push_in_right);
-//			animation.setDuration(500);
-//			view.startAnimation(animation);
-//		}
+		View view = inflater.inflate(R.layout.message_list_item_left, viewGroup, false);
 
 		// create holder
 		ViewHolder holder = new ViewHolder();
@@ -113,12 +102,6 @@ public class MessageListAdapter extends CursorAdapter {
 			holder.content.setBackgroundColor(context.getResources().getColor(R.color.message_admin_background));
 		else
 			holder.content.setBackgroundColor(context.getResources().getColor(R.color.message_user_background));
-		// int color =
-		// context.getResources().getColor(cursor.getInt(isAdminColumnIndex) ==
-		// 1 ?
-		// R.color.admin_message_text_color :
-		// R.color.user_message_text_color);
-        //holder.text.setTextColor(color);
     }
 
 	private boolean isColumnIndexesCalculated() {

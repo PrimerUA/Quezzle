@@ -185,7 +185,7 @@ public class NewChatActivity extends QuezzleBaseActivity {
 
     private boolean isDataValid() {
         boolean result = true;
-        if (TextUtils.isEmpty(nameEdit.getText())) {
+        if (TextUtils.isEmpty(nameEdit.getText().toString().trim())) {
             nameEdit.setError(getString(R.string.empty_field));
             result = false;
         }
