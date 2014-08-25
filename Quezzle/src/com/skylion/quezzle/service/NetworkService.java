@@ -217,7 +217,7 @@ public class NetworkService extends IntentService {
             Uri messagesUri = QuezzleProviderContract.getMessagesUri(chatKey);
 
             // load new data
-            int createdCount = NetworkHelper.loadAllChatMessages(chatKey, messagesUri, lastMessageDate,
+            int createdCount = NetworkHelper.loadAllChatMessages(chatKey, messagesUri, lastMessageDate, false,
                                                                  getContentResolver(), null);
 
             // show notification if needed
@@ -344,9 +344,6 @@ public class NetworkService extends IntentService {
         }
         String userId = currentUser.getObjectId();
 
-        // clear local cache
-        getContentResolver().delete(QuezzleProviderContract.CHAT_PLACES_URI, null, null);
-
         // query all chats
         NetworkHelper.loadAllChats(userId, getContentResolver(), new NetworkHelper.OnResultListener() {
             @Override
@@ -367,11 +364,8 @@ public class NetworkService extends IntentService {
         String chatKey = intent.getStringExtra(CHAT_KEY_EXTRA);
         Uri messagesUri = QuezzleProviderContract.getMessagesUri(chatKey);
 
-		// remove old data
-		getContentResolver().delete(messagesUri, null, null);
-
 		// load new data
-        NetworkHelper.loadAllChatMessages(chatKey, messagesUri, null, getContentResolver(), null);
+        NetworkHelper.loadAllChatMessages(chatKey, messagesUri, null, true, getContentResolver(), null);
 
         //notify reload chat finished
         sendLocalBroadcast(ReloadChatNotification.createResult());

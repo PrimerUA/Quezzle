@@ -37,12 +37,19 @@ public abstract class NetworkHelper {
     public static void loadAllChats(String subscriberId, ContentResolver contentResolver, OnResultListener listener) {
         ParseQuery<ChatPlace> query = ParseQuery.getQuery(ChatPlace.class);
         query.setLimit(LOAD_CHATS_LIMIT);
+        boolean wasCleaned = false;
         int offset = 0;
         try {
             boolean hasMoreData = true;
             while (hasMoreData) {
                 query.setSkip(offset);
                 List<ChatPlace> chats = query.find();
+
+                if (!wasCleaned) {
+                    // clear local cache
+                    contentResolver.delete(QuezzleProviderContract.CHAT_PLACES_URI, null, null);
+                    wasCleaned = true;
+                }
 
                 if (!chats.isEmpty()) {
                     ContentValues[] values = new ContentValues[chats.size()];
@@ -142,9 +149,8 @@ public abstract class NetworkHelper {
         }
     }
 
-    public static int loadAllChatMessages(String chatKey, Uri messagesUri,
-                                          Date lastMessageDate, ContentResolver contentResolver,
-                                          OnResultListener listener) {
+    public static int loadAllChatMessages(String chatKey, Uri messagesUri, Date lastMessageDate, boolean cleanCache,
+                                          ContentResolver contentResolver, OnResultListener listener) {
         int createdCount = 0;
         Map<String, ContentValues> users = new HashMap<String, ContentValues>();
         ParseQuery<Message> query = ParseQuery.getQuery(Message.class);
@@ -156,11 +162,19 @@ public abstract class NetworkHelper {
         }
         query.setLimit(LOAD_MESSAGES_LIMIT);
         int offset = 0;
+        boolean wasCleaned = false;
         try {
             boolean hasMoreData = true;
             while (hasMoreData) {
                 query.setSkip(offset);
                 List<Message> messages = query.find();
+
+                if (cleanCache && !wasCleaned) {
+                    // remove old messages
+                    contentResolver.delete(messagesUri, null, null);
+
+                    wasCleaned = true;
+                }
 
                 if (!messages.isEmpty()) {
                     users.clear();

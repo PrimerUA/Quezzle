@@ -1,9 +1,6 @@
 package com.skylion.quezzle.contentprovider;
 
-import android.content.ContentProvider;
-import android.content.ContentUris;
-import android.content.ContentValues;
-import android.content.UriMatcher;
+import android.content.*;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
@@ -17,6 +14,7 @@ import com.skylion.quezzle.datastorage.table.MessageTable;
 import com.skylion.quezzle.datastorage.table.UserTable;
 
 import java.net.URI;
+import java.util.ArrayList;
 
 /**
  * Created with IntelliJ IDEA.
@@ -236,6 +234,23 @@ public class QuezzleProvider extends ContentProvider {
     @Override
     public String getType(Uri uri) {
         throw new UnsupportedOperationException("QuezzleProvider doesn't implements getType() method");
+    }
+
+    @Override
+    public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations) throws OperationApplicationException {
+        final SQLiteDatabase db = sqlStorage.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            final int numOperations = operations.size();
+            final ContentProviderResult[] results = new ContentProviderResult[numOperations];
+            for (int i = 0; i < numOperations; i++) {
+                results[i] = operations.get(i).apply(this, results, i);
+            }
+            db.setTransactionSuccessful();
+            return results;
+        } finally {
+            db.endTransaction();
+        }
     }
 
     private String addQuotes(String target) {
